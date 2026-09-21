@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb753e0424e014941b974868ea1d6f97, type: 3}
+  m_Name: DummyMonster
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
+  monsterName: Dummy
+  baseHp: 100
+  modelPrefab: {fileID: 7732297471255883045, guid: 9f2b7098f7963b84889a0dd9f964a202, type: 3}
+  material: {fileID: -3033667219593020291, guid: 4c92a4efaf7cd024bbbd68d7e5236bf8, type: 3}
+  scaleCorrection: {x: 1, y: 1, z: 1}
+  movementType: 0

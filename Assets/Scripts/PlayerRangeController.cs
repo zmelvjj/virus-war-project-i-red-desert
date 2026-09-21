@@ -14,7 +14,7 @@ public class PlayerRangeController : MonoBehaviour
 
     Vector3 m_InitialRangeScale;
     float m_RangeArea;
-    float m_zposition;
+    float fast_mouthOpen = 0f;
 
     void Awake()
     {
@@ -30,7 +30,6 @@ public class PlayerRangeController : MonoBehaviour
 
         m_InitialRangeScale = range.localScale;
         m_RangeArea = m_InitialRangeScale.x * m_InitialRangeScale.z;
-        m_zposition = range.localPosition.z;
     }
 
     void Update()
@@ -62,9 +61,12 @@ public class PlayerRangeController : MonoBehaviour
     void UpdateRangeScale()
     {
         var mouthOpen = mouthOpenTracker.HasFace ? mouthOpenTracker.MouthOpen : 0f;
+        if (Mathf.Abs(mouthOpen - fast_mouthOpen) > 0.1f)
+            fast_mouthOpen = Mathf.Lerp(fast_mouthOpen, mouthOpen, 0.7f);
+        
         var widthMultiplier = Mathf.Lerp(closedWidthMultiplier, openWidthMultiplier, Mathf.Clamp01(mouthOpen));
         var width = Mathf.Max(0.001f, m_InitialRangeScale.x * widthMultiplier);
         range.localScale = new Vector3(width, m_InitialRangeScale.y, m_RangeArea/width);
-        range.localPosition = new Vector3(0f, range.localPosition.y, m_zposition * (m_RangeArea / width) / m_InitialRangeScale.z);
+        range.localPosition = new Vector3(0f, range.localPosition.y, m_RangeArea/width * 0.5f);
     }
 }

@@ -133,10 +133,25 @@ public class MouthOpenTracker : MonoBehaviour
         var roiMatrix = BuildFaceRoiMatrix(face, texture);
         BlazeUtils.SampleImageAffine(texture, m_FaceMeshInput, roiMatrix);
 
-        using var cpuInput = await m_FaceMeshInput.ReadbackAndCloneAsync();
+        m_FaceMeshInput.ReadbackRequest();
+        while (!m_FaceMeshInput.IsReadbackRequestDone())
+        {
+            await Awaitable.NextFrameAsync();
+            if (m_IsShuttingDown)
+                return;
+        }
+
+        using var cpuInput = m_FaceMeshInput.ReadbackAndClone();
         m_FaceMeshWorker.Schedule(cpuInput);
 
         var outputs = await ReadFaceMeshOutputs();
+        if (m_IsShuttingDown)
+        {
+            outputs.landmarks?.Dispose();
+            outputs.presence?.Dispose();
+            return;
+        }
+
         using var landmarks = outputs.landmarks;
         using var presence = outputs.presence;
 
@@ -218,57 +233,93 @@ public class MouthOpenTracker : MonoBehaviour
 
     async Awaitable<FaceMeshOutputTensors> ReadFaceMeshOutputs()
     {
+        var outputTensors = new Tensor<float>[m_Model.outputs.Count];
+        for (var i = 0; i < outputTensors.Length; i++)
+        {
+            outputTensors[i] = m_FaceMeshWorker.PeekOutput(m_Model.outputs[i].name) as Tensor<float>;
+            outputTensors[i]?.ReadbackRequest();
+        }
+
+        var isReady = false;
+        while (!isReady)
+        {
+            isReady = true;
+            for (var i = 0; i < outputTensors.Length; i++)
+            {
+                if (outputTensors[i] != null && !outputTensors[i].IsReadbackRequestDone())
+                {
+                    isReady = false;
+                    break;
+                }
+            }
+
+            if (!isReady)
+            {
+                await Awaitable.NextFrameAsync();
+                if (m_IsShuttingDown)
+                    return default;
+            }
+        }
+
         Tensor<float> landmarks = null;
         Tensor<float> presence = null;
         var landmarkLength = -1;
         var presenceLength = int.MaxValue;
 
-        for (var i = 0; i < m_Model.outputs.Count; i++)
+        try
         {
-            var gpuOutput = m_FaceMeshWorker.PeekOutput(m_Model.outputs[i].name) as Tensor<float>;
-            if (gpuOutput == null)
-                continue;
-
-            var cpuOutput = await gpuOutput.ReadbackAndCloneAsync();
-            var length = cpuOutput.shape.length;
-            if (length > landmarkLength)
+            for (var i = 0; i < outputTensors.Length; i++)
             {
-                if (landmarks != null)
+                if (outputTensors[i] == null)
+                    continue;
+
+                var cpuOutput = outputTensors[i].ReadbackAndClone();
+                var length = cpuOutput.shape.length;
+                if (length > landmarkLength)
                 {
-                    if (landmarks.shape.length < presenceLength)
+                    if (landmarks != null)
                     {
-                        presence?.Dispose();
-                        presence = landmarks;
-                        presenceLength = landmarks.shape.length;
+                        if (landmarks.shape.length < presenceLength)
+                        {
+                            presence?.Dispose();
+                            presence = landmarks;
+                            presenceLength = landmarks.shape.length;
+                        }
+                        else
+                        {
+                            landmarks.Dispose();
+                        }
                     }
-                    else
-                    {
-                        landmarks.Dispose();
-                    }
+
+                    landmarks = cpuOutput;
+                    landmarkLength = length;
+                    m_LastLandmarkLength = length;
                 }
+                else if (length < presenceLength)
+                {
+                    presence?.Dispose();
+                    presence = cpuOutput;
+                    presenceLength = length;
+                    m_LastPresenceLength = length;
+                }
+                else
+                {
+                    cpuOutput.Dispose();
+                }
+            }
 
-                landmarks = cpuOutput;
-                landmarkLength = length;
-                m_LastLandmarkLength = length;
-            }
-            else if (length < presenceLength)
+            return new FaceMeshOutputTensors
             {
-                presence?.Dispose();
-                presence = cpuOutput;
-                presenceLength = length;
-                m_LastPresenceLength = length;
-            }
-            else
-            {
-                cpuOutput.Dispose();
-            }
+                landmarks = landmarks,
+                presence = presence
+            };
         }
-
-        return new FaceMeshOutputTensors
+        catch
         {
-            landmarks = landmarks,
-            presence = presence
-        };
+            landmarks?.Dispose();
+            presence?.Dispose();
+            throw;
+        }
     }
 
     float ReadFacePresence(Tensor<float> presence)

@@ -163,13 +163,26 @@ public class FaceDetection : MonoBehaviour
 
         m_FaceDetectorWorker.Schedule(m_DetectorInput);
 
-        var outputIndicesAwaitable = (m_FaceDetectorWorker.PeekOutput(0) as Tensor<int>).ReadbackAndCloneAsync();
-        var outputScoresAwaitable = (m_FaceDetectorWorker.PeekOutput(1) as Tensor<float>).ReadbackAndCloneAsync();
-        var outputBoxesAwaitable = (m_FaceDetectorWorker.PeekOutput(2) as Tensor<float>).ReadbackAndCloneAsync();
+        var outputIndicesTensor = m_FaceDetectorWorker.PeekOutput(0) as Tensor<int>;
+        var outputScoresTensor = m_FaceDetectorWorker.PeekOutput(1) as Tensor<float>;
+        var outputBoxesTensor = m_FaceDetectorWorker.PeekOutput(2) as Tensor<float>;
 
-        using var outputIndices = await outputIndicesAwaitable;
-        using var outputScores = await outputScoresAwaitable;
-        using var outputBoxes = await outputBoxesAwaitable;
+        outputIndicesTensor.ReadbackRequest();
+        outputScoresTensor.ReadbackRequest();
+        outputBoxesTensor.ReadbackRequest();
+
+        while (!outputIndicesTensor.IsReadbackRequestDone() ||
+               !outputScoresTensor.IsReadbackRequestDone() ||
+               !outputBoxesTensor.IsReadbackRequestDone())
+        {
+            await Awaitable.NextFrameAsync();
+            if (m_IsShuttingDown)
+                return;
+        }
+
+        using var outputIndices = outputIndicesTensor.ReadbackAndClone();
+        using var outputScores = outputScoresTensor.ReadbackAndClone();
+        using var outputBoxes = outputBoxesTensor.ReadbackAndClone();
 
         var numFaces = outputIndices.shape.length;
         m_Results.Clear();
