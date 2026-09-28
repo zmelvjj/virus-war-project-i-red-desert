@@ -17,4 +17,8 @@ MonoBehaviour:
   modelPrefab: {fileID: 7732297471255883045, guid: 9f2b7098f7963b84889a0dd9f964a202, type: 3}
   material: {fileID: -3033667219593020291, guid: 4c92a4efaf7cd024bbbd68d7e5236bf8, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
-  movementType: 0
+  movementType: 1
+  navMeshSpeed: 3.5
+  navMeshAngularSpeed: 120
+  navMeshAvoidanceQuality: 4
+  navMeshAvoidancePriority: 50

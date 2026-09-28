@@ -12,12 +12,12 @@ public class MonsterEntity : MonoBehaviour
     Material[][] m_OriginalMaterials;
     Coroutine m_HitFlash;
 
-    public void Initialize(MonsterDefinition definition, int hp)
+    public void Initialize(MonsterDefinition definition, int hp, MonsterMovementType movementType)
     {
         Definition = definition;
         MaxHp = hp;
         CurrentHp = hp;
-        MovementType = definition.MovementType;
+        MovementType = movementType;
         CacheMaterials();
     }
 

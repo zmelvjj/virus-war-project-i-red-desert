@@ -1,9 +1,12 @@
 using UnityEngine;
+using UnityEngine.AI;
 
 public sealed class MonsterBuilder
 {
     readonly MonsterDefinition m_Definition;
     Vector3 m_Position;
+    Vector3 m_MovementCenter;
+    float m_MovementRange;
     int m_Hp;
 
     public MonsterBuilder(MonsterDefinition definition)
@@ -21,6 +24,13 @@ public sealed class MonsterBuilder
     public MonsterBuilder WithHp(int hp)
     {
         m_Hp = hp;
+        return this;
+    }
+
+    public MonsterBuilder Within(Vector3 center, float range)
+    {
+        m_MovementCenter = center;
+        m_MovementRange = range;
         return this;
     }
 
@@ -43,9 +53,35 @@ public sealed class MonsterBuilder
         if (entity == null)
             entity = instance.AddComponent<MonsterEntity>();
 
-        entity.Initialize(m_Definition, m_Hp);
+        var movementType = ConfigureMovement(instance);
+        entity.Initialize(m_Definition, m_Hp, movementType);
         MonsterManager.Instance.Register(entity);
         return entity;
+    }
+
+    MonsterMovementType ConfigureMovement(GameObject instance)
+    {
+        if (m_Definition.MovementType != MonsterMovementType.NavMesh)
+            return MonsterMovementType.Waiting;
+
+        var agent = instance.GetComponentInChildren<NavMeshAgent>();
+        if (agent == null)
+        {
+            Debug.LogWarning($"[MonsterBuilder] '{m_Definition.MonsterName}' has no NavMeshAgent. Movement changed to Waiting.", instance);
+            return MonsterMovementType.Waiting;
+        }
+
+        agent.speed = m_Definition.NavMeshSpeed;
+        agent.angularSpeed = m_Definition.NavMeshAngularSpeed;
+        agent.obstacleAvoidanceType = m_Definition.NavMeshAvoidanceQuality;
+        agent.avoidancePriority = m_Definition.NavMeshAvoidancePriority;
+
+        var movement = instance.GetComponent<MonsterNavMeshMovement>();
+        if (movement == null)
+            movement = instance.AddComponent<MonsterNavMeshMovement>();
+
+        movement.Initialize(agent, m_MovementCenter, m_MovementRange);
+        return MonsterMovementType.NavMesh;
     }
 
     static void PlaceOnGround(GameObject instance, float groundY)

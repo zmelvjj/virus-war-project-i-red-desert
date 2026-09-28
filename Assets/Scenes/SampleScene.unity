@@ -306,7 +306,8 @@ GameObject:
   - component: {fileID: 299818321}
   - component: {fileID: 299818320}
   - component: {fileID: 299818323}
-  m_Layer: 0
+  - component: {fileID: 299818324}
+  m_Layer: 6
   m_Name: floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -406,6 +407,38 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 2, z: 1.0000001}
   m_Center: {x: 0.00000005960464, y: 0, z: -0.00000008940696}
+--- !u!114 &299818324
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 299818318}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a5ac11cc976e418e8d13136b07e1f52, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.AI.Navigation::Unity.AI.Navigation.NavMeshSurface
+  m_SerializedVersion: 0
+  m_AgentTypeID: 0
+  m_CollectObjects: 0
+  m_Size: {x: 10, y: 10, z: 10}
+  m_Center: {x: 0, y: 2, z: 0}
+  m_LayerMask:
+    serializedVersion: 2
+    m_Bits: 72
+  m_UseGeometry: 0
+  m_DefaultArea: 0
+  m_GenerateLinks: 0
+  m_IgnoreNavMeshAgent: 1
+  m_IgnoreNavMeshObstacle: 1
+  m_OverrideTileSize: 1
+  m_TileSize: 256
+  m_OverrideVoxelSize: 1
+  m_VoxelSize: 0.16666667
+  m_MinRegionArea: 2
+  m_NavMeshData: {fileID: 23800000, guid: f4347e3d17e594149b3276bf55e5efab, type: 2}
+  m_BuildHeightMesh: 1
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -835,9 +868,9 @@ MonoBehaviour:
   anchorsCSV: {fileID: 4900000, guid: 4fd81c7347fa79346971d17d6c0cf32b, type: 3}
   iouThreshold: 0.3
   scoreThreshold: 0.5
-  logFaceCountEverySecond: 1
+  logFaceCountEverySecond: 0
   faceCountLogIntervalSeconds: 1
-  useTextureConverterInput: 1
+  useTextureConverterInput: 0
   normalizeInputToMinusOneToOne: 0
 --- !u!114 &842315629
 MonoBehaviour:
@@ -867,8 +900,8 @@ MonoBehaviour:
   mouthOpenChanged:
     m_PersistentCalls:
       m_Calls: []
-  logMouthOpenEverySecond: 1
-  logFaceMeshDetails: 1
+  logMouthOpenEverySecond: 0
+  logFaceMeshDetails: 0
   logIntervalSeconds: 1
 --- !u!114 &842315630
 MonoBehaviour:
@@ -987,7 +1020,7 @@ GameObject:
   - component: {fileID: 1091560176}
   - component: {fileID: 1091560175}
   - component: {fileID: 1091560174}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: player
   m_TagString: Untagged
   m_Icon: {fileID: 0}

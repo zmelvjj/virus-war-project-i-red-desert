@@ -19,9 +19,11 @@ public class MonsterSpawner : MonoBehaviour
             if (MonsterManager.Instance.ActiveCount >= maxMonsters)
                 continue;
 
+            var spawnPosition = RandomPointInArea();
             MonsterFactory.Instance
                 .Create(monster)
-                .At(RandomPointInArea())
+                .At(spawnPosition)
+                .Within(transform.position, range)
                 .Build();
         }
     }

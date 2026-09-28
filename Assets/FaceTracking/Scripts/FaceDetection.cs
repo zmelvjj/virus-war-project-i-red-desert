@@ -65,10 +65,10 @@ public class FaceDetection : MonoBehaviour
             imagePreprocessor = GetComponent<FaceImagePreprocessor>();
 
         var faceDetectorModel = ModelLoader.Load(faceDetector);
-        if (faceDetectorModel.inputs.Count > 0)
-            Debug.Log($"[BlazeFace] ModelInput={faceDetectorModel.inputs[0].name} {faceDetectorModel.inputs[0].shape}");
-        if (faceDetectorModel.outputs.Count >= 2)
-            Debug.Log($"[BlazeFace] ModelOutputs=0:{faceDetectorModel.outputs[0].name}, 1:{faceDetectorModel.outputs[1].name}");
+        // if (faceDetectorModel.inputs.Count > 0)
+        //     Debug.Log($"[BlazeFace] ModelInput={faceDetectorModel.inputs[0].name} {faceDetectorModel.inputs[0].shape}");
+        // if (faceDetectorModel.outputs.Count >= 2)
+        //     Debug.Log($"[BlazeFace] ModelOutputs=0:{faceDetectorModel.outputs[0].name}, 1:{faceDetectorModel.outputs[1].name}");
 
         // post process the model to filter scores + nms select the best faces
         var graph = new FunctionalGraph();
@@ -180,55 +180,57 @@ public class FaceDetection : MonoBehaviour
                 return;
         }
 
-        using var outputIndices = outputIndicesTensor.ReadbackAndClone();
-        using var outputScores = outputScoresTensor.ReadbackAndClone();
-        using var outputBoxes = outputBoxesTensor.ReadbackAndClone();
-
-        var numFaces = outputIndices.shape.length;
-        m_Results.Clear();
-
-        var previewCount = facePreviews == null ? 0 : facePreviews.Length;
-        for (var i = 0; i < previewCount; i++)
+        using (var outputIndices = outputIndicesTensor.ReadbackAndClone())
+        using (var outputScores = outputScoresTensor.ReadbackAndClone())
+        using (var outputBoxes = outputBoxesTensor.ReadbackAndClone())
         {
-            if (facePreviews[i] != null)
-                facePreviews[i].SetActive(i < numFaces);
-        }
+            var numFaces = outputIndices.shape.length;
+            m_Results.Clear();
 
-        for (var i = 0; i < numFaces; i++)
-        {
-            var idx = outputIndices[i];
-
-            var anchorPosition = detectorInputSize * new float2(m_Anchors[idx, 0], m_Anchors[idx, 1]);
-
-            var box_ImageSpace = BlazeUtils.mul(resultMatrix, anchorPosition + new float2(outputBoxes[0, i, 0], outputBoxes[0, i, 1]));
-            var boxTopRight_ImageSpace = BlazeUtils.mul(resultMatrix, anchorPosition + new float2(outputBoxes[0, i, 0] + 0.5f * outputBoxes[0, i, 2], outputBoxes[0, i, 1] + 0.5f * outputBoxes[0, i, 3]));
-
-            var boxSize = 2f * (boxTopRight_ImageSpace - box_ImageSpace);
-            boxSize = new Vector2(Mathf.Abs(boxSize.x), Mathf.Abs(boxSize.y));
-            var keypoints = new Vector2[k_NumKeypoints];
-
-            if (i < previewCount && facePreviews[i] != null)
-                facePreviews[i].SetBoundingBox(true, ImageToWorld(box_ImageSpace), boxSize / texture.height);
-
-            for (var j = 0; j < k_NumKeypoints; j++)
+            var previewCount = facePreviews == null ? 0 : facePreviews.Length;
+            for (var i = 0; i < previewCount; i++)
             {
-                var position_ImageSpace = BlazeUtils.mul(resultMatrix, anchorPosition + new float2(outputBoxes[0, i, 4 + 2 * j + 0], outputBoxes[0, i, 4 + 2 * j + 1]));
-                keypoints[j] = position_ImageSpace;
-
-                if (i < previewCount && facePreviews[i] != null)
-                    facePreviews[i].SetKeypoint(j, true, ImageToWorld(position_ImageSpace));
+                if (facePreviews[i] != null)
+                    facePreviews[i].SetActive(i < numFaces);
             }
 
-            m_Results.Add(new FaceDetectionResult
+            for (var i = 0; i < numFaces; i++)
             {
-                score = Sigmoid(outputScores[0, i, 0]),
-                center = box_ImageSpace,
-                size = boxSize,
-                keypoints = keypoints
-            });
+                var idx = outputIndices[i];
+
+                var anchorPosition = detectorInputSize * new float2(m_Anchors[idx, 0], m_Anchors[idx, 1]);
+
+                var box_ImageSpace = BlazeUtils.mul(resultMatrix, anchorPosition + new float2(outputBoxes[0, i, 0], outputBoxes[0, i, 1]));
+                var boxTopRight_ImageSpace = BlazeUtils.mul(resultMatrix, anchorPosition + new float2(outputBoxes[0, i, 0] + 0.5f * outputBoxes[0, i, 2], outputBoxes[0, i, 1] + 0.5f * outputBoxes[0, i, 3]));
+
+                var boxSize = 2f * (boxTopRight_ImageSpace - box_ImageSpace);
+                boxSize = new Vector2(Mathf.Abs(boxSize.x), Mathf.Abs(boxSize.y));
+                var keypoints = new Vector2[k_NumKeypoints];
+
+                if (i < previewCount && facePreviews[i] != null)
+                    facePreviews[i].SetBoundingBox(true, ImageToWorld(box_ImageSpace), boxSize / texture.height);
+
+                for (var j = 0; j < k_NumKeypoints; j++)
+                {
+                    var position_ImageSpace = BlazeUtils.mul(resultMatrix, anchorPosition + new float2(outputBoxes[0, i, 4 + 2 * j + 0], outputBoxes[0, i, 4 + 2 * j + 1]));
+                    keypoints[j] = position_ImageSpace;
+
+                    if (i < previewCount && facePreviews[i] != null)
+                        facePreviews[i].SetKeypoint(j, true, ImageToWorld(position_ImageSpace));
+                }
+
+                m_Results.Add(new FaceDetectionResult
+                {
+                    score = Sigmoid(outputScores[0, i, 0]),
+                    center = box_ImageSpace,
+                    size = boxSize,
+                    keypoints = keypoints
+                });
+            }
+
+            LogFaceCountIfDue(numFaces, outputScores);
         }
 
-        LogFaceCountIfDue(numFaces, outputScores);
         await Awaitable.NextFrameAsync();
     }
 
@@ -249,11 +251,11 @@ public class FaceDetection : MonoBehaviour
         if (m_Results.Count > 0)
         {
             var face = m_Results[0];
-            Debug.Log($"[BlazeFace] FaceCount={numFaces}, BestScore={bestScore:F3}, Center=({face.center.x:F1},{face.center.y:F1}), Size=({face.size.x:F1},{face.size.y:F1})");
+            //Debug.Log($"[BlazeFace] FaceCount={numFaces}, BestScore={bestScore:F3}, Center=({face.center.x:F1},{face.center.y:F1}), Size=({face.size.x:F1},{face.size.y:F1})");
             return;
         }
 
-        Debug.Log($"[BlazeFace] FaceCount={numFaces}, BestScore={bestScore:F3}");
+        //Debug.Log($"[BlazeFace] FaceCount={numFaces}, BestScore={bestScore:F3}");
     }
 
     float Sigmoid(float value)
@@ -273,5 +275,9 @@ public class FaceDetection : MonoBehaviour
     {
         m_IsShuttingDown = true;
         m_DetectAwaitable?.Cancel();
+        m_FaceDetectorWorker?.Dispose();
+        m_FaceDetectorWorker = null;
+        m_DetectorInput?.Dispose();
+        m_DetectorInput = null;
     }
 }

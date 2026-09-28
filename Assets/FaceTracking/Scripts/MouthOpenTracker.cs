@@ -74,8 +74,7 @@ public class MouthOpenTracker : MonoBehaviour
     async void Start()
     {
         if (faceDetection == null)
-            faceDetection = FindFirstObjectByType<FaceDetection>();
-
+            Debug.LogError("faceDetection null.");
         if (faceDetection == null || faceLandmarkModel == null)
         {
             Debug.LogError("MouthOpenTracker requires FaceDetection and face_landmarks_detector.tflite ModelAsset references.");
@@ -97,9 +96,9 @@ public class MouthOpenTracker : MonoBehaviour
         }
 
         if (m_Model.inputs.Count > 0)
-            Debug.Log($"[MouthOpenTracker] ModelInput={m_Model.inputs[0].name} {m_Model.inputs[0].shape}");
+            //Debug.Log($"[MouthOpenTracker] ModelInput={m_Model.inputs[0].name} {m_Model.inputs[0].shape}");
         for (var i = 0; i < m_Model.outputs.Count; i++)
-            Debug.Log($"[MouthOpenTracker] ModelOutput{i}={m_Model.outputs[i].name}");
+            //Debug.Log($"[MouthOpenTracker] ModelOutput{i}={m_Model.outputs[i].name}");
 
         m_FaceMeshWorker = new Worker(m_Model, backendType);
         m_FaceMeshInput = new Tensor<float>(new TensorShape(1, k_FaceMeshInputSize, k_FaceMeshInputSize, 3));
@@ -132,17 +131,7 @@ public class MouthOpenTracker : MonoBehaviour
         var face = SelectPrimaryFace(faces);
         var roiMatrix = BuildFaceRoiMatrix(face, texture);
         BlazeUtils.SampleImageAffine(texture, m_FaceMeshInput, roiMatrix);
-
-        m_FaceMeshInput.ReadbackRequest();
-        while (!m_FaceMeshInput.IsReadbackRequestDone())
-        {
-            await Awaitable.NextFrameAsync();
-            if (m_IsShuttingDown)
-                return;
-        }
-
-        using var cpuInput = m_FaceMeshInput.ReadbackAndClone();
-        m_FaceMeshWorker.Schedule(cpuInput);
+        m_FaceMeshWorker.Schedule(m_FaceMeshInput);
 
         var outputs = await ReadFaceMeshOutputs();
         if (m_IsShuttingDown)
@@ -152,24 +141,24 @@ public class MouthOpenTracker : MonoBehaviour
             return;
         }
 
-        using var landmarks = outputs.landmarks;
-        using var presence = outputs.presence;
-
-        FacePresence = ReadFacePresence(presence);
-        var hasLandmarks = landmarks != null && TryReadLandmarks(landmarks, m_Landmarks);
-        RawMouthRatio = hasLandmarks ? CalculateMouthRatio(m_Landmarks) : 0f;
-
-        if (FacePresence < minFacePresence || !hasLandmarks)
+        try
         {
+            FacePresence = ReadFacePresence(outputs.presence);
+            var hasLandmarks = outputs.landmarks != null && TryReadLandmarks(outputs.landmarks, m_Landmarks);
+            RawMouthRatio = hasLandmarks ? CalculateMouthRatio(m_Landmarks) : 0f;
+
             LogFaceMeshDetailsIfDue(face);
-            SetMouthOpen(0f, false, FacePresence);
-            await Awaitable.NextFrameAsync();
-            return;
+            if (FacePresence < minFacePresence || !hasLandmarks)
+                SetMouthOpen(0f, false, FacePresence);
+            else
+                SetMouthOpen(Mathf.InverseLerp(closedRatio, openRatio, RawMouthRatio), true, FacePresence);
+        }
+        finally
+        {
+            outputs.landmarks?.Dispose();
+            outputs.presence?.Dispose();
         }
 
-        var normalized = Mathf.InverseLerp(closedRatio, openRatio, RawMouthRatio);
-        LogFaceMeshDetailsIfDue(face);
-        SetMouthOpen(normalized, true, FacePresence);
         await Awaitable.NextFrameAsync();
     }
 
@@ -427,6 +416,8 @@ public class MouthOpenTracker : MonoBehaviour
         m_IsShuttingDown = true;
         m_TrackAwaitable?.Cancel();
         m_FaceMeshInput?.Dispose();
+        m_FaceMeshInput = null;
         m_FaceMeshWorker?.Dispose();
+        m_FaceMeshWorker = null;
     }
 }

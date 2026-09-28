@@ -37,6 +37,9 @@
 # Visual Studio cache directory
 .vs/
 
+# Unity Agent.md
+.AGENTS.md
+
 # Gradle cache directory
 .gradle/
 
