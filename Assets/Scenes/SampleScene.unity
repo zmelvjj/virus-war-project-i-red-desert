@@ -954,7 +954,7 @@ MonoBehaviour:
   monster: {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
   range: 11
   spawnInterval: 1
-  maxMonsters: 2
+  maxMonsters: 10
 --- !u!114 &943823210
 MonoBehaviour:
   m_ObjectHideFlags: 0

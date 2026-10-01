@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -40,13 +41,6 @@ public sealed class MonsterBuilder
         instance.name = m_Definition.MonsterName;
         instance.transform.localScale = Vector3.Scale(instance.transform.localScale, m_Definition.ScaleCorrection);
 
-        if (m_Definition.Material != null)
-        {
-            var renderers = instance.GetComponentsInChildren<Renderer>();
-            foreach (var renderer in renderers)
-                renderer.sharedMaterial = m_Definition.Material;
-        }
-
         PlaceOnGround(instance, m_Position.y);
 
         var entity = instance.GetComponent<MonsterEntity>();
@@ -75,13 +69,60 @@ public sealed class MonsterBuilder
         agent.angularSpeed = m_Definition.NavMeshAngularSpeed;
         agent.obstacleAvoidanceType = m_Definition.NavMeshAvoidanceQuality;
         agent.avoidancePriority = m_Definition.NavMeshAvoidancePriority;
+        agent.updateRotation = false;
 
         var movement = instance.GetComponent<MonsterNavMeshMovement>();
         if (movement == null)
             movement = instance.AddComponent<MonsterNavMeshMovement>();
 
-        movement.Initialize(agent, m_MovementCenter, m_MovementRange);
+        movement.Initialize(
+            agent,
+            m_MovementCenter,
+            m_MovementRange,
+            m_Definition.RotationSpeed,
+            m_Definition.IsRotated ? m_Definition.Diameter : 0f,
+            ResolveRotationPoints(instance));
         return MonsterMovementType.NavMesh;
+    }
+
+    Transform[] ResolveRotationPoints(GameObject instance)
+    {
+        if (!m_Definition.IsRotated || m_Definition.RotationPoints == null)
+            return null;
+
+        var points = new Transform[m_Definition.RotationPoints.Length];
+        for (var i = 0; i < points.Length; i++)
+        {
+            points[i] = ResolvePrefabTransform(
+                m_Definition.RotationPoints[i],
+                m_Definition.ModelPrefab.transform,
+                instance.transform);
+        }
+
+        return points;
+    }
+
+    static Transform ResolvePrefabTransform(Transform source, Transform prefabRoot, Transform instanceRoot)
+    {
+        if (source == null)
+            return null;
+
+        var siblingIndices = new List<int>();
+        var current = source;
+        while (current != null && current != prefabRoot)
+        {
+            siblingIndices.Add(current.GetSiblingIndex());
+            current = current.parent;
+        }
+
+        if (current != prefabRoot)
+            return null;
+
+        var result = instanceRoot;
+        for (var i = siblingIndices.Count - 1; i >= 0; i--)
+            result = result.GetChild(siblingIndices[i]);
+
+        return result;
     }
 
     static void PlaceOnGround(GameObject instance, float groundY)
