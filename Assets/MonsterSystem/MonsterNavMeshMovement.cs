@@ -11,6 +11,10 @@ public class MonsterNavMeshMovement : MonoBehaviour
     float m_RotationSpeed;
     float m_Diameter;
     Transform[] m_RotationPoints;
+    Quaternion[] m_RotationPointBaseRotations;
+    Transform[] m_RotationCompensationPoints;
+    Quaternion[] m_CompensationWorldRotations;
+    float m_RollAngle;
     Vector3 m_Destination;
     Vector3 m_LastPosition;
     bool m_HasDestination;
@@ -23,7 +27,8 @@ public class MonsterNavMeshMovement : MonoBehaviour
         float areaRange,
         float rotationSpeed,
         float diameter,
-        Transform[] rotationPoints)
+        Transform[] rotationPoints,
+        Transform[] rotationCompensationPoints)
     {
         m_Agent = agent;
         m_AreaCenter = areaCenter;
@@ -31,12 +36,31 @@ public class MonsterNavMeshMovement : MonoBehaviour
         m_RotationSpeed = rotationSpeed;
         m_Diameter = diameter;
         m_RotationPoints = rotationPoints;
+        m_RotationCompensationPoints = rotationCompensationPoints;
+        CacheRotationState();
         m_LastPosition = agent.transform.position;
         QueueNextPath();
     }
 
+    void CacheRotationState()
+    {
+        if (m_RotationPoints != null)
+        {
+            m_RotationPointBaseRotations = new Quaternion[m_RotationPoints.Length];
+            for (var i = 0; i < m_RotationPoints.Length; i++)
+            {
+                if (m_RotationPoints[i] != null)
+                    m_RotationPointBaseRotations[i] = m_RotationPoints[i].localRotation;
+            }
+        }
+
+        if (m_RotationCompensationPoints != null)
+            m_CompensationWorldRotations = new Quaternion[m_RotationCompensationPoints.Length];
+    }
+
     void Update()
     {
+        ApplyAgentPosition();
         UpdateRolling();
 
         if (!m_HasDestination || m_Agent.pathPending)
@@ -78,15 +102,16 @@ public class MonsterNavMeshMovement : MonoBehaviour
         }
 
         var targetRotation = Quaternion.LookRotation(direction);
-        m_Agent.transform.rotation = Quaternion.RotateTowards(
-            m_Agent.transform.rotation,
+        var nextRotation = Quaternion.RotateTowards(
+            transform.rotation,
             targetRotation,
             m_RotationSpeed * Time.deltaTime);
+        SetRootRotation(nextRotation);
 
-        if (Quaternion.Angle(m_Agent.transform.rotation, targetRotation) > k_FacingTolerance)
+        if (Quaternion.Angle(transform.rotation, targetRotation) > k_FacingTolerance)
             return;
 
-        m_Agent.transform.rotation = targetRotation;
+        SetRootRotation(targetRotation);
         m_IsTurning = false;
         m_Agent.isStopped = false;
     }
@@ -96,7 +121,50 @@ public class MonsterNavMeshMovement : MonoBehaviour
         var direction = m_Agent.desiredVelocity;
         direction.y = 0f;
         if (direction.sqrMagnitude > 0.0001f)
-            m_Agent.transform.rotation = Quaternion.LookRotation(direction);
+            SetRootRotation(Quaternion.LookRotation(direction));
+    }
+
+    void ApplyAgentPosition()
+    {
+        if (!m_Agent.isOnNavMesh)
+            return;
+
+        transform.position += m_Agent.nextPosition - m_Agent.transform.position;
+    }
+
+    void SetRootRotation(Quaternion rotation)
+    {
+        CacheCompensationRotations();
+        var agentPosition = m_Agent.transform.position;
+        transform.rotation = rotation;
+        transform.position += agentPosition - m_Agent.transform.position;
+        RestoreCompensationRotations();
+    }
+
+    void CacheCompensationRotations()
+    {
+        if (m_RotationCompensationPoints == null)
+            return;
+
+        for (var i = 0; i < m_RotationCompensationPoints.Length; i++)
+        {
+            var point = m_RotationCompensationPoints[i];
+            if (point != null)
+                m_CompensationWorldRotations[i] = point.rotation;
+        }
+    }
+
+    void RestoreCompensationRotations()
+    {
+        if (m_RotationCompensationPoints == null)
+            return;
+
+        for (var i = 0; i < m_RotationCompensationPoints.Length; i++)
+        {
+            var point = m_RotationCompensationPoints[i];
+            if (point != null)
+                point.rotation = m_CompensationWorldRotations[i];
+        }
     }
 
     Vector3 GetPathDirection()
@@ -123,15 +191,15 @@ public class MonsterNavMeshMovement : MonoBehaviour
             return;
 
         var rotationDegrees = movement.magnitude / (Mathf.PI * m_Diameter) * 360f;
+        m_RollAngle = Mathf.Repeat(m_RollAngle + rotationDegrees, 360f);
         for (var i = 0; i < m_RotationPoints.Length; i++)
         {
             var point = m_RotationPoints[i];
             if (point == null)
                 continue;
 
-            var eulerAngles = point.localEulerAngles;
-            eulerAngles.x = Mathf.Repeat(eulerAngles.x + rotationDegrees, 360f);
-            point.localEulerAngles = eulerAngles;
+            point.localRotation = m_RotationPointBaseRotations[i] *
+                Quaternion.AngleAxis(m_RollAngle, Vector3.right);
         }
     }
 

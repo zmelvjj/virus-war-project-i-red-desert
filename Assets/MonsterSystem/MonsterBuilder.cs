@@ -58,71 +58,83 @@ public sealed class MonsterBuilder
         if (m_Definition.MovementType != MonsterMovementType.NavMesh)
             return MonsterMovementType.Waiting;
 
-        var agent = instance.GetComponentInChildren<NavMeshAgent>();
-        if (agent == null)
+        var agents = instance.GetComponentsInChildren<NavMeshAgent>();
+        if (agents.Length == 0)
         {
             Debug.LogWarning($"[MonsterBuilder] '{m_Definition.MonsterName}' has no NavMeshAgent. Movement changed to Waiting.", instance);
             return MonsterMovementType.Waiting;
+        }
+
+        var agent = instance.GetComponent<NavMeshAgent>();
+        if (agent == null)
+            agent = agents[0];
+
+        for (var i = 0; i < agents.Length; i++)
+        {
+            if (agents[i] != agent)
+                agents[i].enabled = false;
         }
 
         agent.speed = m_Definition.NavMeshSpeed;
         agent.angularSpeed = m_Definition.NavMeshAngularSpeed;
         agent.obstacleAvoidanceType = m_Definition.NavMeshAvoidanceQuality;
         agent.avoidancePriority = m_Definition.NavMeshAvoidancePriority;
+        agent.updatePosition = false;
         agent.updateRotation = false;
+        agent.updateUpAxis = false;
 
         var movement = instance.GetComponent<MonsterNavMeshMovement>();
         if (movement == null)
             movement = instance.AddComponent<MonsterNavMeshMovement>();
 
+        var rotationPoints = ResolveRotationPoints(instance);
         movement.Initialize(
             agent,
             m_MovementCenter,
             m_MovementRange,
             m_Definition.RotationSpeed,
             m_Definition.IsRotated ? m_Definition.Diameter : 0f,
-            ResolveRotationPoints(instance));
+            rotationPoints,
+            ResolveRotationCompensationPoints(instance, rotationPoints));
         return MonsterMovementType.NavMesh;
     }
 
     Transform[] ResolveRotationPoints(GameObject instance)
     {
-        if (!m_Definition.IsRotated || m_Definition.RotationPoints == null)
+        if (!m_Definition.IsRotated || m_Definition.RotationPointPaths == null)
             return null;
 
-        var points = new Transform[m_Definition.RotationPoints.Length];
+        var points = new Transform[m_Definition.RotationPointPaths.Length];
         for (var i = 0; i < points.Length; i++)
-        {
-            points[i] = ResolvePrefabTransform(
-                m_Definition.RotationPoints[i],
-                m_Definition.ModelPrefab.transform,
-                instance.transform);
-        }
+            points[i] = instance.transform.Find(m_Definition.RotationPointPaths[i]);
 
         return points;
     }
 
-    static Transform ResolvePrefabTransform(Transform source, Transform prefabRoot, Transform instanceRoot)
+    Transform[] ResolveRotationCompensationPoints(GameObject instance, Transform[] rotationPoints)
     {
-        if (source == null)
+        if (!m_Definition.IsRotated || rotationPoints == null || rotationPoints.Length == 0)
             return null;
 
-        var siblingIndices = new List<int>();
-        var current = source;
-        while (current != null && current != prefabRoot)
+        var points = new List<Transform>();
+        foreach (Transform child in instance.transform)
         {
-            siblingIndices.Add(current.GetSiblingIndex());
-            current = current.parent;
+            var containsRotationPoint = false;
+            for (var i = 0; i < rotationPoints.Length; i++)
+            {
+                var rotationPoint = rotationPoints[i];
+                if (rotationPoint != null && (rotationPoint == child || rotationPoint.IsChildOf(child)))
+                {
+                    containsRotationPoint = true;
+                    break;
+                }
+            }
+
+            if (!containsRotationPoint)
+                points.Add(child);
         }
 
-        if (current != prefabRoot)
-            return null;
-
-        var result = instanceRoot;
-        for (var i = siblingIndices.Count - 1; i >= 0; i--)
-            result = result.GetChild(siblingIndices[i]);
-
-        return result;
+        return points.ToArray();
     }
 
     static void PlaceOnGround(GameObject instance, float groundY)

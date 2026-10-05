@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class MonsterSpawner : MonoBehaviour
 {
+    [SerializeField] Transform spawnArea;
     [SerializeField] MonsterDefinition monster;
     [SerializeField] float range = 10f;
     [SerializeField] float spawnInterval = 1f;
@@ -24,7 +25,8 @@ public class MonsterSpawner : MonoBehaviour
                 .Create(monster)
                 .At(spawnPosition)
                 .Within(transform.position, range)
-                .Build();
+                .Build()
+                .transform.parent = spawnArea;
         }
     }
 

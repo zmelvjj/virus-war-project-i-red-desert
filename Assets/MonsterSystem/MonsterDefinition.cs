@@ -21,7 +21,7 @@ public class MonsterDefinition : ScriptableObject
     [SerializeField] ObstacleAvoidanceType navMeshAvoidanceQuality = ObstacleAvoidanceType.MedQualityObstacleAvoidance;
     [SerializeField, Range(0, 99)] int navMeshAvoidancePriority = 50;
     [SerializeField] bool isRotated = false;
-    [SerializeField] Transform[] rotationPoints;
+    [SerializeField, HideInInspector] string[] rotationPointPaths;
     [SerializeField] float diameter = 1f;
 
     public string MonsterName => monsterName;
@@ -36,5 +36,5 @@ public class MonsterDefinition : ScriptableObject
     public int NavMeshAvoidancePriority => navMeshAvoidancePriority;
     public bool IsRotated => isRotated;
     public float Diameter => diameter;
-    public Transform[] RotationPoints => rotationPoints;
+    public string[] RotationPointPaths => rotationPointPaths;
 }
