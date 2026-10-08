@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="root" class="skill-tree-setup">
+        <ui:Label text="Skill Tree Setup" class="window-title" />
+        <ui:VisualElement class="settings-section">
+            <ui:Button name="openEditorButton" text="Open Skill Tree Editor" class="primary-button" />
+            <ui:VisualElement name="parentFieldHost" class="field-host" />
+            <ui:VisualElement class="output-row">
+                <ui:VisualElement name="outputPathHost" class="output-path-host" />
+                <ui:Button name="browseButton" text="..." tooltip="Select folder" class="browse-button" />
+            </ui:VisualElement>
+            <ui:VisualElement name="baseSizeHost" class="field-host" />
+        </ui:VisualElement>
+        <ui:VisualElement class="action-section">
+            <ui:Button name="generateButton" text="Generate" class="generate-button" />
+            <ui:Label name="statusLabel" class="status-label" />
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

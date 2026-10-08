@@ -1,0 +1,14 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements">
+    <ui:VisualElement name="root" class="skill-tree-editor">
+        <ui:TwoPaneSplitView name="editorSplit" fixed-pane-index="1" fixed-pane-initial-dimension="330" orientation="Horizontal" class="editor-split">
+            <ui:VisualElement class="graph-pane">
+                <ui:VisualElement class="graph-toolbar">
+                    <ui:Label name="modeLabel" class="mode-label" />
+                    <ui:Label text="S" tooltip="Toggle move and resize mode" class="mode-key" />
+                </ui:VisualElement>
+                <ui:VisualElement name="graphHost" class="graph-host" />
+            </ui:VisualElement>
+            <ui:VisualElement name="inspectorHost" class="inspector-host" />
+        </ui:TwoPaneSplitView>
+    </ui:VisualElement>
+</ui:UXML>
