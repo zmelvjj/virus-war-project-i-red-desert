@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Dummy
   baseHp: 100
-  modelPrefab: {fileID: 4405828182202695152, guid: d9e7cbe451302fb41b27134d429065a6, type: 3}
+  modelPrefab: {fileID: 7391865324274800735, guid: d7e9051528b97d34e8ec6a0e1171ad7e, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
   rotationSpeed: 100
   movementType: 1
@@ -23,5 +23,10 @@ MonoBehaviour:
   navMeshAvoidanceQuality: 4
   navMeshAvoidancePriority: 50
   isRotated: 1
-  rotationPointPaths: []
+  rotationPointPaths:
+  - body
+  - Barrier/Outline
+  - Barrier
+  - barrier
+  - barrier_cap
   diameter: 1.5
