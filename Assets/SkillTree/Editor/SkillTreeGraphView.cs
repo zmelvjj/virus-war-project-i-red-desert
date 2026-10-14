@@ -8,7 +8,8 @@ using UnityEngine.UIElements;
 public enum SkillNodeEditMode
 {
     Move,
-    Resize
+    Resize,
+    Info
 }
 
 public enum SkillNodeResizeCorner
@@ -22,10 +23,13 @@ public enum SkillNodeResizeCorner
 public sealed class SkillTreeGraphView : GraphView
 {
     static readonly Vector2 k_DefaultNodeSize = new(200f, 100f);
+    static readonly Color k_ParentHighlightColor = new Color32(70, 189, 114, 255);
+    static readonly Color k_ChildHighlightColor = new Color32(57, 155, 234, 255);
 
     readonly SkillTreeDraftData m_Draft;
     readonly List<SkillNodeView> m_NodeViews = new();
     readonly Dictionary<SkillConnectionDraftData, SkillConnectionView> m_ConnectionViews = new();
+    readonly Dictionary<SkillNodeView, Vector2> m_NodeDragStartCenters = new();
     SkillTreeCanvasElement m_BaseCanvas;
     SkillNodeView m_SelectedNode;
     SkillConnectionView m_SelectedConnection;
@@ -33,14 +37,19 @@ public sealed class SkillTreeGraphView : GraphView
     SkillNodeView m_ConnectionStartNode;
     SkillNodeAnchor m_ConnectionStartAnchor;
     SkillConnectionView m_ConnectionPreview;
+    SkillNodeInfoTooltipView m_InfoTooltip;
+    SkillNodeView m_SnapReferenceNode;
+    bool m_SnapToInteger;
 
     public event Action<SkillNodeView> NodeSelected;
     public event Action<SkillConnectionView> ConnectionSelected;
     public event Action<SkillNodeView> NodeChanged;
+    public event Action<SkillNodeView> NodeInfoChanged;
     public event Action DraftChanged;
     public event Action<SkillNodeEditMode> ModeChanged;
 
     public SkillNodeEditMode EditMode { get; private set; } = SkillNodeEditMode.Move;
+    public int SnapStep { get; set; } = 1;
 
     public SkillTreeGraphView(SkillTreeDraftData draft)
     {
@@ -69,8 +78,10 @@ public sealed class SkillTreeGraphView : GraphView
         m_BaseCanvas.SendToBack();
 
         RegisterCallback<KeyDownEvent>(OnKeyDown);
-        RegisterCallback<PointerDownEvent>(_ => Focus(), TrickleDown.TrickleDown);
+        RegisterCallback<PointerMoveEvent>(OnPointerMove, TrickleDown.TrickleDown);
+        RegisterCallback<PointerDownEvent>(OnPointerDown, TrickleDown.TrickleDown);
         RegisterCallback<PointerUpEvent>(OnPointerUp, TrickleDown.TrickleDown);
+        RegisterCallback<PointerLeaveEvent>(OnPointerLeave);
         RegisterCallback<GeometryChangedEvent>(CenterInitialView);
 
         foreach (var node in draft.nodes)
@@ -82,22 +93,37 @@ public sealed class SkillTreeGraphView : GraphView
                 RouteConnection(connection);
             AddConnectionView(connection);
         }
+
+        m_InfoTooltip = new SkillNodeInfoTooltipView();
+        m_InfoTooltip.NodeInfoChanged += node =>
+        {
+            NodeInfoChanged?.Invoke(node);
+            DraftChanged?.Invoke();
+        };
+        contentViewContainer.Add(m_InfoTooltip);
     }
 
     public override void BuildContextualMenu(ContextualMenuPopulateEvent evt)
     {
+        if (EditMode == SkillNodeEditMode.Info)
+            return;
+
         var target = evt.target as VisualElement;
         var connection = target as SkillConnectionView
             ?? target?.GetFirstAncestorOfType<SkillConnectionView>();
         if (connection != null && connection.Draft != null)
         {
-            evt.menu.AppendAction("Delete Connection", _ => DeleteConnection(connection));
+            evt.menu.AppendAction("Delete Line", _ => DeleteConnection(connection));
             if (connection.Draft.routingMode == SkillConnectionRoutingMode.Manual)
                 evt.menu.AppendAction("Auto Route", _ => SetAutoRoute(connection));
             return;
         }
 
-        var node = target as SkillNodeView ?? target?.GetFirstAncestorOfType<SkillNodeView>();
+        var anchor = target as SkillNodeAnchorView
+            ?? target?.GetFirstAncestorOfType<SkillNodeAnchorView>();
+        var node = anchor?.Node
+            ?? target as SkillNodeView
+            ?? target?.GetFirstAncestorOfType<SkillNodeView>();
         if (node != null)
         {
             evt.menu.AppendAction("Delete Node", _ => DeleteNode(node));
@@ -125,11 +151,13 @@ public sealed class SkillTreeGraphView : GraphView
         DraftChanged?.Invoke();
     }
 
-    void AddNodeView(SkillNodeDraftData draft)
+    SkillNodeView AddNodeView(SkillNodeDraftData draft)
     {
         var node = new SkillNodeView(
             draft,
             () => scale,
+            SnapNodePosition,
+            () => SnapStep,
             GetSelectedNodes,
             BeginConnectionDrag,
             UpdateConnectionDrag,
@@ -145,9 +173,13 @@ public sealed class SkillTreeGraphView : GraphView
         node.SetEditMode(EditMode);
         m_NodeViews.Add(node);
         AddElement(node);
+        foreach (var anchor in node.Anchors)
+            contentViewContainer.Add(anchor);
+        node.UpdateAnchorPositions();
+        return node;
     }
 
-    void DeleteNode(SkillNodeView node)
+    void DeleteNode(SkillNodeView node, bool notify = true)
     {
         var wasInspectorNode = m_SelectedNode == node;
         if (wasInspectorNode)
@@ -165,10 +197,14 @@ public sealed class SkillTreeGraphView : GraphView
 
         m_Draft.nodes.Remove(node.Draft);
         m_NodeViews.Remove(node);
+        foreach (var anchor in node.Anchors)
+            anchor.RemoveFromHierarchy();
         RemoveElement(node);
-        if (wasInspectorNode)
+        UpdateRelationshipHighlights();
+        if (wasInspectorNode && notify)
             SelectFirstNodeForInspector();
-        DraftChanged?.Invoke();
+        if (notify)
+            DraftChanged?.Invoke();
     }
 
     void OnNodeSelected(SkillNodeView node)
@@ -179,10 +215,20 @@ public sealed class SkillTreeGraphView : GraphView
             ConnectionSelected?.Invoke(null);
         }
 
+        if (EditMode == SkillNodeEditMode.Info)
+        {
+            m_SelectedNode = node;
+            UpdateRelationshipHighlights();
+            NodeSelected?.Invoke(node);
+            ShowSelectedInfoTooltip(node);
+            return;
+        }
+
         if (m_SelectedNode != null)
             return;
 
         m_SelectedNode = node;
+        UpdateRelationshipHighlights();
         NodeSelected?.Invoke(node);
     }
 
@@ -192,6 +238,13 @@ public sealed class SkillTreeGraphView : GraphView
             return;
 
         m_SelectedNode = null;
+        if (EditMode == SkillNodeEditMode.Info)
+        {
+            UpdateRelationshipHighlights();
+            NodeSelected?.Invoke(null);
+            m_InfoTooltip.Hide();
+            return;
+        }
         SelectFirstNodeForInspector();
     }
 
@@ -215,16 +268,74 @@ public sealed class SkillTreeGraphView : GraphView
                 continue;
 
             m_SelectedNode = node;
+            UpdateRelationshipHighlights();
             NodeSelected?.Invoke(node);
             return;
         }
 
+        UpdateRelationshipHighlights();
         NodeSelected?.Invoke(null);
+    }
+
+    public void RefreshNodeInfo(SkillNodeView node)
+    {
+        m_InfoTooltip.Refresh(node);
+    }
+
+    void ShowSelectedInfoTooltip(SkillNodeView node)
+    {
+        var rect = node.GetPosition();
+        var position = new Vector2(rect.xMax + 16f, rect.center.y - 24f);
+        m_InfoTooltip.Show(node, position, true);
+    }
+
+    void ShowHoverInfoTooltip(SkillNodeView node, Vector2 panelPosition)
+    {
+        var position = contentViewContainer.WorldToLocal(panelPosition) + new Vector2(18f, 18f);
+        m_InfoTooltip.Show(node, position, false);
+    }
+
+    static SkillNodeView GetNodeFromTarget(VisualElement target)
+    {
+        return target as SkillNodeView
+            ?? target?.GetFirstAncestorOfType<SkillNodeView>();
+    }
+
+    void UpdateRelationshipHighlights()
+    {
+        foreach (var node in m_NodeViews)
+            node.SetRelationshipHighlight(false, false);
+        foreach (var connection in m_ConnectionViews.Values)
+            connection.SetTemporaryColor(null);
+
+        if (m_SelectedNode == null)
+            return;
+
+        var selectedGuid = m_SelectedNode.Draft.guid;
+        foreach (var connection in m_Draft.connections)
+        {
+            if (connection.parentNodeGuid == selectedGuid)
+            {
+                FindNode(connection.childNodeGuid)?.SetRelationshipHighlight(false, true);
+                if (m_ConnectionViews.TryGetValue(connection, out var childConnection))
+                    childConnection.SetTemporaryColor(k_ChildHighlightColor);
+            }
+            else if (connection.childNodeGuid == selectedGuid)
+            {
+                FindNode(connection.parentNodeGuid)?.SetRelationshipHighlight(true, false);
+                if (m_ConnectionViews.TryGetValue(connection, out var parentConnection))
+                    parentConnection.SetTemporaryColor(k_ParentHighlightColor);
+            }
+        }
     }
 
     void AddConnectionView(SkillConnectionDraftData draft)
     {
-        var view = new SkillConnectionView(draft, () => scale, SelectConnection);
+        var view = new SkillConnectionView(
+            draft,
+            () => scale,
+            () => SnapStep,
+            SelectConnection);
         view.PathChanged += RefreshManualConnection;
         view.PathEditCompleted += _ => DraftChanged?.Invoke();
         view.Deselected += OnConnectionUnselected;
@@ -232,7 +343,9 @@ public sealed class SkillTreeGraphView : GraphView
         AddElement(view);
         view.SendToBack();
         m_BaseCanvas.SendToBack();
+        view.SetMinimumBendPointCount(GetMinimumBendPointCount(draft));
         RefreshManualConnection(view);
+        UpdateRelationshipHighlights();
     }
 
     void BeginConnectionDrag(
@@ -245,7 +358,12 @@ public sealed class SkillTreeGraphView : GraphView
         foreach (var nodeView in m_NodeViews)
             nodeView.SetConnectionDragActive(true);
 
-        m_ConnectionPreview = new SkillConnectionView(null, () => scale, null, true);
+        m_ConnectionPreview = new SkillConnectionView(
+            null,
+            () => scale,
+            () => SnapStep,
+            null,
+            true);
         AddElement(m_ConnectionPreview);
         m_ConnectionPreview.SendToBack();
         m_BaseCanvas.SendToBack();
@@ -258,10 +376,20 @@ public sealed class SkillTreeGraphView : GraphView
             return;
 
         var pointerPosition = contentViewContainer.WorldToLocal(panelPosition);
-        m_ConnectionPreview.SetPreviewPath(SmartOrthogonalRouter.Preview(
-            m_ConnectionStartNode.GetPosition(),
-            m_ConnectionStartAnchor,
-            pointerPosition));
+        var picked = panel.Pick(panelPosition);
+        var targetAnchor = picked as SkillNodeAnchorView
+            ?? picked?.GetFirstAncestorOfType<SkillNodeAnchorView>();
+        var path = targetAnchor != null && targetAnchor.Node != m_ConnectionStartNode
+            ? SmartOrthogonalRouter.Route(
+                m_ConnectionStartNode.GetPosition(),
+                m_ConnectionStartAnchor,
+                targetAnchor.Node.GetPosition(),
+                targetAnchor.Anchor)
+            : SmartOrthogonalRouter.Preview(
+                m_ConnectionStartNode.GetPosition(),
+                m_ConnectionStartAnchor,
+                pointerPosition);
+        m_ConnectionPreview.SetPreviewPath(path);
     }
 
     void EndConnectionDrag(SkillNodeAnchorView targetAnchor)
@@ -299,11 +427,14 @@ public sealed class SkillTreeGraphView : GraphView
         DraftChanged?.Invoke();
     }
 
-    void SelectConnection(SkillConnectionView connection)
+    void SelectConnection(SkillConnectionView connection, int segmentIndex)
     {
         ClearSelection();
         AddToSelection(connection);
+        connection.SelectSegment(segmentIndex);
+        m_SelectedNode = null;
         m_SelectedConnection = connection;
+        UpdateRelationshipHighlights();
         NodeSelected?.Invoke(null);
         ConnectionSelected?.Invoke(connection);
     }
@@ -317,7 +448,7 @@ public sealed class SkillTreeGraphView : GraphView
         ConnectionSelected?.Invoke(null);
     }
 
-    void DeleteConnection(SkillConnectionView connection)
+    void DeleteConnection(SkillConnectionView connection, bool notify = true)
     {
         if (m_SelectedConnection == connection)
         {
@@ -326,7 +457,8 @@ public sealed class SkillTreeGraphView : GraphView
         }
 
         RemoveConnection(connection.Draft);
-        DraftChanged?.Invoke();
+        if (notify)
+            DraftChanged?.Invoke();
     }
 
     void RemoveConnection(SkillConnectionDraftData draft)
@@ -338,6 +470,7 @@ public sealed class SkillTreeGraphView : GraphView
         }
 
         m_Draft.connections.Remove(draft);
+        UpdateRelationshipHighlights();
     }
 
     void SetAutoRoute(SkillConnectionView connection)
@@ -347,7 +480,6 @@ public sealed class SkillTreeGraphView : GraphView
         connection.Draft.bendPointCount = -1;
         RouteConnection(connection.Draft);
         connection.RefreshLayout();
-        connection.SetInvalid(false);
         ConnectionSelected?.Invoke(connection);
         DraftChanged?.Invoke();
     }
@@ -359,25 +491,44 @@ public sealed class SkillTreeGraphView : GraphView
         if (parent == null || child == null)
             return;
 
-        var obstacles = GetObstacleRects(parent, child);
-        var existingConnections = new List<SkillConnectionDraftData>();
-        foreach (var existing in m_Draft.connections)
-        {
-            if (existing != connection)
-                existingConnections.Add(existing);
-        }
-
-        var path = SmartOrthogonalRouter.Route(
+        var minimumPath = SmartOrthogonalRouter.Route(
             parent.GetPosition(),
             connection.startAnchor,
             child.GetPosition(),
-            connection.endAnchor,
-            obstacles,
-            existingConnections,
-            connection.hasCustomBendPointCount ? connection.bendPointCount : -1);
+            connection.endAnchor);
+        var minimum = Mathf.Max(0, minimumPath.Count - 2);
+        var path = minimumPath;
+        if (connection.hasCustomBendPointCount)
+        {
+            connection.bendPointCount = SmartOrthogonalRouter.NormalizeRequestedBendPointCount(
+                minimum,
+                connection.bendPointCount);
+            path = SmartOrthogonalRouter.Route(
+                parent.GetPosition(),
+                connection.startAnchor,
+                child.GetPosition(),
+                connection.endAnchor,
+                connection.bendPointCount);
+        }
         connection.pathPoints.Clear();
         connection.pathPoints.AddRange(path);
         connection.bendPointCount = Mathf.Max(0, path.Count - 2);
+        if (m_ConnectionViews.TryGetValue(connection, out var view))
+            view.SetMinimumBendPointCount(minimum);
+    }
+
+    int GetMinimumBendPointCount(SkillConnectionDraftData connection)
+    {
+        var parent = FindNode(connection.parentNodeGuid);
+        var child = FindNode(connection.childNodeGuid);
+        if (parent == null || child == null)
+            return 0;
+
+        return SmartOrthogonalRouter.GetMinimumBendPointCount(
+            parent.GetPosition(),
+            connection.startAnchor,
+            child.GetPosition(),
+            connection.endAnchor);
     }
 
     public void SetConnectionBendPointCount(SkillConnectionView connection, int bendPointCount)
@@ -390,7 +541,6 @@ public sealed class SkillTreeGraphView : GraphView
         connection.Draft.hasCustomBendPointCount = true;
         RouteConnection(connection.Draft);
         connection.RefreshLayout();
-        connection.SetInvalid(false);
         ConnectionSelected?.Invoke(connection);
         DraftChanged?.Invoke();
     }
@@ -462,43 +612,20 @@ public sealed class SkillTreeGraphView : GraphView
     void RefreshManualConnection(SkillConnectionView connection)
     {
         if (connection.Draft != null)
+        {
             connection.Draft.bendPointCount = Mathf.Max(0, connection.Draft.pathPoints.Count - 2);
+            connection.SetMinimumBendPointCount(GetMinimumBendPointCount(connection.Draft));
+        }
 
         if (connection.Draft == null
             || connection.Draft.routingMode == SkillConnectionRoutingMode.Auto)
         {
-            connection.SetInvalid(false);
             if (m_SelectedConnection == connection)
                 ConnectionSelected?.Invoke(connection);
             return;
         }
-
-        var parent = FindNode(connection.Draft.parentNodeGuid);
-        var child = FindNode(connection.Draft.childNodeGuid);
-        connection.SetInvalid(SmartOrthogonalRouter.PathIntersectsObstacles(
-            connection.Draft.pathPoints,
-            GetObstacleRects(parent, child)));
         if (m_SelectedConnection == connection)
             ConnectionSelected?.Invoke(connection);
-    }
-
-    List<Rect> GetObstacleRects(SkillNodeView excludedA, SkillNodeView excludedB)
-    {
-        var obstacles = new List<Rect>();
-        foreach (var node in m_NodeViews)
-        {
-            if (node == excludedA || node == excludedB)
-                continue;
-
-            var rect = node.GetPosition();
-            rect.xMin -= SmartOrthogonalRouter.ObstaclePadding;
-            rect.xMax += SmartOrthogonalRouter.ObstaclePadding;
-            rect.yMin -= SmartOrthogonalRouter.ObstaclePadding;
-            rect.yMax += SmartOrthogonalRouter.ObstaclePadding;
-            obstacles.Add(rect);
-        }
-
-        return obstacles;
     }
 
     SkillNodeView FindNode(string guid)
@@ -515,28 +642,345 @@ public sealed class SkillTreeGraphView : GraphView
 
     void OnKeyDown(KeyDownEvent evt)
     {
+        var target = evt.target as VisualElement;
+        var textField = target as TextField
+            ?? target?.GetFirstAncestorOfType<TextField>();
+        if (textField != null)
+            return;
+
+        if (evt.keyCode == KeyCode.I)
+        {
+            SetEditMode(EditMode == SkillNodeEditMode.Info
+                ? SkillNodeEditMode.Move
+                : SkillNodeEditMode.Info);
+            evt.StopPropagation();
+            return;
+        }
+
+        if (EditMode == SkillNodeEditMode.Info)
+            return;
+
+        if (evt.ctrlKey && evt.keyCode == KeyCode.D)
+        {
+            DuplicateSelectedNodes();
+            evt.StopPropagation();
+            return;
+        }
+
+        if (evt.keyCode == KeyCode.Backspace)
+        {
+            DeleteSelectedElements();
+            evt.StopPropagation();
+            return;
+        }
+
         if (evt.keyCode != KeyCode.S)
             return;
 
-        EditMode = EditMode == SkillNodeEditMode.Move
+        SetEditMode(EditMode == SkillNodeEditMode.Move
             ? SkillNodeEditMode.Resize
-            : SkillNodeEditMode.Move;
+            : SkillNodeEditMode.Move);
+        evt.StopPropagation();
+    }
+
+    public void SetEditMode(SkillNodeEditMode mode)
+    {
+        if (EditMode == mode)
+            return;
+
+        ClearSelection();
+        m_SelectedNode = null;
+        m_SelectedConnection = null;
+        m_InfoTooltip.Hide();
+        EditMode = mode;
 
         foreach (var node in m_NodeViews)
             node.SetEditMode(EditMode);
 
         EnableInClassList("resize-mode", EditMode == SkillNodeEditMode.Resize);
+        EnableInClassList("info-mode", EditMode == SkillNodeEditMode.Info);
+        UpdateRelationshipHighlights();
+        NodeSelected?.Invoke(null);
+        ConnectionSelected?.Invoke(null);
         ModeChanged?.Invoke(EditMode);
-        evt.StopPropagation();
+    }
+
+    void DuplicateSelectedNodes()
+    {
+        var selectedNodes = GetSelectedNodes();
+        if (selectedNodes.Count == 0)
+            return;
+
+        var guidMap = new Dictionary<string, string>();
+        var duplicatedViews = new List<SkillNodeView>();
+        foreach (var node in selectedNodes)
+        {
+            var duplicate = CloneNodeDraft(node.Draft);
+            guidMap[node.Draft.guid] = duplicate.guid;
+            m_Draft.nodes.Add(duplicate);
+            duplicatedViews.Add(AddNodeView(duplicate));
+        }
+
+        var duplicatedConnections = new List<SkillConnectionDraftData>();
+        foreach (var connection in m_Draft.connections)
+        {
+            if (!guidMap.TryGetValue(connection.parentNodeGuid, out var parentGuid)
+                || !guidMap.TryGetValue(connection.childNodeGuid, out var childGuid))
+            {
+                continue;
+            }
+
+            duplicatedConnections.Add(CloneConnectionDraft(connection, parentGuid, childGuid));
+        }
+
+        foreach (var connection in duplicatedConnections)
+        {
+            m_Draft.connections.Add(connection);
+            AddConnectionView(connection);
+        }
+
+        ClearSelection();
+        m_SelectedNode = null;
+        m_SelectedConnection = null;
+        foreach (var node in duplicatedViews)
+            AddToSelection(node);
+        DraftChanged?.Invoke();
+    }
+
+    static SkillNodeDraftData CloneNodeDraft(SkillNodeDraftData source)
+    {
+        return new SkillNodeDraftData
+        {
+            guid = Guid.NewGuid().ToString("N"),
+            nodeSpriteGuid = source.nodeSpriteGuid,
+            nodeSpriteLocalId = source.nodeSpriteLocalId,
+            nodeColor = source.nodeColor,
+            skillSpriteGuid = source.skillSpriteGuid,
+            skillSpriteLocalId = source.skillSpriteLocalId,
+            skillColor = source.skillColor,
+            skillSpriteSizeRatio = source.skillSpriteSizeRatio,
+            price = source.price,
+            effects = CloneEffects(source.effects),
+            nodeInfo = new SkillNodeInfoDraftData
+            {
+                mainText = source.nodeInfo.mainText,
+                fontGuid = source.nodeInfo.fontGuid,
+                description = source.nodeInfo.description,
+                statName = source.nodeInfo.statName,
+                valueText = source.nodeInfo.valueText
+            },
+            position = source.position,
+            size = source.size
+        };
+    }
+
+    static List<SkillEffectDraftData> CloneEffects(
+        IReadOnlyList<SkillEffectDraftData> source)
+    {
+        var effects = new List<SkillEffectDraftData>(source.Count);
+        foreach (var effect in source)
+        {
+            effects.Add(new SkillEffectDraftData
+            {
+                effectType = effect.effectType,
+                stat = effect.stat,
+                ability = effect.ability,
+                abilityProperty = effect.abilityProperty,
+                operation = effect.operation,
+                value = effect.value
+            });
+        }
+
+        return effects;
+    }
+
+    static SkillConnectionDraftData CloneConnectionDraft(
+        SkillConnectionDraftData source,
+        string parentGuid,
+        string childGuid)
+    {
+        return new SkillConnectionDraftData
+        {
+            color = source.color,
+            spriteGuid = source.spriteGuid,
+            spriteLocalId = source.spriteLocalId,
+            repeatSprite = source.repeatSprite,
+            parentNodeGuid = parentGuid,
+            childNodeGuid = childGuid,
+            startAnchor = source.startAnchor,
+            endAnchor = source.endAnchor,
+            routingMode = source.routingMode,
+            bendPointCount = source.bendPointCount,
+            hasCustomBendPointCount = source.hasCustomBendPointCount,
+            pathPoints = new List<Vector2>(source.pathPoints)
+        };
+    }
+
+    void DeleteSelectedElements()
+    {
+        var selectedNodes = new List<SkillNodeView>();
+        var selectedConnections = new List<SkillConnectionView>();
+        foreach (var selectable in selection)
+        {
+            if (selectable is SkillNodeView node)
+                selectedNodes.Add(node);
+            else if (selectable is SkillConnectionView connection)
+                selectedConnections.Add(connection);
+        }
+
+        if (selectedNodes.Count == 0 && selectedConnections.Count == 0)
+            return;
+
+        foreach (var node in selectedNodes)
+            DeleteNode(node, false);
+        foreach (var connection in selectedConnections)
+        {
+            if (connection.Draft != null && m_Draft.connections.Contains(connection.Draft))
+                DeleteConnection(connection, false);
+        }
+
+        m_SelectedNode = null;
+        m_SelectedConnection = null;
+        UpdateRelationshipHighlights();
+        NodeSelected?.Invoke(null);
+        ConnectionSelected?.Invoke(null);
+        DraftChanged?.Invoke();
+    }
+
+    void OnPointerMove(PointerMoveEvent evt)
+    {
+        if (EditMode == SkillNodeEditMode.Info)
+        {
+            if (m_SelectedNode != null)
+                return;
+
+            var node = GetNodeFromTarget(evt.target as VisualElement);
+            if (node == null)
+                m_InfoTooltip.Hide();
+            else
+                ShowHoverInfoTooltip(node, evt.position);
+            return;
+        }
+
+        m_SnapToInteger = evt.ctrlKey;
+    }
+
+    void OnPointerDown(PointerDownEvent evt)
+    {
+        Focus();
+        m_SnapToInteger = evt.ctrlKey;
+        m_NodeDragStartCenters.Clear();
+
+        var target = evt.target as VisualElement;
+        if (EditMode == SkillNodeEditMode.Info)
+        {
+            var tooltip = target as SkillNodeInfoTooltipView
+                ?? target?.GetFirstAncestorOfType<SkillNodeInfoTooltipView>();
+            if (tooltip != null)
+                return;
+
+            if (evt.button != 0)
+                return;
+
+            var infoNode = GetNodeFromTarget(target);
+            if (infoNode != null)
+            {
+                if (!infoNode.IsNodeSelected)
+                {
+                    ClearSelection();
+                    AddToSelection(infoNode);
+                }
+                else
+                {
+                    ShowSelectedInfoTooltip(infoNode);
+                }
+            }
+            else
+            {
+                ClearSelection();
+                m_SelectedNode = null;
+                UpdateRelationshipHighlights();
+                NodeSelected?.Invoke(null);
+                m_InfoTooltip.Hide();
+            }
+
+            evt.StopImmediatePropagation();
+            return;
+        }
+
+        var anchor = target as SkillNodeAnchorView
+            ?? target?.GetFirstAncestorOfType<SkillNodeAnchorView>();
+        m_SnapReferenceNode = anchor?.Node
+            ?? target as SkillNodeView
+            ?? target?.GetFirstAncestorOfType<SkillNodeView>();
+
+        if (EditMode == SkillNodeEditMode.Resize
+            && evt.button == 0
+            && evt.ctrlKey
+            && anchor == null
+            && !target.ClassListContains("resize-handle")
+            && m_SnapReferenceNode != null)
+        {
+            if (m_SnapReferenceNode.IsNodeSelected)
+                RemoveFromSelection(m_SnapReferenceNode);
+            else
+                AddToSelection(m_SnapReferenceNode);
+            evt.StopImmediatePropagation();
+            return;
+        }
+
+        if (m_SnapReferenceNode == null)
+            return;
+
+        foreach (var node in m_NodeViews)
+        {
+            if (node.IsNodeSelected || node == m_SnapReferenceNode)
+                m_NodeDragStartCenters[node] = node.GetPosition().center;
+        }
+    }
+
+    Rect SnapNodePosition(SkillNodeView node, Rect newPosition)
+    {
+        if (!m_SnapToInteger)
+            return newPosition;
+
+        var step = Mathf.Max(1, SnapStep);
+        if (m_SnapReferenceNode == null
+            || !m_NodeDragStartCenters.TryGetValue(node, out var nodeStart)
+            || !m_NodeDragStartCenters.TryGetValue(m_SnapReferenceNode, out var referenceStart))
+        {
+            var snappedCenter = new Vector2(
+                Mathf.Round(newPosition.center.x / step) * step,
+                Mathf.Round(newPosition.center.y / step) * step);
+            newPosition.position = snappedCenter - newPosition.size * 0.5f;
+            return newPosition;
+        }
+
+        var dragDelta = newPosition.center - nodeStart;
+        var referencePosition = referenceStart + dragDelta;
+        var snappedReference = new Vector2(
+            Mathf.Round(referencePosition.x / step) * step,
+            Mathf.Round(referencePosition.y / step) * step);
+        newPosition.position += snappedReference - referencePosition;
+        return newPosition;
     }
 
     void OnPointerUp(PointerUpEvent evt)
     {
+        m_SnapToInteger = false;
+        m_SnapReferenceNode = null;
+        m_NodeDragStartCenters.Clear();
         if (!m_HasPendingTransformChange)
             return;
 
         m_HasPendingTransformChange = false;
         DraftChanged?.Invoke();
+    }
+
+    void OnPointerLeave(PointerLeaveEvent evt)
+    {
+        if (EditMode == SkillNodeEditMode.Info && m_SelectedNode == null)
+            m_InfoTooltip.Hide();
     }
 
     void CenterInitialView(GeometryChangedEvent evt)
@@ -559,17 +1003,21 @@ public sealed class SkillNodeView : Node
 {
     readonly Image m_NodeImage;
     readonly Image m_SkillImage;
+    readonly VisualElement m_RelationshipOutline;
+    readonly Func<SkillNodeView, Rect, Rect> m_SnapPosition;
+    readonly Func<int> m_SnapStep;
     readonly List<VisualElement> m_ResizeHandles = new();
     readonly List<SkillNodeAnchorView> m_Anchors = new();
     Rect m_Position;
     bool m_Initialized;
     bool m_IsSelected;
-    bool m_IsHovered;
     bool m_ConnectionDragActive;
     SkillNodeEditMode m_EditMode;
 
     public SkillNodeDraftData Draft { get; }
     public bool IsNodeSelected => m_IsSelected;
+    public IReadOnlyList<SkillNodeAnchorView> Anchors => m_Anchors;
+    public float SnapStep => Mathf.Max(1, m_SnapStep());
 
     public event Action<SkillNodeView> Selected;
     public event Action<SkillNodeView> Unselected;
@@ -578,12 +1026,16 @@ public sealed class SkillNodeView : Node
     public SkillNodeView(
         SkillNodeDraftData draft,
         Func<float> zoomScale,
+        Func<SkillNodeView, Rect, Rect> snapPosition,
+        Func<int> snapStep,
         Func<List<SkillNodeView>> selectedNodes,
         Action<SkillNodeView, SkillNodeAnchor, Vector2> beginConnectionDrag,
         Action<Vector2> updateConnectionDrag,
         Action<SkillNodeAnchorView> endConnectionDrag)
     {
         Draft = draft;
+        m_SnapPosition = snapPosition;
+        m_SnapStep = snapStep;
         viewDataKey = draft.guid;
         capabilities = Capabilities.Selectable | Capabilities.Movable;
         AddToClassList("skill-node");
@@ -612,31 +1064,44 @@ public sealed class SkillNodeView : Node
         m_SkillImage.AddToClassList("skill-image");
         visual.Add(m_SkillImage);
 
+        m_RelationshipOutline = new VisualElement
+        {
+            pickingMode = PickingMode.Ignore
+        };
+        m_RelationshipOutline.AddToClassList("related-node-outline");
+        foreach (var cornerClass in new[]
+                 {
+                     "related-node-top-left",
+                     "related-node-top-right",
+                     "related-node-bottom-left",
+                     "related-node-bottom-right"
+                 })
+        {
+            var corner = new VisualElement
+            {
+                pickingMode = PickingMode.Ignore
+            };
+            corner.AddToClassList("related-node-corner");
+            corner.AddToClassList(cornerClass);
+            m_RelationshipOutline.Add(corner);
+        }
+        visual.Add(m_RelationshipOutline);
+
         AddResizeHandle(visual, SkillNodeResizeCorner.TopLeft, zoomScale, selectedNodes);
         AddResizeHandle(visual, SkillNodeResizeCorner.TopRight, zoomScale, selectedNodes);
         AddResizeHandle(visual, SkillNodeResizeCorner.BottomLeft, zoomScale, selectedNodes);
         AddResizeHandle(visual, SkillNodeResizeCorner.BottomRight, zoomScale, selectedNodes);
-        AddAnchor(visual, SkillNodeAnchor.Top, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
-        AddAnchor(visual, SkillNodeAnchor.Right, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
-        AddAnchor(visual, SkillNodeAnchor.Bottom, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
-        AddAnchor(visual, SkillNodeAnchor.Left, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
-
-        RegisterCallback<PointerEnterEvent>(_ =>
-        {
-            m_IsHovered = true;
-            UpdateAnchors();
-        });
-        RegisterCallback<PointerLeaveEvent>(_ =>
-        {
-            m_IsHovered = false;
-            UpdateAnchors();
-        });
+        AddAnchor(SkillNodeAnchor.Top, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
+        AddAnchor(SkillNodeAnchor.Right, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
+        AddAnchor(SkillNodeAnchor.Bottom, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
+        AddAnchor(SkillNodeAnchor.Left, beginConnectionDrag, updateConnectionDrag, endConnectionDrag);
 
         RefreshVisuals();
         m_Position = new Rect(draft.position - draft.size * 0.5f, draft.size);
         base.SetPosition(m_Position);
         style.width = draft.size.x;
         style.height = draft.size.y;
+        UpdateAnchorPositions();
         m_Initialized = true;
     }
 
@@ -649,10 +1114,13 @@ public sealed class SkillNodeView : Node
     {
         newPos.width = Mathf.Max(0f, newPos.width);
         newPos.height = Mathf.Max(0f, newPos.height);
+        if (m_Initialized && m_EditMode == SkillNodeEditMode.Move)
+            newPos = m_SnapPosition(this, newPos);
         m_Position = newPos;
         base.SetPosition(newPos);
         style.width = newPos.width;
         style.height = newPos.height;
+        UpdateAnchorPositions();
 
         if (!m_Initialized)
             return;
@@ -696,6 +1164,15 @@ public sealed class SkillNodeView : Node
     {
         m_ConnectionDragActive = isActive;
         UpdateAnchors();
+    }
+
+    public void SetRelationshipHighlight(bool isParent, bool isChild)
+    {
+        m_RelationshipOutline.EnableInClassList(
+            "related-node-outline-active",
+            isParent || isChild);
+        m_RelationshipOutline.EnableInClassList("related-node-parent", isParent);
+        m_RelationshipOutline.EnableInClassList("related-node-child", isChild);
     }
 
     public void RefreshVisuals()
@@ -751,7 +1228,6 @@ public sealed class SkillNodeView : Node
     }
 
     void AddAnchor(
-        VisualElement visual,
         SkillNodeAnchor anchor,
         Action<SkillNodeView, SkillNodeAnchor, Vector2> beginConnectionDrag,
         Action<Vector2> updateConnectionDrag,
@@ -764,7 +1240,12 @@ public sealed class SkillNodeView : Node
             updateConnectionDrag,
             endConnectionDrag);
         m_Anchors.Add(anchorView);
-        visual.Add(anchorView);
+    }
+
+    public void UpdateAnchorPositions()
+    {
+        foreach (var anchor in m_Anchors)
+            anchor.SetNodeRect(m_Position);
     }
 
     void UpdateResizeHandles()
@@ -778,7 +1259,7 @@ public sealed class SkillNodeView : Node
     void UpdateAnchors()
     {
         var isActive = m_EditMode == SkillNodeEditMode.Move
-            && (m_IsSelected || m_IsHovered || m_ConnectionDragActive);
+            && (m_IsSelected || m_ConnectionDragActive);
         foreach (var anchor in m_Anchors)
             anchor.EnableInClassList("node-anchor-active", isActive);
     }
@@ -850,12 +1331,15 @@ sealed class SkillNodeResizeManipulator : PointerManipulator
         var resizeScale = SkillNodeResizeMath.CalculateScale(
             m_StartRect,
             m_Corner,
-            delta);
+            delta,
+            evt.ctrlKey ? m_Node.SnapStep : 0f);
 
         foreach (var state in m_ResizeStates)
-            state.node.SetPosition(SkillNodeResizeMath.ScaleAroundCenter(
+            state.node.SetPosition(SkillNodeResizeMath.ScaleFromOppositeCorner(
                 state.rect,
-                resizeScale));
+                m_Corner,
+                resizeScale,
+                evt.ctrlKey ? state.node.SnapStep : 0f));
 
         evt.StopPropagation();
     }
@@ -888,24 +1372,47 @@ public static class SkillNodeResizeMath
     public static Vector2 CalculateScale(
         Rect anchorRect,
         SkillNodeResizeCorner corner,
-        Vector2 delta)
+        Vector2 delta,
+        float snapStep = 0f)
     {
         var widthDelta = corner is SkillNodeResizeCorner.TopLeft or SkillNodeResizeCorner.BottomLeft
-            ? -delta.x * 2f
-            : delta.x * 2f;
+            ? -delta.x
+            : delta.x;
         var heightDelta = corner is SkillNodeResizeCorner.TopLeft or SkillNodeResizeCorner.TopRight
-            ? -delta.y * 2f
-            : delta.y * 2f;
+            ? -delta.y
+            : delta.y;
         var width = Mathf.Max(0f, anchorRect.width + widthDelta);
         var height = Mathf.Max(0f, anchorRect.height + heightDelta);
+        if (snapStep > 0f)
+        {
+            width = Mathf.Round(width / snapStep) * snapStep;
+            height = Mathf.Round(height / snapStep) * snapStep;
+        }
         return new Vector2(width / anchorRect.width, height / anchorRect.height);
     }
 
-    public static Rect ScaleAroundCenter(Rect rect, Vector2 resizeScale)
+    public static Rect ScaleFromOppositeCorner(
+        Rect rect,
+        SkillNodeResizeCorner corner,
+        Vector2 resizeScale,
+        float snapStep = 0f)
     {
         var size = new Vector2(
             Mathf.Max(0f, rect.width * resizeScale.x),
             Mathf.Max(0f, rect.height * resizeScale.y));
-        return new Rect(rect.center - size * 0.5f, size);
+        if (snapStep > 0f)
+        {
+            size.x = Mathf.Round(size.x / snapStep) * snapStep;
+            size.y = Mathf.Round(size.y / snapStep) * snapStep;
+        }
+
+        var position = corner switch
+        {
+            SkillNodeResizeCorner.TopLeft => new Vector2(rect.xMax - size.x, rect.yMax - size.y),
+            SkillNodeResizeCorner.TopRight => new Vector2(rect.xMin, rect.yMax - size.y),
+            SkillNodeResizeCorner.BottomLeft => new Vector2(rect.xMax - size.x, rect.yMin),
+            _ => rect.position
+        };
+        return new Rect(position, size);
     }
 }

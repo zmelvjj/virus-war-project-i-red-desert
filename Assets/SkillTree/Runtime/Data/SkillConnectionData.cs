@@ -5,6 +5,9 @@ using UnityEngine;
 [Serializable]
 public sealed class SkillConnectionData
 {
+    [SerializeField] Color color = new(0.68f, 0.72f, 0.78f);
+    [SerializeField] Sprite sprite;
+    [SerializeField] bool repeatSprite;
     [SerializeField] string parentNodeGuid;
     [SerializeField] string childNodeGuid;
     [SerializeField] SkillNodeAnchor startAnchor;
@@ -12,6 +15,9 @@ public sealed class SkillConnectionData
     [SerializeField] SkillConnectionRoutingMode routingMode;
     [SerializeField] List<Vector2> pathPoints = new();
 
+    public Color Color => color;
+    public Sprite Sprite => sprite;
+    public bool RepeatSprite => repeatSprite;
     public string ParentNodeGuid => parentNodeGuid;
     public string ChildNodeGuid => childNodeGuid;
     public SkillNodeAnchor StartAnchor => startAnchor;

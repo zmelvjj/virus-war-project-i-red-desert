@@ -8,6 +8,7 @@ public class MonsterManager : MonoBehaviour
 
     readonly List<MonsterEntity> m_Monsters = new();
     readonly Queue<MonsterNavMeshMovement> m_NavigationQueue = new();
+    GameFlowManager m_GameFlowManager;
 
     public IReadOnlyList<MonsterEntity> Monsters => m_Monsters;
     public int ActiveCount => m_Monsters.Count;
@@ -15,6 +16,16 @@ public class MonsterManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+    }
+
+    void OnEnable()
+    {
+        AttachGameFlowManager();
+    }
+
+    void Start()
+    {
+        AttachGameFlowManager();
     }
 
     public void Register(MonsterEntity monster)
@@ -34,7 +45,7 @@ public class MonsterManager : MonoBehaviour
 
     void Update()
     {
-        if (m_NavigationQueue.Count == 0)
+        if (!GameFlowManager.IsMainGame || m_NavigationQueue.Count == 0)
             return;
 
         var movement = m_NavigationQueue.Dequeue();
@@ -44,7 +55,37 @@ public class MonsterManager : MonoBehaviour
 
     void OnDestroy()
     {
+        if (m_GameFlowManager != null)
+            m_GameFlowManager.OnRunRestarted -= ResetRun;
+
         if (Instance == this)
             Instance = null;
+    }
+
+    void AttachGameFlowManager()
+    {
+        if (!GameFlowManager.HasInstance
+            || m_GameFlowManager == GameFlowManager.Instance)
+        {
+            return;
+        }
+
+        if (m_GameFlowManager != null)
+            m_GameFlowManager.OnRunRestarted -= ResetRun;
+
+        m_GameFlowManager = GameFlowManager.Instance;
+        m_GameFlowManager.OnRunRestarted += ResetRun;
+    }
+
+    void ResetRun()
+    {
+        for (var i = m_Monsters.Count - 1; i >= 0; i--)
+        {
+            if (m_Monsters[i] != null)
+                Destroy(m_Monsters[i].gameObject);
+        }
+
+        m_Monsters.Clear();
+        m_NavigationQueue.Clear();
     }
 }

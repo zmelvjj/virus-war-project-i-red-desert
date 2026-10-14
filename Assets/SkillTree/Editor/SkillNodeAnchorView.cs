@@ -4,6 +4,8 @@ using UnityEngine.UIElements;
 
 public sealed class SkillNodeAnchorView : VisualElement
 {
+    const float k_Size = 14f;
+
     readonly Action<SkillNodeView, SkillNodeAnchor, Vector2> m_BeginDrag;
     readonly Action<Vector2> m_UpdateDrag;
     readonly Action<SkillNodeAnchorView> m_EndDrag;
@@ -34,16 +36,16 @@ public sealed class SkillNodeAnchorView : VisualElement
             _ => "anchor-left"
         });
 
-        var dot = new VisualElement
-        {
-            pickingMode = PickingMode.Ignore
-        };
-        dot.AddToClassList("node-anchor-dot");
-        Add(dot);
-
         RegisterCallback<PointerDownEvent>(OnPointerDown);
         RegisterCallback<PointerMoveEvent>(OnPointerMove);
         RegisterCallback<PointerUpEvent>(OnPointerUp);
+    }
+
+    public void SetNodeRect(Rect rect)
+    {
+        var center = SmartOrthogonalRouter.GetAnchorPoint(rect, Anchor);
+        style.left = center.x - k_Size * 0.5f;
+        style.top = center.y - k_Size * 0.5f;
     }
 
     void OnPointerDown(PointerDownEvent evt)

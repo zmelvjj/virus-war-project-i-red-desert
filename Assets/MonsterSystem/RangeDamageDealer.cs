@@ -5,8 +5,6 @@ using UnityEngine;
 [RequireComponent(typeof(BoxCollider))]
 public class RangeDamageDealer : MonoBehaviour
 {
-    [SerializeField] int damage = 10;
-    [SerializeField] float attackInterval = 1f;
     [SerializeField] Material hitMaterial;
 
     BoxCollider m_RangeCollider;
@@ -15,12 +13,12 @@ public class RangeDamageDealer : MonoBehaviour
     IEnumerator Start()
     {
         m_RangeCollider = GetComponent<BoxCollider>();
-        var wait = new WaitForSeconds(attackInterval);
 
         while (true)
         {
-            yield return wait;
-            Attack();
+            yield return new WaitForSeconds(1f / PlayerStats.Instance.AttackSpeed);
+            if (GameFlowManager.IsMainGame)
+                Attack();
         }
     }
 
@@ -38,8 +36,13 @@ public class RangeDamageDealer : MonoBehaviour
                 m_Targets.Add(monster);
         }
 
+        var damage = Mathf.RoundToInt(PlayerStats.Instance.Damage);
         foreach (var monster in m_Targets)
+        {
+            var hitPosition = monster.transform.position;
             monster.TakeDamage(damage, hitMaterial);
+            BasicAttackEvents.Raise(new BasicAttackHit(monster, hitPosition, damage));
+        }
     }
 
     static Vector3 Abs(Vector3 value)

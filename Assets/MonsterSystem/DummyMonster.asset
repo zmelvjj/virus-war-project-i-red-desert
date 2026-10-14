@@ -23,5 +23,6 @@ MonoBehaviour:
   navMeshAvoidanceQuality: 4
   navMeshAvoidancePriority: 50
   isRotated: 1
-  rotationPointPaths: []
+  rotationPointPaths:
+  - Capsule
   diameter: 1.5

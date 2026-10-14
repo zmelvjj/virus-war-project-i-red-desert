@@ -34,6 +34,9 @@ public class PlayerRangeController : MonoBehaviour
 
     void Update()
     {
+        if (!GameFlowManager.IsMainGame)
+            return;
+
         RotateTowardMouse();
         UpdateRangeScale();
     }

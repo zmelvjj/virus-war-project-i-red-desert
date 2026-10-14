@@ -6,7 +6,7 @@ using UnityEngine;
 [Serializable]
 public sealed class SkillTreeDraftData
 {
-    public int version = 5;
+    public int version = 8;
     public Vector2 baseSize = new(1920f, 1080f);
     public string assetOutputPath = "Assets/Generated/SkillTree";
     public string uguiParentGlobalObjectId;
@@ -87,11 +87,20 @@ public static class SkillTreeDraftStore
                 connection.hasCustomBendPointCount = false;
         }
 
+        if (draft.version < 6)
+        {
+            foreach (var connection in draft.connections)
+                connection.color = new Color(0.68f, 0.72f, 0.78f);
+        }
+
         foreach (var node in draft.nodes)
+        {
             node.nodeInfo ??= new SkillNodeInfoDraftData();
+            node.effects ??= new List<SkillEffectDraftData>();
+        }
         foreach (var connection in draft.connections)
             connection.pathPoints ??= new List<Vector2>();
 
-        draft.version = 5;
+        draft.version = 8;
     }
 }

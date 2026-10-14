@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public static class SkillTreeUGuiGenerator
 {
@@ -57,10 +58,10 @@ public static class SkillTreeUGuiGenerator
         nodeImage.sprite = SkillTreeAssetReferenceUtility.Load<Sprite>(
             draft.nodeSpriteGuid,
             draft.nodeSpriteLocalId);
-        nodeImage.color = draft.nodeColor;
+        nodeImage.color = nodeImage.sprite != null ? draft.nodeColor : Color.clear;
         nodeImage.preserveAspect = false;
-        nodeImage.raycastTarget = false;
-        nodeImage.enabled = nodeImage.sprite != null;
+        nodeImage.raycastTarget = true;
+        nodeImage.enabled = true;
 
         var skillObject = CreateImageObject("Skill Image", nodeRect, out var skillImage);
         var skillRect = skillObject.GetComponent<RectTransform>();
@@ -78,6 +79,9 @@ public static class SkillTreeUGuiGenerator
         skillImage.preserveAspect = false;
         skillImage.raycastTarget = false;
         skillImage.enabled = skillImage.sprite != null;
+
+        var nodeUi = nodeObject.AddComponent<SkillTreeNodeUI>();
+        nodeUi.Initialize(draft.guid, nodeImage, skillImage);
     }
 
     static void CreateConnection(
@@ -87,22 +91,43 @@ public static class SkillTreeUGuiGenerator
         Vector2 positionScale,
         float uniformScale)
     {
+        var connectionObject = CreateRectObject($"Connection_{connectionIndex}", parent);
+        var connectionRect = connectionObject.GetComponent<RectTransform>();
+        Stretch(connectionRect);
+
+        var connectionUi = connectionObject.AddComponent<SkillTreeConnectionUI>();
+        connectionUi.Initialize(draft.parentNodeGuid, draft.childNodeGuid);
+
         var thickness = Mathf.Max(1f, k_ConnectionThickness * uniformScale);
+        var sprite = SkillTreeAssetReferenceUtility.Load<Sprite>(
+            draft.spriteGuid,
+            draft.spriteLocalId);
         for (var i = 0; i < draft.pathPoints.Count - 1; i++)
         {
             var start = ScalePosition(draft.pathPoints[i], positionScale);
             var end = ScalePosition(draft.pathPoints[i + 1], positionScale);
             var segmentObject = CreateImageObject(
-                $"Connection_{connectionIndex}_Segment_{i}",
-                parent,
+                $"Segment_{i}",
+                connectionRect,
                 out var image);
             var segmentRect = segmentObject.GetComponent<RectTransform>();
             Center(segmentRect);
             segmentRect.anchoredPosition = (start + end) * 0.5f;
-            segmentRect.sizeDelta = Mathf.Abs(start.x - end.x) >= Mathf.Abs(start.y - end.y)
-                ? new Vector2(Mathf.Abs(start.x - end.x), thickness)
-                : new Vector2(thickness, Mathf.Abs(start.y - end.y));
-            image.color = new Color(0.68f, 0.72f, 0.78f);
+            var horizontal = Mathf.Abs(start.x - end.x) >= Mathf.Abs(start.y - end.y);
+            var segmentLength = Vector2.Distance(start, end) + thickness;
+            segmentRect.sizeDelta = new Vector2(segmentLength, thickness);
+            segmentRect.localEulerAngles = horizontal
+                ? Vector3.zero : new Vector3(0f, 0f, 90f);
+            image.sprite = sprite;
+            image.color = draft.color;
+            image.type = sprite != null && draft.repeatSprite
+                ? Image.Type.Tiled : Image.Type.Simple;
+            image.preserveAspect = false;
+            if (sprite != null && draft.repeatSprite)
+            {
+                image.pixelsPerUnitMultiplier = sprite.rect.height
+                    / (sprite.pixelsPerUnit * thickness);
+            }
             image.raycastTarget = false;
         }
     }
@@ -122,15 +147,15 @@ public static class SkillTreeUGuiGenerator
     static GameObject CreateImageObject(
         string name,
         RectTransform parent,
-        out UnityEngine.UI.Image image)
+        out Image image)
     {
         var gameObject = new GameObject(
             name,
             typeof(RectTransform),
             typeof(CanvasRenderer),
-            typeof(UnityEngine.UI.Image));
+            typeof(Image));
         gameObject.transform.SetParent(parent, false);
-        image = gameObject.GetComponent<UnityEngine.UI.Image>();
+        image = gameObject.GetComponent<Image>();
         return gameObject;
     }
 

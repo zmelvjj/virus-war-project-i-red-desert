@@ -5,11 +5,7 @@ using UnityEngine;
 public static class SmartOrthogonalRouter
 {
     public const float LeadLength = 28f;
-    public const float ObstaclePadding = 14f;
 
-    const float k_BendPenalty = 48f;
-    const float k_CrossingPenalty = 80f;
-    const float k_PreviewMinimumSegmentLength = 18f;
     const float k_Epsilon = 0.01f;
 
     enum TravelDirection
@@ -48,51 +44,63 @@ public static class SmartOrthogonalRouter
         }
     }
 
+    readonly struct RouteCost
+    {
+        public readonly int bends;
+        public readonly float length;
+
+        public RouteCost(int bends, float length)
+        {
+            this.bends = bends;
+            this.length = length;
+        }
+    }
+
     public static List<Vector2> Route(
         Rect startRect,
         SkillNodeAnchor startAnchor,
         Rect endRect,
         SkillNodeAnchor endAnchor,
-        IReadOnlyList<Rect> obstacles,
-        IReadOnlyList<SkillConnectionDraftData> existingConnections,
         int requestedBendPointCount = -1)
     {
         var start = GetAnchorPoint(startRect, startAnchor);
         var end = GetAnchorPoint(endRect, endAnchor);
         var startDirection = GetAnchorDirection(startAnchor);
         var endDirection = GetAnchorDirection(endAnchor);
-        var startLead = start + startDirection * LeadLength;
-        var endLead = end + endDirection * LeadLength;
-        var routingObstacles = new List<Rect>(obstacles.Count + 2);
-        routingObstacles.AddRange(obstacles);
-        routingObstacles.Add(Expand(startRect, ObstaclePadding));
-        routingObstacles.Add(Expand(endRect, ObstaclePadding));
-        var middle = FindPath(
-            startLead,
-            endLead,
-            routingObstacles,
-            existingConnections,
-            GetDirection(Vector2.zero, startDirection),
-            GetDirection(endDirection, Vector2.zero));
-        var path = new List<Vector2> { start, startLead };
-        for (var i = 1; i < middle.Count - 1; i++)
-            path.Add(middle[i]);
-        path.Add(endLead);
-        path.Add(end);
+        var path = FindMinimumPath(
+            start,
+            end,
+            GetDirection(startDirection),
+            Opposite(GetDirection(endDirection)),
+            true);
         path = Simplify(path);
+        CenterParallelEndpointSegments(path);
 
         if (requestedBendPointCount >= 0)
-            path = EnsureBendPointCount(path, requestedBendPointCount, obstacles);
+        {
+            var minimum = Mathf.Max(0, path.Count - 2);
+            path = EnsureBendPointCount(
+                path,
+                NormalizeRequestedBendPointCount(minimum, requestedBendPointCount));
+        }
         return path;
     }
 
-    static Rect Expand(Rect rect, float amount)
+    public static int GetMinimumBendPointCount(
+        Rect startRect,
+        SkillNodeAnchor startAnchor,
+        Rect endRect,
+        SkillNodeAnchor endAnchor)
     {
-        return new Rect(
-            rect.xMin - amount,
-            rect.yMin - amount,
-            rect.width + amount * 2f,
-            rect.height + amount * 2f);
+        return Mathf.Max(0, Route(startRect, startAnchor, endRect, endAnchor).Count - 2);
+    }
+
+    public static int NormalizeRequestedBendPointCount(int minimum, int requested)
+    {
+        var normalized = Mathf.Max(minimum, requested);
+        if ((normalized - minimum) % 2 != 0)
+            normalized++;
+        return normalized;
     }
 
     public static List<Vector2> Preview(
@@ -102,37 +110,14 @@ public static class SmartOrthogonalRouter
     {
         var start = GetAnchorPoint(startRect, startAnchor);
         var direction = GetAnchorDirection(startAnchor);
-        var perpendicular = new Vector2(-direction.y, direction.x);
-        var offset = pointerPosition - start;
-        var forwardDistance = Vector2.Dot(offset, direction);
-        var sideDistance = Vector2.Dot(offset, perpendicular);
+        var lead = start + direction * LeadLength;
+        var middle = FindMinimumPath(
+            lead,
+            pointerPosition,
+            GetDirection(direction),
+            TravelDirection.None);
         var path = new List<Vector2> { start };
-
-        if (forwardDistance >= LeadLength
-            && (Mathf.Abs(sideDistance) < k_Epsilon
-                || Mathf.Abs(sideDistance) >= k_PreviewMinimumSegmentLength))
-        {
-            path.Add(start + direction * forwardDistance);
-            path.Add(pointerPosition);
-            return Simplify(path);
-        }
-
-        var turnDistance = LeadLength;
-        if (Mathf.Abs(forwardDistance - turnDistance) < k_PreviewMinimumSegmentLength)
-            turnDistance = Mathf.Max(LeadLength, forwardDistance + k_PreviewMinimumSegmentLength);
-
-        var firstSide = sideDistance + k_PreviewMinimumSegmentLength;
-        var secondSide = sideDistance - k_PreviewMinimumSegmentLength;
-        var routeSide = Mathf.Abs(firstSide) >= k_PreviewMinimumSegmentLength
-            && (Mathf.Abs(secondSide) < k_PreviewMinimumSegmentLength
-                || Mathf.Abs(firstSide) <= Mathf.Abs(secondSide))
-            ? firstSide
-            : secondSide;
-
-        path.Add(start + direction * turnDistance);
-        path.Add(start + direction * turnDistance + perpendicular * routeSide);
-        path.Add(start + direction * forwardDistance + perpendicular * routeSide);
-        path.Add(pointerPosition);
+        path.AddRange(middle);
         return Simplify(path);
     }
 
@@ -151,24 +136,11 @@ public static class SmartOrthogonalRouter
     {
         return anchor switch
         {
-            SkillNodeAnchor.Top => Vector2.up * -1f,
+            SkillNodeAnchor.Top => Vector2.down,
             SkillNodeAnchor.Right => Vector2.right,
             SkillNodeAnchor.Bottom => Vector2.up,
             _ => Vector2.left
         };
-    }
-
-    public static bool PathIntersectsObstacles(
-        IReadOnlyList<Vector2> path,
-        IReadOnlyList<Rect> obstacles)
-    {
-        for (var i = 0; i < path.Count - 1; i++)
-        {
-            if (SegmentBlocked(path[i], path[i + 1], obstacles))
-                return true;
-        }
-
-        return false;
     }
 
     public static List<Vector2> Simplify(IReadOnlyList<Vector2> path)
@@ -191,74 +163,20 @@ public static class SmartOrthogonalRouter
         return simplified;
     }
 
-    static List<Vector2> EnsureBendPointCount(
-        List<Vector2> path,
-        int requestedBendPointCount,
-        IReadOnlyList<Rect> obstacles)
-    {
-        var result = new List<Vector2>(path);
-        var requested = Mathf.Max(0, requestedBendPointCount);
-        if ((requested - (result.Count - 2)) % 2 != 0)
-            requested++;
-
-        while (result.Count - 2 < requested)
-        {
-            var inserted = false;
-            for (var i = 1; i < result.Count - 1; i++)
-            {
-                var previous = result[i - 1];
-                var corner = result[i];
-                var next = result[i + 1];
-                var previousLength = Vector2.Distance(previous, corner);
-                var nextLength = Vector2.Distance(corner, next);
-                if (previousLength < 24f || nextLength < 24f)
-                    continue;
-
-                var previousDirection = (previous - corner).normalized;
-                var nextDirection = (next - corner).normalized;
-                var offset = Mathf.Min(16f, previousLength / 3f, nextLength / 3f);
-                var first = corner + previousDirection * offset;
-                var third = corner + nextDirection * offset;
-                var second = new Vector2(first.x, third.y);
-                if (Mathf.Abs(first.x - corner.x) < k_Epsilon)
-                    second = new Vector2(third.x, first.y);
-
-                var candidate = new List<Vector2>(result);
-                candidate.RemoveAt(i);
-                candidate.InsertRange(i, new[] { first, second, third });
-                if (PathIntersectsObstacles(candidate, obstacles))
-                    continue;
-
-                result = candidate;
-                inserted = true;
-                break;
-            }
-
-            if (!inserted)
-                break;
-        }
-
-        return Simplify(result);
-    }
-
-    static List<Vector2> FindPath(
+    static List<Vector2> FindMinimumPath(
         Vector2 start,
         Vector2 end,
-        IReadOnlyList<Rect> obstacles,
-        IReadOnlyList<SkillConnectionDraftData> existingConnections,
         TravelDirection initialDirection,
-        TravelDirection finalDirection)
+        TravelDirection finalDirection,
+        bool requireInitialDirection = false)
     {
-        var xCoordinates = new List<float> { start.x, end.x };
-        var yCoordinates = new List<float> { start.y, end.y };
-        foreach (var obstacle in obstacles)
-        {
-            xCoordinates.Add(obstacle.xMin);
-            xCoordinates.Add(obstacle.xMax);
-            yCoordinates.Add(obstacle.yMin);
-            yCoordinates.Add(obstacle.yMax);
-        }
+        if (Approximately(start, end))
+            return new List<Vector2> { start };
 
+        var xCoordinates = new List<float>();
+        var yCoordinates = new List<float>();
+        AddRouteCoordinates(xCoordinates, start.x, end.x);
+        AddRouteCoordinates(yCoordinates, start.y, end.y);
         SortDistinct(xCoordinates);
         SortDistinct(yCoordinates);
 
@@ -266,50 +184,53 @@ public static class SmartOrthogonalRouter
         foreach (var x in xCoordinates)
         {
             foreach (var y in yCoordinates)
-            {
-                var point = new Vector2(x, y);
-                if (!IsInsideObstacle(point, obstacles) || Approximately(point, start) || Approximately(point, end))
-                    points.Add(point);
-            }
+                points.Add(new Vector2(x, y));
         }
 
         var startIndex = FindPoint(points, start);
         var endIndex = FindPoint(points, end);
         var startState = new RouteState(startIndex, initialDirection);
         var open = new List<RouteState> { startState };
-        var costs = new Dictionary<RouteState, float> { [startState] = 0f };
+        var costs = new Dictionary<RouteState, RouteCost>
+        {
+            [startState] = new RouteCost(0, 0f)
+        };
         var previous = new Dictionary<RouteState, RouteState>();
         RouteState? completed = null;
 
         while (open.Count > 0)
         {
-            var current = PopLowest(open, costs, points, end);
-            if (current.pointIndex == endIndex)
+            var current = PopLowest(open, costs);
+            if (current.pointIndex == endIndex
+                && (finalDirection == TravelDirection.None || current.direction == finalDirection))
             {
                 completed = current;
                 break;
             }
 
-            foreach (var neighborIndex in GetVisibleNeighbors(current.pointIndex, points, obstacles))
+            foreach (var neighborIndex in GetVisibleNeighbors(current.pointIndex, points))
             {
                 var direction = GetDirection(points[current.pointIndex], points[neighborIndex]);
-                var next = new RouteState(neighborIndex, direction);
-                var distance = Vector2.Distance(points[current.pointIndex], points[neighborIndex]);
-                var bendCost = current.direction != TravelDirection.None && current.direction != direction
-                    ? k_BendPenalty
-                    : 0f;
-                if (neighborIndex == endIndex && direction != finalDirection)
-                    bendCost += k_BendPenalty;
-                var crossingCost = CountCrossings(
-                    points[current.pointIndex],
-                    points[neighborIndex],
-                    existingConnections) * k_CrossingPenalty;
-                var newCost = costs[current] + distance + bendCost + crossingCost;
-
-                if (costs.TryGetValue(next, out var oldCost) && oldCost <= newCost)
+                if (requireInitialDirection
+                    && current.pointIndex == startIndex
+                    && direction != initialDirection)
+                {
+                    continue;
+                }
+                if (AreOpposite(current.direction, direction))
                     continue;
 
-                costs[next] = newCost;
+                var next = new RouteState(neighborIndex, direction);
+                var currentCost = costs[current];
+                var nextCost = new RouteCost(
+                    currentCost.bends + (current.direction == direction ? 0 : 1),
+                    currentCost.length + Vector2.Distance(
+                        points[current.pointIndex],
+                        points[neighborIndex]));
+                if (costs.TryGetValue(next, out var oldCost) && !IsBetter(nextCost, oldCost))
+                    continue;
+
+                costs[next] = nextCost;
                 previous[next] = current;
                 if (!open.Contains(next))
                     open.Add(next);
@@ -319,20 +240,23 @@ public static class SmartOrthogonalRouter
         if (completed.HasValue)
             return Reconstruct(completed.Value, previous, points);
 
-        var horizontalCorner = new Vector2(end.x, start.y);
-        if (!SegmentBlocked(start, horizontalCorner, obstacles)
-            && !SegmentBlocked(horizontalCorner, end, obstacles))
-        {
-            return Simplify(new[] { start, horizontalCorner, end });
-        }
+        return Simplify(new[] { start, new Vector2(end.x, start.y), end });
+    }
 
-        return Simplify(new[] { start, new Vector2(start.x, end.y), end });
+    static void AddRouteCoordinates(List<float> coordinates, float start, float end)
+    {
+        coordinates.Add(start);
+        coordinates.Add(end);
+        coordinates.Add((start + end) * 0.5f);
+        coordinates.Add(start - LeadLength);
+        coordinates.Add(start + LeadLength);
+        coordinates.Add(end - LeadLength);
+        coordinates.Add(end + LeadLength);
     }
 
     static IEnumerable<int> GetVisibleNeighbors(
         int pointIndex,
-        IReadOnlyList<Vector2> points,
-        IReadOnlyList<Rect> obstacles)
+        IReadOnlyList<Vector2> points)
     {
         var origin = points[pointIndex];
         var bestIndices = new[] { -1, -1, -1, -1 };
@@ -361,8 +285,7 @@ public static class SmartOrthogonalRouter
                 continue;
             }
 
-            if (distance >= bestDistances[directionIndex]
-                || SegmentBlocked(origin, candidate, obstacles))
+            if (distance >= bestDistances[directionIndex])
             {
                 continue;
             }
@@ -380,28 +303,25 @@ public static class SmartOrthogonalRouter
 
     static RouteState PopLowest(
         List<RouteState> open,
-        IReadOnlyDictionary<RouteState, float> costs,
-        IReadOnlyList<Vector2> points,
-        Vector2 end)
+        IReadOnlyDictionary<RouteState, RouteCost> costs)
     {
         var bestIndex = 0;
-        var bestScore = float.MaxValue;
-        for (var i = 0; i < open.Count; i++)
+        for (var i = 1; i < open.Count; i++)
         {
-            var state = open[i];
-            var score = costs[state]
-                + Mathf.Abs(points[state.pointIndex].x - end.x)
-                + Mathf.Abs(points[state.pointIndex].y - end.y);
-            if (score >= bestScore)
-                continue;
-
-            bestScore = score;
-            bestIndex = i;
+            if (IsBetter(costs[open[i]], costs[open[bestIndex]]))
+                bestIndex = i;
         }
 
         var best = open[bestIndex];
         open.RemoveAt(bestIndex);
         return best;
+    }
+
+    static bool IsBetter(RouteCost candidate, RouteCost current)
+    {
+        return candidate.bends < current.bends
+            || candidate.bends == current.bends
+            && candidate.length < current.length - k_Epsilon;
     }
 
     static List<Vector2> Reconstruct(
@@ -422,106 +342,109 @@ public static class SmartOrthogonalRouter
         return Simplify(path);
     }
 
-    static bool SegmentBlocked(Vector2 start, Vector2 end, IReadOnlyList<Rect> obstacles)
+    static List<Vector2> EnsureBendPointCount(
+        List<Vector2> path,
+        int requestedBendPointCount)
     {
-        var horizontal = Mathf.Abs(start.y - end.y) < k_Epsilon;
-        foreach (var obstacle in obstacles)
+        var result = new List<Vector2>(path);
+        var requested = Mathf.Max(0, requestedBendPointCount);
+
+        while (result.Count - 2 < requested)
         {
-            if (horizontal)
+            var inserted = false;
+            for (var i = 1; i < result.Count - 1; i++)
             {
-                if (start.y <= obstacle.yMin + k_Epsilon || start.y >= obstacle.yMax - k_Epsilon)
+                var previous = result[i - 1];
+                var corner = result[i];
+                var next = result[i + 1];
+                var previousLength = Vector2.Distance(previous, corner);
+                var nextLength = Vector2.Distance(corner, next);
+                if (previousLength < k_Epsilon || nextLength < k_Epsilon)
                     continue;
 
-                if (RangesOverlap(start.x, end.x, obstacle.xMin, obstacle.xMax))
-                    return true;
-            }
-            else
-            {
-                if (start.x <= obstacle.xMin + k_Epsilon || start.x >= obstacle.xMax - k_Epsilon)
-                    continue;
+                var previousDirection = (previous - corner).normalized;
+                var nextDirection = (next - corner).normalized;
+                var outerLength = Mathf.Min(previousLength, nextLength) * 0.5f;
+                var first = corner + previousDirection * (previousLength - outerLength);
+                var third = corner + nextDirection * (nextLength - outerLength);
+                var second = new Vector2(first.x, third.y);
+                if (Mathf.Abs(first.x - corner.x) < k_Epsilon)
+                    second = new Vector2(third.x, first.y);
 
-                if (RangesOverlap(start.y, end.y, obstacle.yMin, obstacle.yMax))
-                    return true;
+                result.RemoveAt(i);
+                result.InsertRange(i, new[] { first, second, third });
+                inserted = true;
+                break;
             }
+
+            if (!inserted)
+                break;
         }
 
-        return false;
+        return Simplify(result);
     }
 
-    static bool IsInsideObstacle(Vector2 point, IReadOnlyList<Rect> obstacles)
+    static void CenterParallelEndpointSegments(List<Vector2> path)
     {
-        foreach (var obstacle in obstacles)
+        if (path.Count != 4)
+            return;
+
+        var firstDirection = (path[1] - path[0]).normalized;
+        var lastDirection = (path[^1] - path[^2]).normalized;
+        if (Vector2.Dot(firstDirection, lastDirection) < 0.99f)
+            return;
+
+        if (Mathf.Abs(firstDirection.x) < k_Epsilon)
         {
-            if (point.x > obstacle.xMin + k_Epsilon
-                && point.x < obstacle.xMax - k_Epsilon
-                && point.y > obstacle.yMin + k_Epsilon
-                && point.y < obstacle.yMax - k_Epsilon)
-            {
-                return true;
-            }
+            var centerY = (path[0].y + path[^1].y) * 0.5f;
+            path[1] = new Vector2(path[0].x, centerY);
+            path[2] = new Vector2(path[^1].x, centerY);
         }
-
-        return false;
-    }
-
-    static int CountCrossings(
-        Vector2 start,
-        Vector2 end,
-        IReadOnlyList<SkillConnectionDraftData> connections)
-    {
-        var count = 0;
-        foreach (var connection in connections)
+        else
         {
-            for (var i = 0; i < connection.pathPoints.Count - 1; i++)
-            {
-                if (SegmentsCross(start, end, connection.pathPoints[i], connection.pathPoints[i + 1]))
-                    count++;
-            }
+            var centerX = (path[0].x + path[^1].x) * 0.5f;
+            path[1] = new Vector2(centerX, path[0].y);
+            path[2] = new Vector2(centerX, path[^1].y);
         }
-
-        return count;
     }
 
-    static bool SegmentsCross(Vector2 a, Vector2 b, Vector2 c, Vector2 d)
+    static TravelDirection GetDirection(Vector2 direction)
     {
-        var firstHorizontal = Mathf.Abs(a.y - b.y) < k_Epsilon;
-        var secondHorizontal = Mathf.Abs(c.y - d.y) < k_Epsilon;
-        if (firstHorizontal == secondHorizontal)
-            return false;
+        if (Mathf.Abs(direction.x) > Mathf.Abs(direction.y))
+            return direction.x < 0f ? TravelDirection.Left : TravelDirection.Right;
 
-        var horizontalStart = firstHorizontal ? a : c;
-        var horizontalEnd = firstHorizontal ? b : d;
-        var verticalStart = firstHorizontal ? c : a;
-        var verticalEnd = firstHorizontal ? d : b;
-        return Between(verticalStart.x, horizontalStart.x, horizontalEnd.x)
-            && Between(horizontalStart.y, verticalStart.y, verticalEnd.y);
+        return direction.y < 0f ? TravelDirection.Up : TravelDirection.Down;
+    }
+
+    static TravelDirection GetDirection(Vector2 start, Vector2 end)
+    {
+        if (Mathf.Abs(start.y - end.y) < k_Epsilon)
+            return end.x < start.x ? TravelDirection.Left : TravelDirection.Right;
+
+        return end.y < start.y ? TravelDirection.Up : TravelDirection.Down;
+    }
+
+    static TravelDirection Opposite(TravelDirection direction)
+    {
+        return direction switch
+        {
+            TravelDirection.Left => TravelDirection.Right,
+            TravelDirection.Right => TravelDirection.Left,
+            TravelDirection.Up => TravelDirection.Down,
+            TravelDirection.Down => TravelDirection.Up,
+            _ => TravelDirection.None
+        };
+    }
+
+    static bool AreOpposite(TravelDirection first, TravelDirection second)
+    {
+        return Opposite(first) == second;
     }
 
     static bool AreCollinear(Vector2 a, Vector2 b, Vector2 c)
     {
-        var aligned = Mathf.Abs(a.x - b.x) < k_Epsilon && Mathf.Abs(b.x - c.x) < k_Epsilon
+        return Mathf.Abs(a.x - b.x) < k_Epsilon && Mathf.Abs(b.x - c.x) < k_Epsilon
             || Mathf.Abs(a.y - b.y) < k_Epsilon && Mathf.Abs(b.y - c.y) < k_Epsilon;
-        return aligned && Vector2.Dot(b - a, c - b) >= 0f;
-    }
-
-    static TravelDirection GetDirection(Vector2 a, Vector2 b)
-    {
-        if (Mathf.Abs(a.y - b.y) < k_Epsilon)
-            return b.x < a.x ? TravelDirection.Left : TravelDirection.Right;
-
-        return b.y < a.y ? TravelDirection.Up : TravelDirection.Down;
-    }
-
-    static bool RangesOverlap(float a, float b, float min, float max)
-    {
-        var segmentMin = Mathf.Min(a, b);
-        var segmentMax = Mathf.Max(a, b);
-        return segmentMax > min + k_Epsilon && segmentMin < max - k_Epsilon;
-    }
-
-    static bool Between(float value, float a, float b)
-    {
-        return value >= Mathf.Min(a, b) - k_Epsilon && value <= Mathf.Max(a, b) + k_Epsilon;
     }
 
     static bool Approximately(Vector2 a, Vector2 b)

@@ -12,6 +12,7 @@ public sealed class SkillTreeEditorWindow : EditorWindow
     SkillTreeGraphView m_GraphView;
     SkillNodeInspectorView m_Inspector;
     Label m_ModeLabel;
+    Button m_InfoModeButton;
 
     [MenuItem("Tools/Skill Tree/Editor")]
     public static void OpenFromMenu()
@@ -64,6 +65,20 @@ public sealed class SkillTreeEditorWindow : EditorWindow
         m_GraphView = new SkillTreeGraphView(m_Draft);
         m_Inspector = new SkillNodeInspectorView();
         m_ModeLabel = rootVisualElement.Q<Label>("modeLabel");
+        m_InfoModeButton = rootVisualElement.Q<Button>("infoModeButton");
+        m_InfoModeButton.clicked += () => m_GraphView.SetEditMode(
+            m_GraphView.EditMode == SkillNodeEditMode.Info
+                ? SkillNodeEditMode.Move
+                : SkillNodeEditMode.Info);
+        var snapStepField = rootVisualElement.Q<IntegerField>("snapStepField");
+        snapStepField.SetValueWithoutNotify(m_GraphView.SnapStep);
+        snapStepField.RegisterValueChangedCallback(evt =>
+        {
+            var step = Mathf.Max(1, evt.newValue);
+            m_GraphView.SnapStep = step;
+            if (step != evt.newValue)
+                snapStepField.SetValueWithoutNotify(step);
+        });
 
         rootVisualElement.Q<VisualElement>("graphHost").Add(m_GraphView);
         rootVisualElement.Q<VisualElement>("inspectorHost").Add(m_Inspector);
@@ -72,7 +87,17 @@ public sealed class SkillTreeEditorWindow : EditorWindow
         m_GraphView.ConnectionSelected += m_Inspector.BindConnection;
         m_GraphView.NodeChanged += m_Inspector.RefreshTransformFields;
         m_GraphView.DraftChanged += SaveDraft;
+        m_GraphView.NodeInfoChanged += node =>
+        {
+            m_Inspector.RefreshNodeInfoFields(node);
+            SaveDraft();
+        };
         m_Inspector.DraftChanged += SaveDraft;
+        m_Inspector.NodeInfoChanged += node =>
+        {
+            m_GraphView.RefreshNodeInfo(node);
+            SaveDraft();
+        };
         m_Inspector.ConnectionBendPointCountChanged += m_GraphView.SetConnectionBendPointCount;
         m_GraphView.ModeChanged += UpdateModeLabel;
         UpdateModeLabel(m_GraphView.EditMode);
@@ -82,9 +107,14 @@ public sealed class SkillTreeEditorWindow : EditorWindow
     void UpdateModeLabel(SkillNodeEditMode mode)
     {
         var isResize = mode == SkillNodeEditMode.Resize;
-        m_ModeLabel.text = isResize ? "Resize Mode" : "Move Mode";
+        var isInfo = mode == SkillNodeEditMode.Info;
+        m_ModeLabel.text = isInfo ? "Info Editor" : isResize ? "크기 변경" : "이동 모드";
         m_ModeLabel.EnableInClassList("mode-resize", isResize);
-        m_ModeLabel.EnableInClassList("mode-move", !isResize);
+        m_ModeLabel.EnableInClassList("mode-info", isInfo);
+        m_ModeLabel.EnableInClassList("mode-move", !isResize && !isInfo);
+        m_InfoModeButton.EnableInClassList("info-mode-button-active", isInfo);
+        rootVisualElement.EnableInClassList("info-editor-mode", isInfo);
+        m_Inspector.SetMode(mode);
     }
 
     void SaveDraft()

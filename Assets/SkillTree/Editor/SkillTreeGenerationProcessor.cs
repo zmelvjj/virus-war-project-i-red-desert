@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -83,7 +84,7 @@ public static class SkillTreeGenerationProcessor
         var serialized = new SerializedObject(info);
         serialized.FindProperty("mainText").stringValue = draft.nodeInfo.mainText;
         serialized.FindProperty("font").objectReferenceValue =
-            SkillTreeAssetReferenceUtility.Load<Font>(draft.nodeInfo.fontGuid, 0);
+            SkillTreeAssetReferenceUtility.Load<TMP_FontAsset>(draft.nodeInfo.fontGuid, 0);
         serialized.FindProperty("description").stringValue = draft.nodeInfo.description;
         serialized.FindProperty("statName").stringValue = draft.nodeInfo.statName;
         serialized.FindProperty("valueText").stringValue = draft.nodeInfo.valueText;
@@ -110,11 +111,30 @@ public static class SkillTreeGenerationProcessor
         serialized.FindProperty("skillColor").colorValue = draft.skillColor;
         serialized.FindProperty("skillSpriteSizeRatio").vector2Value = draft.skillSpriteSizeRatio;
         serialized.FindProperty("nodeInfo").objectReferenceValue = nodeInfo;
-        serialized.FindProperty("actionType").enumValueIndex = (int)draft.actionType;
+        serialized.FindProperty("price").intValue = draft.price;
+
+        var effectsProperty = serialized.FindProperty("effects");
+        effectsProperty.arraySize = draft.effects.Count;
+        for (var i = 0; i < draft.effects.Count; i++)
+            WriteEffect(effectsProperty.GetArrayElementAtIndex(i), draft.effects[i]);
+
         serialized.FindProperty("position").vector2Value = draft.position;
         serialized.FindProperty("size").vector2Value = draft.size;
         serialized.ApplyModifiedPropertiesWithoutUndo();
         return node;
+    }
+
+    static void WriteEffect(
+        SerializedProperty property,
+        SkillEffectDraftData draft)
+    {
+        property.FindPropertyRelative("effectType").enumValueIndex = (int)draft.effectType;
+        property.FindPropertyRelative("stat").enumValueIndex = (int)draft.stat;
+        property.FindPropertyRelative("ability").enumValueIndex = (int)draft.ability;
+        property.FindPropertyRelative("abilityProperty").enumValueIndex =
+            (int)draft.abilityProperty;
+        property.FindPropertyRelative("operation").enumValueIndex = (int)draft.operation;
+        property.FindPropertyRelative("value").floatValue = draft.value;
     }
 
     static void WriteTreeData(
@@ -144,6 +164,10 @@ public static class SkillTreeGenerationProcessor
         SerializedProperty property,
         SkillConnectionDraftData draft)
     {
+        property.FindPropertyRelative("color").colorValue = draft.color;
+        property.FindPropertyRelative("sprite").objectReferenceValue =
+            SkillTreeAssetReferenceUtility.Load<Sprite>(draft.spriteGuid, draft.spriteLocalId);
+        property.FindPropertyRelative("repeatSprite").boolValue = draft.repeatSprite;
         property.FindPropertyRelative("parentNodeGuid").stringValue = draft.parentNodeGuid;
         property.FindPropertyRelative("childNodeGuid").stringValue = draft.childNodeGuid;
         property.FindPropertyRelative("startAnchor").enumValueIndex = (int)draft.startAnchor;

@@ -60,6 +60,17 @@ public class MonsterNavMeshMovement : MonoBehaviour
 
     void Update()
     {
+        if (!GameFlowManager.IsMainGame)
+        {
+            if (m_Agent.isOnNavMesh)
+                m_Agent.isStopped = true;
+
+            return;
+        }
+
+        if (m_HasDestination && !m_IsTurning && m_Agent.isOnNavMesh)
+            m_Agent.isStopped = false;
+
         ApplyAgentPosition();
         UpdateRolling();
 

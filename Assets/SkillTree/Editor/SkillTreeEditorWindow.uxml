@@ -4,7 +4,12 @@
             <ui:VisualElement class="graph-pane">
                 <ui:VisualElement class="graph-toolbar">
                     <ui:Label name="modeLabel" class="mode-label" />
-                    <ui:Label text="S" tooltip="Toggle move and resize mode" class="mode-key" />
+                    <ui:Label text="S" tooltip="이동/크기 변경 모드 전환" class="mode-key" />
+                    <ui:Button name="infoModeButton" text="Info Editor" tooltip="Tooltip 정보 편집 모드 (I)" class="info-mode-button" />
+                    <ui:VisualElement class="snap-step-control">
+                        <ui:Label text="Ctrl 스냅" class="snap-step-label" />
+                        <ui:IntegerField name="snapStepField" value="1" class="snap-step-input" />
+                    </ui:VisualElement>
                 </ui:VisualElement>
                 <ui:VisualElement name="graphHost" class="graph-host" />
             </ui:VisualElement>
