@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Dummy
   baseHp: 100
-  modelPrefab: {fileID: 4405828182202695152, guid: d9e7cbe451302fb41b27134d429065a6, type: 3}
+  modelPrefab: {fileID: 6488921758625308738, guid: 1bf9f35337d7b72488224395ed861dea, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
   rotationSpeed: 100
   movementType: 1
@@ -25,4 +25,9 @@ MonoBehaviour:
   isRotated: 1
   rotationPointPaths:
   - Capsule
+  - body
+  - barrier_damagedOutline
+  - barrier_damaged
+  - barrier_chipped
+  - barrier
   diameter: 1.5

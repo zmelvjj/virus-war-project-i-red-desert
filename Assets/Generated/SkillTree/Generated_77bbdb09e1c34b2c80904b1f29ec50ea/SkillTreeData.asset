@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 207597a39f17530419d9a651a63b07b2, type: 3}
+  m_Name: SkillTreeData
+  m_EditorClassIdentifier: Assembly-CSharp::SkillTreeData
+  baseSize: {x: 1920, y: 1080}
+  nodes:
+  - {fileID: 11400000, guid: acb077fb61e3edd42b2f0a7e0151baf9, type: 2}
+  - {fileID: 11400000, guid: 4bbbe3cab3babb14b9d7522884076e57, type: 2}
+  - {fileID: 11400000, guid: b7018597199cdf2409039bdb3499dec7, type: 2}
+  - {fileID: 11400000, guid: 97f2d97bf97b9464390bcc5662c801b3, type: 2}
+  connections:
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: d4f845a5dc2445c5b745504e1e362d01
+    childNodeGuid: 00c9c036968f4ecd9d8ad1b37c3062c6
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -50, y: 0}
+    - {x: -150, y: 0}
+  - color: {r: 1, g: 0.93771154, b: 0.3537736, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: d4f845a5dc2445c5b745504e1e362d01
+    childNodeGuid: 65f0d87d913c46ee9aa62547451c7f4d
+    startAnchor: 0
+    endAnchor: 2
+    routingMode: 0
+    pathPoints:
+    - {x: 0, y: -50}
+    - {x: 0, y: -150}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 00c9c036968f4ecd9d8ad1b37c3062c6
+    childNodeGuid: 6add5ed0b2fc404bb96fee67f77a99ac
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -250, y: 0}
+    - {x: -350, y: 0}
