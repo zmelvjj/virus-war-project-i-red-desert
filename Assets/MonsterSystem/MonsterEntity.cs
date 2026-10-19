@@ -11,6 +11,8 @@ public class MonsterEntity : MonoBehaviour
     Renderer[] m_Renderers;
     Material[][] m_OriginalMaterials;
     Coroutine m_HitFlash;
+    Animator m_Animator;
+    MonsterNavMeshMovement m_NavMeshMovement;
 
     public void Initialize(MonsterDefinition definition, int hp, MonsterMovementType movementType)
     {
@@ -19,19 +21,27 @@ public class MonsterEntity : MonoBehaviour
         CurrentHp = hp;
         MovementType = movementType;
         CacheMaterials();
+        m_Animator = GetComponent<Animator>();
+        m_NavMeshMovement = GetComponent<MonsterNavMeshMovement>();
     }
 
     public void TakeDamage(int damage)
     {
         TakeDamage(damage, null);
+        //m_Animator.SetInteger("HP_Ratio", (int)CurrentHp/MaxHp*100);
+
     }
 
     public void TakeDamage(int damage, Material hitMaterial)
     {
         CurrentHp = Mathf.Max(0, CurrentHp - damage);
-        if (CurrentHp == 0)
+        //m_Animator.SetInteger("HP_Ratio", (int)CurrentHp/MaxHp*100);
+        if (CurrentHp <= 0)
         {
-            Destroy(gameObject);
+            if (m_NavMeshMovement != null)
+                m_NavMeshMovement.enabled = false;
+
+            // Destroy(gameObject);
             return;
         }
 

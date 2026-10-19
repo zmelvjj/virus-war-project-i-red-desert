@@ -3066,7 +3066,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawner
   spawnArea: {fileID: 299818322}
   monster: {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
-  range: 4.23
+  range: 11
   spawnInterval: 1
   maxMonsters: 10
 --- !u!114 &943823210
@@ -3093,6 +3093,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 24c542965d010ed4fa4b2e9ae308f2e2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterManager
+  navigationSlotCount: 32
+  navigationSlotMinSpacing: 1.5
+  navigationDensityRadius: 3
+  navigationMinimumTravelDistanceRatio: 0.3
+  navigationPreferredTravelDistanceRatio: 0.55
+  navigationMaximumPreferredDistanceRatio: 0.8
+  navigationTopCandidateCount: 5
 --- !u!4 &943823212
 Transform:
   m_ObjectHideFlags: 0
@@ -3232,8 +3239,8 @@ MonoBehaviour:
   aimCamera: {fileID: 330585545}
   range: {fileID: 1947607913}
   mouthOpenTracker: {fileID: 842315629}
-  closedWidthMultiplier: 0.5
-  openWidthMultiplier: 1.25
+  closedWidthMultiplier: 1
+  openWidthMultiplier: 1
 --- !u!65 &1091560175
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4512,7 +4519,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStaminaController
   baseMaxStamina: 100
-  baseDrainPerSecond: 10
+  baseDrainPerSecond: 5
 --- !u!1 &1891744966
 GameObject:
   m_ObjectHideFlags: 0

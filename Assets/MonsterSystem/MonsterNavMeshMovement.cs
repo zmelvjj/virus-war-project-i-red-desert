@@ -14,12 +14,31 @@ public class MonsterNavMeshMovement : MonoBehaviour
     Quaternion[] m_RotationPointBaseRotations;
     Transform[] m_RotationCompensationPoints;
     Quaternion[] m_CompensationWorldRotations;
+    NavMeshPath m_CandidatePath;
     float m_RollAngle;
     Vector3 m_Destination;
     Vector3 m_LastPosition;
     bool m_HasDestination;
     bool m_IsQueued;
     bool m_IsTurning;
+    bool m_IsInitialized;
+    float m_StuckCheckInterval;
+    float m_StuckDuration;
+    float m_StuckMinimumMovement;
+    float m_RepathCooldown;
+    float m_BlockedMovementRatio;
+    float m_BlockedArrivalDuration;
+    float m_LastStuckCheckTime;
+    float m_StuckElapsed;
+    float m_RepathCooldownUntil;
+    float m_BlockedMovementElapsed;
+    Vector3 m_LastStuckCheckPosition;
+    Vector3 m_LastFramePosition;
+
+    public NavMeshAgent Agent => m_Agent;
+    public Vector3 AreaCenter => m_AreaCenter;
+    public float AreaRange => m_AreaRange;
+    public NavMeshPath CandidatePath => m_CandidatePath;
 
     public void Initialize(
         NavMeshAgent agent,
@@ -28,8 +47,15 @@ public class MonsterNavMeshMovement : MonoBehaviour
         float rotationSpeed,
         float diameter,
         Transform[] rotationPoints,
-        Transform[] rotationCompensationPoints)
+        Transform[] rotationCompensationPoints,
+        float stuckCheckInterval,
+        float stuckDuration,
+        float stuckMinimumMovement,
+        float repathCooldown,
+        float blockedMovementRatio,
+        float blockedArrivalDuration)
     {
+        m_CandidatePath = new NavMeshPath();
         m_Agent = agent;
         m_AreaCenter = areaCenter;
         m_AreaRange = areaRange;
@@ -37,9 +63,41 @@ public class MonsterNavMeshMovement : MonoBehaviour
         m_Diameter = diameter;
         m_RotationPoints = rotationPoints;
         m_RotationCompensationPoints = rotationCompensationPoints;
+        m_StuckCheckInterval = stuckCheckInterval;
+        m_StuckDuration = stuckDuration;
+        m_StuckMinimumMovement = stuckMinimumMovement;
+        m_RepathCooldown = repathCooldown;
+        m_BlockedMovementRatio = blockedMovementRatio;
+        m_BlockedArrivalDuration = blockedArrivalDuration;
         CacheRotationState();
         m_LastPosition = agent.transform.position;
+        m_IsInitialized = true;
+        MonsterManager.Instance.RegisterNavigation(this);
+        ResetStuckObservation();
+        ResetBlockedMovementObservation();
         QueueNextPath();
+    }
+
+    void OnEnable()
+    {
+        if (m_IsInitialized && MonsterManager.HasInstance)
+            MonsterManager.Instance.RegisterNavigation(this);
+    }
+
+    void OnDisable()
+    {
+        if (m_IsInitialized && MonsterManager.HasInstance)
+            MonsterManager.Instance.UnregisterNavigation(this);
+
+        m_IsQueued = false;
+        m_HasDestination = false;
+        m_IsTurning = false;
+
+        if (m_Agent != null && m_Agent.isOnNavMesh)
+        {
+            m_Agent.isStopped = true;
+            m_Agent.ResetPath();
+        }
     }
 
     void CacheRotationState()
@@ -65,6 +123,8 @@ public class MonsterNavMeshMovement : MonoBehaviour
             if (m_Agent.isOnNavMesh)
                 m_Agent.isStopped = true;
 
+            ResetStuckObservation();
+            ResetBlockedMovementObservation();
             return;
         }
 
@@ -79,27 +139,35 @@ public class MonsterNavMeshMovement : MonoBehaviour
 
         if (!m_Agent.hasPath || m_Agent.pathStatus != NavMeshPathStatus.PathComplete)
         {
-            m_Agent.isStopped = true;
-            m_HasDestination = false;
-            m_IsTurning = false;
+            AbandonDestination();
             QueueNextPath();
             return;
         }
 
         if (m_IsTurning)
         {
+            ResetStuckObservation();
+            ResetBlockedMovementObservation();
             RotateBeforeMoving();
             return;
         }
 
         FaceMovementDirection();
 
-        if (m_Agent.remainingDistance > m_Agent.stoppingDistance)
+        if (m_Agent.remainingDistance <= m_Agent.stoppingDistance)
+        {
+            m_Agent.isStopped = true;
+            m_HasDestination = false;
+            ResetStuckObservation();
+            ResetBlockedMovementObservation();
+            QueueNextPath();
+            return;
+        }
+
+        if (DetectBlockedMovement())
             return;
 
-        m_Agent.isStopped = true;
-        m_HasDestination = false;
-        QueueNextPath();
+        DetectStuck();
     }
 
     void RotateBeforeMoving()
@@ -227,18 +295,105 @@ public class MonsterNavMeshMovement : MonoBehaviour
     {
         m_IsQueued = false;
 
-        var randomPoint = Random.insideUnitCircle * m_AreaRange;
-        var candidate = m_AreaCenter + new Vector3(randomPoint.x, 0f, randomPoint.y);
-        if (NavMesh.SamplePosition(candidate, out var hit, m_Agent.height, m_Agent.areaMask) &&
-            m_Agent.SetDestination(hit.position))
+        if (MonsterManager.Instance.TryAssignNavigationDestination(
+                this,
+                out var destination,
+                out var path)
+            && m_Agent.SetPath(path))
         {
-            m_Destination = hit.position;
+            m_Destination = destination;
             m_Agent.isStopped = true;
             m_HasDestination = true;
             m_IsTurning = true;
+            ResetStuckObservation();
+            ResetBlockedMovementObservation();
             return;
         }
 
+        MonsterManager.Instance.ReleaseNavigationDestination(this);
         QueueNextPath();
+    }
+
+    void DetectStuck()
+    {
+        if (Time.time < m_LastStuckCheckTime + m_StuckCheckInterval)
+            return;
+
+        var elapsed = Time.time - m_LastStuckCheckTime;
+        var movedDistance = Vector3.Distance(
+            m_LastStuckCheckPosition,
+            m_Agent.transform.position);
+        m_LastStuckCheckTime = Time.time;
+        m_LastStuckCheckPosition = m_Agent.transform.position;
+
+        if (movedDistance >= m_StuckMinimumMovement)
+        {
+            m_StuckElapsed = 0f;
+            return;
+        }
+
+        m_StuckElapsed += elapsed;
+        if (m_StuckElapsed < m_StuckDuration || Time.time < m_RepathCooldownUntil)
+            return;
+
+        m_RepathCooldownUntil = Time.time + m_RepathCooldown;
+        AbandonDestination();
+        QueueNextPath();
+    }
+
+    bool DetectBlockedMovement()
+    {
+        var currentPosition = m_Agent.transform.position;
+        var actualDelta = currentPosition - m_LastFramePosition;
+        actualDelta.y = 0f;
+        m_LastFramePosition = currentPosition;
+
+        var expectedDelta = m_Agent.speed * Time.deltaTime;
+        if (expectedDelta <= 0f
+            || actualDelta.magnitude >= expectedDelta * m_BlockedMovementRatio)
+        {
+            m_BlockedMovementElapsed = 0f;
+            return false;
+        }
+
+        m_BlockedMovementElapsed += Time.deltaTime;
+        if (m_BlockedMovementElapsed < m_BlockedArrivalDuration)
+            return false;
+
+        AbandonDestination();
+        QueueNextPath();
+        return true;
+    }
+
+    void AbandonDestination()
+    {
+        MonsterManager.Instance.ReleaseNavigationDestination(this);
+        if (m_Agent.isOnNavMesh)
+        {
+            m_Agent.isStopped = true;
+            m_Agent.ResetPath();
+        }
+
+        m_HasDestination = false;
+        m_IsTurning = false;
+        ResetStuckObservation();
+        ResetBlockedMovementObservation();
+    }
+
+    void ResetStuckObservation()
+    {
+        m_LastStuckCheckTime = Time.time;
+        m_LastStuckCheckPosition = m_Agent != null
+            ? m_Agent.transform.position
+            : transform.position;
+        m_StuckElapsed = 0f;
+    }
+
+    void ResetBlockedMovementObservation()
+    {
+        m_LastFramePosition = m_Agent != null
+            ? m_Agent.transform.position
+            : transform.position;
+        m_BlockedMovementElapsed = 0f;
     }
 }

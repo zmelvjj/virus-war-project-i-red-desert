@@ -3,11 +3,21 @@ using UnityEngine;
 
 public class MonsterManager : MonoBehaviour
 {
+    [Header("Navigation Distribution")]
+    [SerializeField, Min(1)] int navigationSlotCount = 32;
+    [SerializeField, Min(0f)] float navigationSlotMinSpacing = 1.5f;
+    [SerializeField, Min(0.01f)] float navigationDensityRadius = 3f;
+    [SerializeField, Range(0f, 1f)] float navigationMinimumTravelDistanceRatio = 0.3f;
+    [SerializeField, Range(0f, 1f)] float navigationPreferredTravelDistanceRatio = 0.55f;
+    [SerializeField, Range(0f, 1f)] float navigationMaximumPreferredDistanceRatio = 0.8f;
+    [SerializeField, Min(1)] int navigationTopCandidateCount = 5;
+
     public static MonsterManager Instance { get; private set; }
     public static bool HasInstance => Instance != null;
 
     readonly List<MonsterEntity> m_Monsters = new();
     readonly Queue<MonsterNavMeshMovement> m_NavigationQueue = new();
+    NavigationDistributionSystem m_NavigationDistribution;
     GameFlowManager m_GameFlowManager;
 
     public IReadOnlyList<MonsterEntity> Monsters => m_Monsters;
@@ -16,6 +26,14 @@ public class MonsterManager : MonoBehaviour
     void Awake()
     {
         Instance = this;
+        m_NavigationDistribution = new NavigationDistributionSystem(
+            navigationSlotCount,
+            navigationSlotMinSpacing,
+            navigationDensityRadius,
+            navigationMinimumTravelDistanceRatio,
+            navigationPreferredTravelDistanceRatio,
+            navigationMaximumPreferredDistanceRatio,
+            navigationTopCandidateCount);
     }
 
     void OnEnable()
@@ -41,6 +59,32 @@ public class MonsterManager : MonoBehaviour
     public void QueueNavigation(MonsterNavMeshMovement movement)
     {
         m_NavigationQueue.Enqueue(movement);
+    }
+
+    public void RegisterNavigation(MonsterNavMeshMovement movement)
+    {
+        m_NavigationDistribution.Register(movement);
+    }
+
+    public void UnregisterNavigation(MonsterNavMeshMovement movement)
+    {
+        m_NavigationDistribution.Unregister(movement);
+    }
+
+    public void ReleaseNavigationDestination(MonsterNavMeshMovement movement)
+    {
+        m_NavigationDistribution.Release(movement);
+    }
+
+    public bool TryAssignNavigationDestination(
+        MonsterNavMeshMovement movement,
+        out Vector3 destination,
+        out UnityEngine.AI.NavMeshPath path)
+    {
+        return m_NavigationDistribution.TryRequestDestination(
+            movement,
+            out destination,
+            out path);
     }
 
     void Update()
@@ -87,5 +131,6 @@ public class MonsterManager : MonoBehaviour
 
         m_Monsters.Clear();
         m_NavigationQueue.Clear();
+        m_NavigationDistribution.Reset();
     }
 }

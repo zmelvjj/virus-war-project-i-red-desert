@@ -15,6 +15,12 @@ public class MonsterDefinitionEditor : Editor
     SerializedProperty m_NavMeshAngularSpeed;
     SerializedProperty m_NavMeshAvoidanceQuality;
     SerializedProperty m_NavMeshAvoidancePriority;
+    SerializedProperty m_StuckCheckInterval;
+    SerializedProperty m_StuckDuration;
+    SerializedProperty m_StuckMinimumMovement;
+    SerializedProperty m_RepathCooldown;
+    SerializedProperty m_BlockedMovementRatio;
+    SerializedProperty m_BlockedArrivalDuration;
     SerializedProperty m_IsRotated;
     SerializedProperty m_Diameter;
     SerializedProperty m_RotationPointPaths;
@@ -31,6 +37,12 @@ public class MonsterDefinitionEditor : Editor
         m_NavMeshAngularSpeed = serializedObject.FindProperty("navMeshAngularSpeed");
         m_NavMeshAvoidanceQuality = serializedObject.FindProperty("navMeshAvoidanceQuality");
         m_NavMeshAvoidancePriority = serializedObject.FindProperty("navMeshAvoidancePriority");
+        m_StuckCheckInterval = serializedObject.FindProperty("stuckCheckInterval");
+        m_StuckDuration = serializedObject.FindProperty("stuckDuration");
+        m_StuckMinimumMovement = serializedObject.FindProperty("stuckMinimumMovement");
+        m_RepathCooldown = serializedObject.FindProperty("repathCooldown");
+        m_BlockedMovementRatio = serializedObject.FindProperty("blockedMovementRatio");
+        m_BlockedArrivalDuration = serializedObject.FindProperty("blockedArrivalDuration");
         m_IsRotated = serializedObject.FindProperty("isRotated");
         m_Diameter = serializedObject.FindProperty("diameter");
         m_RotationPointPaths = serializedObject.FindProperty("rotationPointPaths");
@@ -55,6 +67,15 @@ public class MonsterDefinitionEditor : Editor
             EditorGUILayout.PropertyField(m_NavMeshAngularSpeed);
             EditorGUILayout.PropertyField(m_NavMeshAvoidanceQuality);
             EditorGUILayout.PropertyField(m_NavMeshAvoidancePriority);
+
+            EditorGUILayout.Space();
+            EditorGUILayout.LabelField("Stuck Recovery", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(m_StuckCheckInterval);
+            EditorGUILayout.PropertyField(m_StuckDuration);
+            EditorGUILayout.PropertyField(m_StuckMinimumMovement);
+            EditorGUILayout.PropertyField(m_RepathCooldown);
+            EditorGUILayout.PropertyField(m_BlockedMovementRatio);
+            EditorGUILayout.PropertyField(m_BlockedArrivalDuration);
 
             EditorGUILayout.Space();
             EditorGUILayout.PropertyField(m_IsRotated);

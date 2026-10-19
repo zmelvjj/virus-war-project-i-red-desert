@@ -50,6 +50,7 @@ public sealed class MonsterBuilder
         var movementType = ConfigureMovement(instance);
         entity.Initialize(m_Definition, m_Hp, movementType);
         MonsterManager.Instance.Register(entity);
+
         return entity;
     }
 
@@ -95,7 +96,13 @@ public sealed class MonsterBuilder
             m_Definition.RotationSpeed,
             m_Definition.IsRotated ? m_Definition.Diameter : 0f,
             rotationPoints,
-            ResolveRotationCompensationPoints(instance, rotationPoints));
+            ResolveRotationCompensationPoints(instance, rotationPoints),
+            m_Definition.StuckCheckInterval,
+            m_Definition.StuckDuration,
+            m_Definition.StuckMinimumMovement,
+            m_Definition.RepathCooldown,
+            m_Definition.BlockedMovementRatio,
+            m_Definition.BlockedArrivalDuration);
         return MonsterMovementType.NavMesh;
     }
 

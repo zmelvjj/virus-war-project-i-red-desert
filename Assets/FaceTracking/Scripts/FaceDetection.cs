@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using Unity.InferenceEngine;
@@ -39,7 +40,6 @@ public class FaceDetection : MonoBehaviour
 
     Worker m_FaceDetectorWorker;
     Tensor<float> m_DetectorInput;
-    Awaitable m_DetectAwaitable;
     readonly List<FaceDetectionResult> m_Results = new();
     bool m_IsShuttingDown;
     float m_NextFaceCountLogTime;
@@ -52,12 +52,12 @@ public class FaceDetection : MonoBehaviour
     public float TextureWidth => m_TextureWidth;
     public float TextureHeight => m_TextureHeight;
 
-    public async void Start()
+    public IEnumerator Start()
     {
         if (faceDetector == null || anchorsCSV == null)
         {
             Debug.LogError("FaceDetection requires a BlazeFace model and anchors CSV.");
-            return;
+            yield break;
         }
 
         m_Anchors = BlazeUtils.LoadAnchors(anchorsCSV.text, k_NumAnchors);
@@ -94,26 +94,15 @@ public class FaceDetection : MonoBehaviour
 
         while (!m_IsShuttingDown)
         {
-            try
+            var sourceTexture = GetSourceTexture();
+            if (sourceTexture == null || sourceTexture.width <= 16 || sourceTexture.height <= 16)
             {
-                var sourceTexture = GetSourceTexture();
-                if (sourceTexture == null || sourceTexture.width <= 16 || sourceTexture.height <= 16)
-                {
-                    await Awaitable.NextFrameAsync();
-                    continue;
-                }
+                yield return null;
+                continue;
+            }
 
-                m_DetectAwaitable = Detect(sourceTexture);
-                await m_DetectAwaitable;
-            }
-            catch (OperationCanceledException)
-            {
-                break;
-            }
+            yield return Detect(sourceTexture);
         }
-
-        m_FaceDetectorWorker?.Dispose();
-        m_DetectorInput?.Dispose();
     }
 
     Vector3 ImageToWorld(Vector2 position)
@@ -121,7 +110,7 @@ public class FaceDetection : MonoBehaviour
         return (position - 0.5f * new Vector2(m_TextureWidth, m_TextureHeight)) / m_TextureHeight;
     }
 
-    async Awaitable Detect(Texture texture)
+    IEnumerator Detect(Texture texture)
     {
         CurrentTexture = texture;
         m_TextureWidth = texture.width;
@@ -175,14 +164,38 @@ public class FaceDetection : MonoBehaviour
                !outputScoresTensor.IsReadbackRequestDone() ||
                !outputBoxesTensor.IsReadbackRequestDone())
         {
-            await Awaitable.NextFrameAsync();
+            yield return null;
             if (m_IsShuttingDown)
-                return;
+                yield break;
         }
 
-        using (var outputIndices = outputIndicesTensor.ReadbackAndClone())
-        using (var outputScores = outputScoresTensor.ReadbackAndClone())
-        using (var outputBoxes = outputBoxesTensor.ReadbackAndClone())
+        Tensor<int> outputIndices = null;
+        Tensor<float> outputScores = null;
+        Tensor<float> outputBoxes = null;
+        var readbackFailed = false;
+        try
+        {
+            outputIndices = outputIndicesTensor.ReadbackAndClone();
+            outputScores = outputScoresTensor.ReadbackAndClone();
+            outputBoxes = outputBoxesTensor.ReadbackAndClone();
+        }
+        catch (InvalidOperationException)
+        {
+            readbackFailed = true;
+        }
+
+        if (readbackFailed)
+        {
+            outputIndices?.Dispose();
+            outputScores?.Dispose();
+            outputBoxes?.Dispose();
+            yield return null;
+            yield break;
+        }
+
+        using (outputIndices)
+        using (outputScores)
+        using (outputBoxes)
         {
             var numFaces = outputIndices.shape.length;
             m_Results.Clear();
@@ -231,7 +244,7 @@ public class FaceDetection : MonoBehaviour
             LogFaceCountIfDue(numFaces, outputScores);
         }
 
-        await Awaitable.NextFrameAsync();
+        yield return null;
     }
 
     void LogFaceCountIfDue(int numFaces, Tensor<float> outputScores)
@@ -274,7 +287,7 @@ public class FaceDetection : MonoBehaviour
     void OnDestroy()
     {
         m_IsShuttingDown = true;
-        m_DetectAwaitable?.Cancel();
+        StopAllCoroutines();
         m_FaceDetectorWorker?.Dispose();
         m_FaceDetectorWorker = null;
         m_DetectorInput?.Dispose();

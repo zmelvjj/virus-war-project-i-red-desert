@@ -67,5 +67,5 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "virus-war-project-i-red-desert.slnx"
+    "dotnet.defaultSolution": "project_mind.slnx"
 }
