@@ -3067,8 +3067,8 @@ MonoBehaviour:
   spawnArea: {fileID: 299818322}
   monster: {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
   range: 11
-  spawnInterval: 1
-  maxMonsters: 10
+  spawnInterval: 0.1
+  maxMonsters: 50
 --- !u!114 &943823210
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3239,8 +3239,8 @@ MonoBehaviour:
   aimCamera: {fileID: 330585545}
   range: {fileID: 1947607913}
   mouthOpenTracker: {fileID: 842315629}
-  closedWidthMultiplier: 1
-  openWidthMultiplier: 1
+  closedWidthMultiplier: 0.5
+  openWidthMultiplier: 1.5
 --- !u!65 &1091560175
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -4519,7 +4519,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStaminaController
   baseMaxStamina: 100
-  baseDrainPerSecond: 5
+  baseDrainPerSecond: 1
 --- !u!1 &1891744966
 GameObject:
   m_ObjectHideFlags: 0
