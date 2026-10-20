@@ -28,14 +28,14 @@ public class MonsterEntity : MonoBehaviour
     public void TakeDamage(int damage)
     {
         TakeDamage(damage, null);
-        //m_Animator.SetInteger("HP_Ratio", (int)CurrentHp/MaxHp*100);
+        m_Animator.SetInteger("HP_Ratio", (int)(CurrentHp/(float)MaxHp*100));
 
     }
 
     public void TakeDamage(int damage, Material hitMaterial)
     {
         CurrentHp = Mathf.Max(0, CurrentHp - damage);
-        //m_Animator.SetInteger("HP_Ratio", (int)CurrentHp/MaxHp*100);
+        m_Animator.SetInteger("HP_Ratio", (int)(CurrentHp/(float)MaxHp*100));
         if (CurrentHp <= 0)
         {
             if (m_NavMeshMovement != null)

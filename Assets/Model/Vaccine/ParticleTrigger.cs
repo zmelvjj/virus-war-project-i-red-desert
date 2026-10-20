@@ -6,7 +6,6 @@ public class ParticleTrigger : MonoBehaviour
 
     public void PlayParticle()
     {
-        particle.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        particle.Play();
+        particle.Emit(60);
     }
 }

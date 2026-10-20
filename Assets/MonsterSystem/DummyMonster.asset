@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: DummyMonster
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Dummy
-  baseHp: 100
+  baseHp: 50
   modelPrefab: {fileID: 6488921758625308738, guid: 1bf9f35337d7b72488224395ed861dea, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
   rotationSpeed: 100
@@ -22,6 +22,12 @@ MonoBehaviour:
   navMeshAngularSpeed: 120
   navMeshAvoidanceQuality: 4
   navMeshAvoidancePriority: 50
+  stuckCheckInterval: 0.75
+  stuckDuration: 4
+  stuckMinimumMovement: 0.1
+  repathCooldown: 3
+  blockedMovementRatio: 0.15
+  blockedArrivalDuration: 1
   isRotated: 1
   rotationPointPaths:
   - Capsule

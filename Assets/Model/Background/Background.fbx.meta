@@ -1,19 +1,9 @@
 fileFormatVersion: 2
-guid: 608bea0638d48574c81a86cb03b94e07
+guid: 3aa9cc17777e85e4a9da4ba7a3dadfcf
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
-  externalObjects:
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: petri
-    second: {fileID: 2100000, guid: 32230c4b420cc304b9d46725f1f966ea, type: 2}
-  - first:
-      type: UnityEngine:Material
-      assembly: UnityEngine.CoreModule
-      name: table
-    second: {fileID: 2100000, guid: dafbc3afd476c3a4d81b82ed8655783e, type: 2}
+  externalObjects: {}
   materials:
     materialImportMode: 2
     materialName: 0
