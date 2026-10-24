@@ -6,6 +6,7 @@ using UnityEngine;
 public class RangeDamageDealer : MonoBehaviour
 {
     [SerializeField] Material hitMaterial;
+    [SerializeField] SneezeParticleController control;
 
     BoxCollider m_RangeCollider;
     readonly HashSet<MonsterEntity> m_Targets = new();
@@ -18,7 +19,10 @@ public class RangeDamageDealer : MonoBehaviour
         {
             yield return new WaitForSeconds(1f / PlayerStats.Instance.AttackSpeed);
             if (GameFlowManager.IsMainGame)
+            {
                 Attack();
+                control.Fire();
+            }
         }
     }
 
