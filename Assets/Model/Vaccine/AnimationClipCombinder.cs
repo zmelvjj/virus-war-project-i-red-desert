@@ -1,7 +1,8 @@
 using UnityEngine;
 using UnityEditor;
 using System.Linq;
- 
+
+#if UNITY_EDITOR 
 public static class AnimationClipCombiner
 {
     [MenuItem("Tools/Animation/Combine Selected Clips")]
@@ -71,3 +72,5 @@ public static class AnimationClipCombiner
         Debug.Log($"애니메이션 합치기 완료: {path}");
     }
 }
+
+#endif

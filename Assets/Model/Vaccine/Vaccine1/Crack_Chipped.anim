@@ -343,7 +343,7 @@ AnimationClip:
   m_HasMotionFloatCurves: 0
   m_Events:
   - time: 0.016666668
-    functionName: PlayParticle
+    functionName: Chipped
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0

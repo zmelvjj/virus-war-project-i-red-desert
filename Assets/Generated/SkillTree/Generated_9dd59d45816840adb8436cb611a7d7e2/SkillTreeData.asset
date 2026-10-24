@@ -1,0 +1,91 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 207597a39f17530419d9a651a63b07b2, type: 3}
+  m_Name: SkillTreeData
+  m_EditorClassIdentifier: Assembly-CSharp::SkillTreeData
+  baseSize: {x: 1920, y: 1080}
+  nodes:
+  - {fileID: 11400000, guid: 17ab1f3b81426c5429bb9c73c6808478, type: 2}
+  - {fileID: 11400000, guid: a8ac3082f46332040a58305eb21ce055, type: 2}
+  - {fileID: 11400000, guid: 9202e5f14cc26a643a1ab99ab52e141b, type: 2}
+  - {fileID: 11400000, guid: 97e0c2f1fea33b44596e59ba767dd5b2, type: 2}
+  - {fileID: 11400000, guid: 4ed8c14a61ad2d543b24ebe2b6dee1ae, type: 2}
+  - {fileID: 11400000, guid: b52423ef3c7c1e64bb542da6142d78c6, type: 2}
+  - {fileID: 11400000, guid: a021367f4ad060d4fb08d17b3121af91, type: 2}
+  connections:
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: d4f845a5dc2445c5b745504e1e362d01
+    childNodeGuid: d9b6ff2e26804c31886c23a1ca34f236
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -67.5, y: 0}
+    - {x: -150, y: 0}
+  - color: {r: 1, g: 1, b: 0, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: d9b6ff2e26804c31886c23a1ca34f236
+    childNodeGuid: 6ddb76f8fa624753bb2c80ec992cc96a
+    startAnchor: 0
+    endAnchor: 2
+    routingMode: 0
+    pathPoints:
+    - {x: -200, y: -50}
+    - {x: -200, y: -150}
+  - color: {r: 1, g: 0.99862754, b: 0, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 6ddb76f8fa624753bb2c80ec992cc96a
+    childNodeGuid: 572d2d0d7f7b4075a6e297da57d8f7e8
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -250, y: -200}
+    - {x: -350, y: -200}
+  - color: {r: 1, g: 1, b: 0, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 6ddb76f8fa624753bb2c80ec992cc96a
+    childNodeGuid: 3fb543e431ea4870915389fd546cb479
+    startAnchor: 0
+    endAnchor: 2
+    routingMode: 0
+    pathPoints:
+    - {x: -200, y: -250}
+    - {x: -200, y: -350}
+  - color: {r: 1, g: 1, b: 0, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 6ddb76f8fa624753bb2c80ec992cc96a
+    childNodeGuid: 9fe5244167184b36b67dc70014544d63
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: -150, y: -200}
+    - {x: -100, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: d9b6ff2e26804c31886c23a1ca34f236
+    childNodeGuid: 6f66e0abe52d40a4bc23e615d6496668
+    startAnchor: 2
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -200, y: 50}
+    - {x: -200, y: 150}
+    - {x: -350, y: 150}

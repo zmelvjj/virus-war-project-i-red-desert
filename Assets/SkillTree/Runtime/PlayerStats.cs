@@ -72,6 +72,6 @@ public sealed class PlayerStats : MonoBehaviour
                 percent += modifier.Value;
         }
 
-        return Mathf.Max(0f, (baseValue + flat) * (1f + percent));
+        return Mathf.Max(0f, (baseValue + flat) * (1f + percent * 0.01f));
     }
 }
