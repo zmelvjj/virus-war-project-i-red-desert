@@ -3,13 +3,20 @@ using UnityEngine;
 
 public class MonsterEntity : MonoBehaviour
 {
+    [SerializeField] Transform damagePopupPoint;
+    [SerializeField, Min(0f)] float fallbackDamagePopupHeight = 2f;
+
     public MonsterDefinition Definition { get; private set; }
     public int MaxHp { get; private set; }
     public int CurrentHp { get; private set; }
     public MonsterMovementType MovementType { get; private set; }
+    public Vector3 DamagePopupPosition => damagePopupPoint != null
+        ? damagePopupPoint.position
+        : transform.position + Vector3.up * fallbackDamagePopupHeight;
 
     Renderer[] m_Renderers;
     Material[][] m_OriginalMaterials;
+    MaterialPropertyBlock m_HitPropertyBlock;
     Coroutine m_HitFlash;
     Animator m_Animator;
     MonsterNavMeshMovement m_NavMeshMovement;
@@ -28,14 +35,23 @@ public class MonsterEntity : MonoBehaviour
     public void TakeDamage(int damage)
     {
         TakeDamage(damage, null);
-        //m_Animator.SetInteger("HP_Ratio", (int)CurrentHp/MaxHp*100);
-
+        if (m_Animator != null)
+            m_Animator.SetInteger("HP_Ratio", (int)((float)CurrentHp / MaxHp * 100));
     }
 
     public void TakeDamage(int damage, Material hitMaterial)
     {
+        TakeDamage(damage, hitMaterial, null);
+    }
+
+    public void TakeDamage(
+        int damage,
+        Material hitMaterial,
+        Color? hitColor)
+    {
         CurrentHp = Mathf.Max(0, CurrentHp - damage);
-        //m_Animator.SetInteger("HP_Ratio", (int)CurrentHp/MaxHp*100);
+        if (m_Animator != null)
+            m_Animator.SetInteger("HP_Ratio", (int)((float)CurrentHp / MaxHp * 100));
         if (CurrentHp <= 0)
         {
             if (m_NavMeshMovement != null)
@@ -50,7 +66,7 @@ public class MonsterEntity : MonoBehaviour
             if (m_HitFlash != null)
                 StopCoroutine(m_HitFlash);
 
-            m_HitFlash = StartCoroutine(FlashMaterial(hitMaterial));
+            m_HitFlash = StartCoroutine(FlashMaterial(hitMaterial, hitColor));
         }
     }
 
@@ -63,8 +79,16 @@ public class MonsterEntity : MonoBehaviour
             m_OriginalMaterials[i] = m_Renderers[i].sharedMaterials;
     }
 
-    IEnumerator FlashMaterial(Material hitMaterial)
+    IEnumerator FlashMaterial(Material hitMaterial, Color? hitColor)
     {
+        if (hitColor.HasValue)
+        {
+            m_HitPropertyBlock ??= new MaterialPropertyBlock();
+            m_HitPropertyBlock.Clear();
+            m_HitPropertyBlock.SetColor("_BaseColor", hitColor.Value);
+            m_HitPropertyBlock.SetColor("_Color", hitColor.Value);
+        }
+
         for (var i = 0; i < m_Renderers.Length; i++)
         {
             var materials = new Material[m_OriginalMaterials[i].Length];
@@ -72,12 +96,19 @@ public class MonsterEntity : MonoBehaviour
                 materials[j] = hitMaterial;
 
             m_Renderers[i].sharedMaterials = materials;
+            m_Renderers[i].SetPropertyBlock(null);
+
+            if (hitColor.HasValue)
+                m_Renderers[i].SetPropertyBlock(m_HitPropertyBlock);
         }
 
         yield return new WaitForSeconds(0.2f);
 
         for (var i = 0; i < m_Renderers.Length; i++)
+        {
             m_Renderers[i].sharedMaterials = m_OriginalMaterials[i];
+            m_Renderers[i].SetPropertyBlock(null);
+        }
 
         m_HitFlash = null;
     }

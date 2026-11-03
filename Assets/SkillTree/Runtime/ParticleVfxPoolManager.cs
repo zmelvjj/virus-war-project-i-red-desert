@@ -5,7 +5,7 @@ using UnityEngine;
 [Serializable]
 public sealed class ParticleVfxPoolSettings
 {
-    public ParticleSystem prefab;
+    public GameObject prefab;
     [Min(0)] public int initialSize;
 }
 
@@ -14,7 +14,7 @@ public sealed class ParticleVfxPoolManager : MonoBehaviour
 {
     [SerializeField] List<ParticleVfxPoolSettings> pools = new();
 
-    readonly Dictionary<ParticleSystem, Queue<PooledParticleVfx>> m_Pools = new();
+    readonly Dictionary<GameObject, Queue<PooledParticleVfx>> m_Pools = new();
 
     public static ParticleVfxPoolManager Instance { get; private set; }
     public static bool HasInstance => Instance != null;
@@ -37,13 +37,24 @@ public sealed class ParticleVfxPoolManager : MonoBehaviour
             Instance = null;
     }
 
-    public void Play(ParticleSystem prefab, Vector3 position, Quaternion rotation)
+    public void Play(
+        GameObject prefab,
+        Vector3 position,
+        Quaternion rotation,
+        float scaleMultiplier = 1f,
+        Transform followTarget = null,
+        float duration = 0f)
     {
         var pool = GetOrCreatePool(prefab);
         var instance = pool.Count > 0
             ? pool.Dequeue()
             : CreateInstance(prefab);
-        instance.Play(position, rotation);
+        instance.Play(
+            position,
+            rotation,
+            scaleMultiplier,
+            followTarget,
+            duration);
     }
 
     internal void Return(PooledParticleVfx instance)
@@ -52,7 +63,7 @@ public sealed class ParticleVfxPoolManager : MonoBehaviour
         GetOrCreatePool(instance.SourcePrefab).Enqueue(instance);
     }
 
-    Queue<PooledParticleVfx> GetOrCreatePool(ParticleSystem prefab)
+    Queue<PooledParticleVfx> GetOrCreatePool(GameObject prefab)
     {
         if (!m_Pools.TryGetValue(prefab, out var pool))
         {
@@ -63,14 +74,14 @@ public sealed class ParticleVfxPoolManager : MonoBehaviour
         return pool;
     }
 
-    PooledParticleVfx CreateInstance(ParticleSystem prefab)
+    PooledParticleVfx CreateInstance(GameObject prefab)
     {
-        var particleSystem = Instantiate(prefab, transform);
-        particleSystem.name = prefab.name;
-        var instance = particleSystem.GetComponent<PooledParticleVfx>();
+        var effect = Instantiate(prefab, transform);
+        effect.name = prefab.name;
+        var instance = effect.GetComponent<PooledParticleVfx>();
         if (instance == null)
-            instance = particleSystem.gameObject.AddComponent<PooledParticleVfx>();
-        instance.Initialize(this, prefab, particleSystem);
+            instance = effect.AddComponent<PooledParticleVfx>();
+        instance.Initialize(this, prefab);
         instance.PrepareForPool();
         return instance;
     }

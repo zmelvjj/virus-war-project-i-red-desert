@@ -14,19 +14,32 @@ public enum PlayerStatType
 public enum SkillModifierOperation
 {
     Flat,
-    Percent
+    Percent,
+    Set
 }
 
 public enum AbilityType
 {
-    Lightning
+    Lightning,
+    Ignite,
+    Critical,
+    Shockwave,
+    Combo
 }
 
 public enum AbilityProperty
 {
     Chance,
     Range,
-    Damage
+    Damage,
+    Duration,
+    SpreadChance,
+    SpreadRange,
+    BonusAttack,
+    BonusAttackDuration,
+    Mark,
+    BonusDamage,
+    AngleReduction
 }
 
 public enum SkillUnlockState

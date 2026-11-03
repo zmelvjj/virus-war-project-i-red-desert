@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using TMPro;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -7,6 +8,57 @@ using UnityEngine.UIElements;
 
 public sealed class SkillNodeInspectorView : VisualElement
 {
+    static readonly List<AbilityProperty> s_LightningProperties = new()
+    {
+        AbilityProperty.Chance,
+        AbilityProperty.Range,
+        AbilityProperty.Damage
+    };
+
+    static readonly List<AbilityProperty> s_IgniteProperties = new()
+    {
+        AbilityProperty.Chance,
+        AbilityProperty.Damage,
+        AbilityProperty.Duration,
+        AbilityProperty.SpreadChance,
+        AbilityProperty.SpreadRange
+    };
+
+    static readonly List<AbilityProperty> s_CriticalProperties = new()
+    {
+        AbilityProperty.Chance,
+        AbilityProperty.Damage,
+        AbilityProperty.BonusAttack,
+        AbilityProperty.BonusAttackDuration,
+        AbilityProperty.Mark
+    };
+
+    static readonly List<AbilityProperty> s_ShockwaveProperties = new()
+    {
+        AbilityProperty.Chance,
+        AbilityProperty.Range,
+        AbilityProperty.Damage
+    };
+
+    static readonly List<AbilityProperty> s_ComboProperties = new()
+    {
+        AbilityProperty.BonusDamage,
+        AbilityProperty.AngleReduction
+    };
+
+    static readonly List<SkillModifierOperation> s_StatOperations = new()
+    {
+        SkillModifierOperation.Flat,
+        SkillModifierOperation.Percent
+    };
+
+    static readonly List<SkillModifierOperation> s_AbilityOperations = new()
+    {
+        SkillModifierOperation.Flat,
+        SkillModifierOperation.Percent,
+        SkillModifierOperation.Set
+    };
+
     readonly Label m_TitleLabel;
     readonly Label m_EmptyLabel;
     readonly ScrollView m_Fields;
@@ -511,7 +563,7 @@ public sealed class SkillNodeInspectorView : VisualElement
                     "스탯",
                     effect.stat,
                     value => effect.stat = (PlayerStatType)value);
-                AddModifierFields(container, effect);
+                AddModifierFields(container, effect, false);
                 break;
 
             case SkillEffectType.AbilityUnlock:
@@ -523,21 +575,12 @@ public sealed class SkillNodeInspectorView : VisualElement
                 break;
 
             case SkillEffectType.AbilityModifier:
-                AddEnumEffectField(
-                    container,
-                    "어빌리티",
-                    effect.ability,
-                    value => effect.ability = (AbilityType)value);
-                AddEnumEffectField(
-                    container,
-                    "속성",
-                    effect.abilityProperty,
-                    value => effect.abilityProperty = (AbilityProperty)value);
-                AddModifierFields(container, effect);
+                AddAbilityModifierFields(container, effect);
                 break;
         }
 
         if (effect.effectType != SkillEffectType.AbilityUnlock
+            && effect.operation != SkillModifierOperation.Set
             && Mathf.Approximately(effect.value, 0f))
         {
             var warning = new Label("값이 0이면 효과가 적용되지 않습니다.");
@@ -550,23 +593,80 @@ public sealed class SkillNodeInspectorView : VisualElement
 
     void AddModifierFields(
         VisualElement container,
-        SkillEffectDraftData effect)
+        SkillEffectDraftData effect,
+        bool allowSet)
     {
-        AddEnumEffectField(
-            container,
+        var operations = allowSet ? s_AbilityOperations : s_StatOperations;
+        if (!operations.Contains(effect.operation))
+            effect.operation = SkillModifierOperation.Flat;
+
+        var operationField = new PopupField<SkillModifierOperation>(
             "연산",
-            effect.operation,
-            value => effect.operation = (SkillModifierOperation)value);
+            operations,
+            effect.operation);
+        operationField.RegisterValueChangedCallback(evt =>
+        {
+            effect.operation = evt.newValue;
+            RefreshEffectFields();
+            DraftChanged?.Invoke();
+        });
+        AddEffectField(container, operationField);
 
         var valueField = new FloatField("값");
         valueField.SetValueWithoutNotify(effect.value);
         valueField.RegisterValueChangedCallback(evt =>
         {
             effect.value = evt.newValue;
-            RefreshEffectFields();
             DraftChanged?.Invoke();
         });
         AddEffectField(container, valueField);
+    }
+
+    void AddAbilityModifierFields(
+        VisualElement container,
+        SkillEffectDraftData effect)
+    {
+        var abilityField = new EnumField("어빌리티", effect.ability);
+        abilityField.RegisterValueChangedCallback(evt =>
+        {
+            effect.ability = (AbilityType)evt.newValue;
+            var properties = GetAbilityProperties(effect.ability);
+            if (!properties.Contains(effect.abilityProperty))
+                effect.abilityProperty = properties[0];
+
+            RefreshEffectFields();
+            DraftChanged?.Invoke();
+        });
+        AddEffectField(container, abilityField);
+
+        var supportedProperties = GetAbilityProperties(effect.ability);
+        if (!supportedProperties.Contains(effect.abilityProperty))
+            effect.abilityProperty = supportedProperties[0];
+
+        var propertyField = new PopupField<AbilityProperty>(
+            "속성",
+            supportedProperties,
+            effect.abilityProperty);
+        propertyField.RegisterValueChangedCallback(evt =>
+        {
+            effect.abilityProperty = evt.newValue;
+            DraftChanged?.Invoke();
+        });
+        AddEffectField(container, propertyField);
+
+        AddModifierFields(container, effect, true);
+    }
+
+    static List<AbilityProperty> GetAbilityProperties(AbilityType ability)
+    {
+        return ability switch
+        {
+            AbilityType.Ignite => s_IgniteProperties,
+            AbilityType.Critical => s_CriticalProperties,
+            AbilityType.Shockwave => s_ShockwaveProperties,
+            AbilityType.Combo => s_ComboProperties,
+            _ => s_LightningProperties
+        };
     }
 
     void AddEnumEffectField(

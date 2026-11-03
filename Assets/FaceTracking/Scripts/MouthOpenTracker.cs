@@ -71,6 +71,14 @@ public class MouthOpenTracker : MonoBehaviour
     public bool HasFace { get; private set; }
     public float FacePresence { get; private set; }
 
+    public static MouthOpenTracker Instance { get; private set; }
+    public static bool HasInstance => Instance != null;
+
+    void Awake()
+    {
+        Instance = this;
+    }
+
     async void Start()
     {
         if (faceDetection == null)
@@ -419,5 +427,8 @@ public class MouthOpenTracker : MonoBehaviour
         m_FaceMeshInput = null;
         m_FaceMeshWorker?.Dispose();
         m_FaceMeshWorker = null;
+
+        if (Instance == this)
+            Instance = null;
     }
 }
