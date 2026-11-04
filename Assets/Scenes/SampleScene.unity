@@ -389,78 +389,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 42504343}
   m_CullTransparentMesh: 1
---- !u!1 &48401715
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 48401718}
-  - component: {fileID: 48401717}
-  - component: {fileID: 48401716}
-  m_Layer: 0
-  m_Name: RawImage
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &48401716
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 48401715}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.RawImage
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Texture: {fileID: 0}
-  m_UVRect:
-    serializedVersion: 2
-    x: 0
-    y: 0
-    width: 1
-    height: 1
---- !u!222 &48401717
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 48401715}
-  m_CullTransparentMesh: 1
---- !u!224 &48401718
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 48401715}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 58109198}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 0}
-  m_AnchorMax: {x: 1, y: 0}
-  m_AnchoredPosition: {x: -10, y: 10}
-  m_SizeDelta: {x: 192, y: 108}
-  m_Pivot: {x: 1, y: 0}
 --- !u!1 &58109197
 GameObject:
   m_ObjectHideFlags: 0
@@ -493,11 +421,11 @@ RectTransform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 2122757247}
-  - {fileID: 48401718}
   - {fileID: 7887427604892625716}
   - {fileID: 652638375}
   - {fileID: 246869149}
   - {fileID: 1841720798}
+  - {fileID: 522755446}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -1874,6 +1802,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 491697380}
   m_CullTransparentMesh: 1
+--- !u!1 &522755445
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 522755446}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &522755446
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 522755445}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 58109198}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &577888704
 GameObject:
   m_ObjectHideFlags: 0
@@ -7464,7 +7427,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16105f0d45ca8aa4dadb3f3df568286e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::WebcamProvider
-  preview: {fileID: 48401716}
+  preview: {fileID: 0}
   logFrameStatusEverySecond: 0
   logIntervalSeconds: 1
 --- !u!114 &842315628
@@ -7736,9 +7699,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MonsterSpawner
   spawnArea: {fileID: 2072133681892728073}
-  monster: {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
+  monsters:
+  - {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
+  - {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
+  - {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
+  - {fileID: 11400000, guid: 797ff9e7c4a1a4f46beaf0fddd9642aa, type: 2}
+  - {fileID: 11400000, guid: ef7dc5e34e14a2e4a9e79f229c370315, type: 2}
+  - {fileID: 11400000, guid: a0bed739357c5444bad3fc94e04b6f96, type: 2}
   range: 11
-  spawnInterval: 0.1
+  spawnInterval: 1
   maxMonsters: 5
 --- !u!114 &943823210
 MonoBehaviour:
@@ -10138,7 +10107,7 @@ MonoBehaviour:
   gameOverPanel: {fileID: 246869148}
   skillTreeRoot: {fileID: 2122757246}
   upgradeRestartButtonRoot: {fileID: 1841720797}
-  temporaryUpgradeHiddenRawImage: {fileID: 48401715}
+  temporaryUpgradeHiddenRawImage: {fileID: 522755445}
   staminaBar: {fileID: 870341788}
   restartButton: {fileID: 1136949081}
   upgradeButton: {fileID: 469692089}
@@ -10156,7 +10125,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStaminaController
   baseMaxStamina: 100
-  baseDrainPerSecond: 6.8
+  baseDrainPerSecond: 0
 --- !u!1 &1947607912
 GameObject:
   m_ObjectHideFlags: 0

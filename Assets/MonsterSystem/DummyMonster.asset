@@ -36,4 +36,4 @@ MonoBehaviour:
   - barrier_damaged
   - barrier_chipped
   - barrier
-  diameter: 1.5
+  diameter: 1
