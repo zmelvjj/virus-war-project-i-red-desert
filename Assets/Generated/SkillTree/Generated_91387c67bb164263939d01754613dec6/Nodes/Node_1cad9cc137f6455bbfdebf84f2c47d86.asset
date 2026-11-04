@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03be6d237e506414ab78d28a616d2552, type: 3}
+  m_Name: Node_1cad9cc137f6455bbfdebf84f2c47d86
+  m_EditorClassIdentifier: Assembly-CSharp::SkillNodeData
+  guid: 1cad9cc137f6455bbfdebf84f2c47d86
+  nodeSprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  nodeColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  skillSprite: {fileID: 0}
+  skillColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  skillSpriteSizeRatio: {x: 0.64, y: 0.64}
+  nodeInfo: {fileID: 11400000, guid: 075ee07f2eafaae449c7d3ba6ff8eebd, type: 2}
+  dnaCost: 0
+  effects:
+  - effectType: 2
+    stat: 0
+    ability: 2
+    abilityProperty: 8
+    operation: 0
+    value: 1
+  position: {x: -424.50018, y: -432.4593}
+  size: {x: 200, y: 100}

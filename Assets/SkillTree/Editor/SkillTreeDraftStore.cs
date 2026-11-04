@@ -18,6 +18,8 @@ public static class SkillTreeDraftStore
 {
     const string k_DraftPath = "ProjectSettings/SkillTreeEditor/SkillTreeDraft.json";
     const string k_LegacyDraftPath = "Library/SkillTreeEditor/SkillTreeDraft.json";
+    const string k_LegacyDNACostKey = "\"price\":";
+    const string k_DNACostKey = "\"dnaCost\":";
 
     public static SkillTreeDraftData Load()
     {
@@ -25,7 +27,9 @@ public static class SkillTreeDraftStore
         if (!File.Exists(loadPath))
             return new SkillTreeDraftData();
 
-        var draft = JsonUtility.FromJson<SkillTreeDraftData>(File.ReadAllText(loadPath))
+        var json = File.ReadAllText(loadPath)
+            .Replace(k_LegacyDNACostKey, k_DNACostKey);
+        var draft = JsonUtility.FromJson<SkillTreeDraftData>(json)
             ?? new SkillTreeDraftData();
         Normalize(draft);
 

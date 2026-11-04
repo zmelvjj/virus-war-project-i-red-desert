@@ -17,7 +17,7 @@ MonoBehaviour:
   baseDuration: 3
   tickInterval: 1
   baseSpreadChance: 0
-  baseSpreadRange: 3
+  baseSpreadRange: 100
   vfxPrefab: {fileID: 4000667520668516784, guid: d0ec0a14054713c4cb454dc5f34fabb2, type: 3}
   fixedGroundY: 0
   vfxPositionOffset: {x: 0, y: 1, z: 0}

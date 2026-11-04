@@ -69,7 +69,7 @@ public sealed class SkillNodeInspectorView : VisualElement
     readonly ObjectField m_SkillSpriteField;
     readonly ColorField m_SkillColorField;
     readonly Vector2Field m_SkillSpriteRatioField;
-    readonly IntegerField m_PriceField;
+    readonly IntegerField m_DNACostField;
     readonly VisualElement m_EffectsContainer;
     readonly Vector2Field m_PositionField;
     readonly Vector2Field m_SizeField;
@@ -124,8 +124,8 @@ public sealed class SkillNodeInspectorView : VisualElement
         AddField(m_SkillColorField);
         m_SkillSpriteRatioField = new Vector2Field("스킬 스프라이트 비율");
         AddField(m_SkillSpriteRatioField);
-        m_PriceField = new IntegerField("가격");
-        AddField(m_PriceField);
+        m_DNACostField = new IntegerField("DNA 비용");
+        AddField(m_DNACostField);
 
         var effectsHeader = new VisualElement();
         effectsHeader.AddToClassList("effect-list-header");
@@ -407,12 +407,12 @@ public sealed class SkillNodeInspectorView : VisualElement
             m_Node.RefreshVisuals();
             DraftChanged?.Invoke();
         });
-        m_PriceField.RegisterValueChangedCallback(evt =>
+        m_DNACostField.RegisterValueChangedCallback(evt =>
         {
             if (m_Node == null)
                 return;
 
-            m_Node.Draft.price = evt.newValue;
+            m_Node.Draft.dnaCost = evt.newValue;
             DraftChanged?.Invoke();
         });
         m_PositionField.RegisterValueChangedCallback(evt =>
@@ -499,7 +499,7 @@ public sealed class SkillNodeInspectorView : VisualElement
                 draft.skillSpriteLocalId));
         m_SkillColorField.SetValueWithoutNotify(draft.skillColor);
         m_SkillSpriteRatioField.SetValueWithoutNotify(draft.skillSpriteSizeRatio);
-        m_PriceField.SetValueWithoutNotify(draft.price);
+        m_DNACostField.SetValueWithoutNotify(draft.dnaCost);
         RefreshEffectFields();
         RefreshTransformFields(m_Node);
     }

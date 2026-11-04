@@ -20,12 +20,14 @@ public class MonsterEntity : MonoBehaviour
     Coroutine m_HitFlash;
     Animator m_Animator;
     MonsterNavMeshMovement m_NavMeshMovement;
+    bool m_IsDead;
 
     public void Initialize(MonsterDefinition definition, int hp, MonsterMovementType movementType)
     {
         Definition = definition;
         MaxHp = hp;
         CurrentHp = hp;
+        m_IsDead = false;
         MovementType = movementType;
         CacheMaterials();
         m_Animator = GetComponent<Animator>();
@@ -49,13 +51,20 @@ public class MonsterEntity : MonoBehaviour
         Material hitMaterial,
         Color? hitColor)
     {
+        if (m_IsDead)
+            return;
+
         CurrentHp = Mathf.Max(0, CurrentHp - damage);
         if (m_Animator != null)
             m_Animator.SetInteger("HP_Ratio", (int)((float)CurrentHp / MaxHp * 100));
         if (CurrentHp <= 0)
         {
+            m_IsDead = true;
             if (m_NavMeshMovement != null)
                 m_NavMeshMovement.enabled = false;
+
+            if (DNADropSystem.HasInstance)
+                DNADropSystem.Instance.Drop(Definition.RewardDNA, transform.position);
 
             // Destroy(gameObject);
             return;

@@ -8,7 +8,7 @@ public sealed class SkillNodeInfoTooltipView : VisualElement
     readonly TextField m_MainTextField;
     readonly TextField m_DescriptionField;
     readonly Label m_StateLabel;
-    readonly Label m_PriceLabel;
+    readonly Label m_DNACostLabel;
     readonly TextField m_StatNameField;
     readonly TextField m_ValueTextField;
     SkillNodeView m_Node;
@@ -30,9 +30,9 @@ public sealed class SkillNodeInfoTooltipView : VisualElement
         titleRow.Add(m_StateLabel);
 
         m_DescriptionField = AddTextField("node-info-tooltip-description", true);
-        m_PriceLabel = new Label();
-        m_PriceLabel.AddToClassList("node-info-tooltip-price");
-        Add(m_PriceLabel);
+        m_DNACostLabel = new Label();
+        m_DNACostLabel.AddToClassList("node-info-tooltip-dna-cost");
+        Add(m_DNACostLabel);
 
         var statRow = new VisualElement();
         statRow.AddToClassList("node-info-tooltip-stat-row");
@@ -112,7 +112,7 @@ public sealed class SkillNodeInfoTooltipView : VisualElement
         m_MainTextField.SetValueWithoutNotify(info.mainText);
         m_DescriptionField.SetValueWithoutNotify(info.description);
         m_StateLabel.text = "열림";
-        m_PriceLabel.text = $"가격  {m_Node.Draft.price}";
+        m_DNACostLabel.text = $"DNA  {m_Node.Draft.dnaCost}";
         m_StatNameField.SetValueWithoutNotify(info.statName);
         m_ValueTextField.SetValueWithoutNotify(info.valueText);
 

@@ -14,8 +14,10 @@ public sealed class DamagePopupManager : MonoBehaviour
     [Header("Style")]
     [SerializeField] Color normalColor = Color.white;
     [SerializeField] Color criticalColor = Color.red;
+    [SerializeField] Color igniteColor = new(1f, 0.45f, 0f);
     [SerializeField, Min(1f)] float normalFontSize = 32f;
     [SerializeField, Min(1f)] float criticalFontSize = 44f;
+    [SerializeField, Min(1f)] float igniteFontSize = 38f;
 
     [Header("Animation")]
     [SerializeField, Min(0.01f)] float lifetime = 1f;
@@ -59,13 +61,24 @@ public sealed class DamagePopupManager : MonoBehaviour
                 -horizontalRandomOffset,
                 horizontalRandomOffset);
 
+        var color = result.IsCritical
+            ? criticalColor
+            : result.PopupStyle == DamagePopupStyle.Ignite
+                ? igniteColor
+                : normalColor;
+        var fontSize = result.IsCritical
+            ? criticalFontSize
+            : result.PopupStyle == DamagePopupStyle.Ignite
+                ? igniteFontSize
+                : normalFontSize;
+
         popup.Play(
             result.FinalDamage,
             result.IsCritical,
             position,
             gameCamera,
-            result.IsCritical ? criticalColor : normalColor,
-            result.IsCritical ? criticalFontSize : normalFontSize,
+            color,
+            fontSize,
             lifetime,
             moveDistance,
             fadeStartRatio);

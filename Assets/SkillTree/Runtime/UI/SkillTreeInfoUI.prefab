@@ -911,7 +911,7 @@ GameObject:
   - component: {fileID: 5352541778659955676}
   - component: {fileID: 1576562814016135779}
   m_Layer: 0
-  m_Name: Price
+  m_Name: DNACost
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1233,7 +1233,7 @@ MonoBehaviour:
   titleText: {fileID: 5231264678467798762}
   stateText: {fileID: 6800378121381252751}
   descriptionText: {fileID: 2266682805394677636}
-  priceText: {fileID: 5352541778659955676}
+  dnaCostText: {fileID: 5352541778659955676}
   statNameText: {fileID: 1565324841163744897}
   valueText: {fileID: 6217234886648760737}
   pointerOffset: {x: 18, y: -18}

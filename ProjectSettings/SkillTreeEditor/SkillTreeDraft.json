@@ -5,7 +5,7 @@
         "y": 1080.0
     },
     "assetOutputPath": "Assets/Generated/SkillTree",
-    "uguiParentGlobalObjectId": "GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-2122757247-0",
+    "uguiParentGlobalObjectId": "",
     "nodes": [
         {
             "guid": "dce22fa58f1c4486827a30fc6d5c8f1e",
@@ -36,11 +36,11 @@
                 "statName": "",
                 "valueText": ""
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [],
             "position": {
-                "x": 0.0,
-                "y": 0.0
+                "x": -1.0580101013183594,
+                "y": -0.000003814697265625
             },
             "size": {
                 "x": 100.0,
@@ -76,7 +76,7 @@
                 "statName": "번개 확률",
                 "valueText": "1%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 1,
@@ -125,7 +125,7 @@
                 "statName": "확률",
                 "valueText": "+25%"
             },
-            "price": 79,
+            "dnaCost": 79,
             "effects": [
                 {
                     "effectType": 2,
@@ -174,7 +174,7 @@
                 "statName": "대미지",
                 "valueText": "+20%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 2,
@@ -223,7 +223,7 @@
                 "statName": "범위",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 2,
@@ -272,7 +272,7 @@
                 "statName": "공속 ",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -321,7 +321,7 @@
                 "statName": "확률",
                 "valueText": "+25%"
             },
-            "price": 79,
+            "dnaCost": 79,
             "effects": [
                 {
                     "effectType": 2,
@@ -370,7 +370,7 @@
                 "statName": "대미지",
                 "valueText": "+20%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 2,
@@ -419,7 +419,7 @@
                 "statName": "범위",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 2,
@@ -468,7 +468,7 @@
                 "statName": "확률",
                 "valueText": "+25%"
             },
-            "price": 79,
+            "dnaCost": 79,
             "effects": [
                 {
                     "effectType": 2,
@@ -517,7 +517,7 @@
                 "statName": "대미지",
                 "valueText": "+20%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 2,
@@ -566,7 +566,7 @@
                 "statName": "범위",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 2,
@@ -615,7 +615,7 @@
                 "statName": "확률",
                 "valueText": "+25%"
             },
-            "price": 79,
+            "dnaCost": 79,
             "effects": [
                 {
                     "effectType": 2,
@@ -664,7 +664,7 @@
                 "statName": "범위",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 2,
@@ -713,7 +713,7 @@
                 "statName": "공격력",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -762,7 +762,7 @@
                 "statName": "공속 ",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -811,7 +811,7 @@
                 "statName": "공격력",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -860,7 +860,7 @@
                 "statName": "공속 ",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -909,7 +909,7 @@
                 "statName": "공격력",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -958,7 +958,7 @@
                 "statName": "공속 ",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -1007,7 +1007,7 @@
                 "statName": "공격력",
                 "valueText": "+25%"
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 0,
@@ -1056,7 +1056,7 @@
                 "statName": "",
                 "valueText": ""
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 1,
@@ -1084,8 +1084,8 @@
                 }
             ],
             "position": {
-                "x": 89.53671264648438,
-                "y": 466.97064208984377
+                "x": 115.98672485351563,
+                "y": 448.984619140625
             },
             "size": {
                 "x": 200.0,
@@ -1121,7 +1121,7 @@
                 "statName": "",
                 "valueText": ""
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 1,
@@ -1178,7 +1178,7 @@
                 "statName": "",
                 "valueText": ""
             },
-            "price": 0,
+            "dnaCost": 0,
             "effects": [
                 {
                     "effectType": 1,
@@ -1198,8 +1198,8 @@
                 }
             ],
             "position": {
-                "x": 6.99599552154541,
-                "y": -314.8211364746094
+                "x": -114.29957580566406,
+                "y": -428.74041748046877
             },
             "size": {
                 "x": 200.0,
@@ -1207,9 +1207,9 @@
             }
         },
         {
-            "guid": "440db34ef9bf46dc87e891a30aef533d",
-            "nodeSpriteGuid": "",
-            "nodeSpriteLocalId": 0,
+            "guid": "5be1253309c04469a9a05b1c401624c4",
+            "nodeSpriteGuid": "311925a002f4447b3a28927169b83ea6",
+            "nodeSpriteLocalId": 7482667652216324306,
             "nodeColor": {
                 "r": 0.3921568691730499,
                 "g": 0.3921568691730499,
@@ -1235,11 +1235,118 @@
                 "statName": "",
                 "valueText": ""
             },
-            "price": 0,
-            "effects": [],
+            "dnaCost": 0,
+            "effects": [
+                {
+                    "effectType": 2,
+                    "stat": 0,
+                    "ability": 1,
+                    "abilityProperty": 4,
+                    "operation": 1,
+                    "value": 50.0
+                }
+            ],
             "position": {
-                "x": 224.0,
-                "y": -60.79998779296875
+                "x": -397.3011779785156,
+                "y": 422.23779296875
+            },
+            "size": {
+                "x": 200.0,
+                "y": 100.0
+            }
+        },
+        {
+            "guid": "1cad9cc137f6455bbfdebf84f2c47d86",
+            "nodeSpriteGuid": "311925a002f4447b3a28927169b83ea6",
+            "nodeSpriteLocalId": 7482667652216324306,
+            "nodeColor": {
+                "r": 0.3921568691730499,
+                "g": 0.3921568691730499,
+                "b": 0.3921568691730499,
+                "a": 1.0
+            },
+            "skillSpriteGuid": "",
+            "skillSpriteLocalId": 0,
+            "skillColor": {
+                "r": 0.3921568691730499,
+                "g": 0.3921568691730499,
+                "b": 0.3921568691730499,
+                "a": 1.0
+            },
+            "skillSpriteSizeRatio": {
+                "x": 0.6399999856948853,
+                "y": 0.6399999856948853
+            },
+            "nodeInfo": {
+                "mainText": "",
+                "fontGuid": "",
+                "description": "",
+                "statName": "",
+                "valueText": ""
+            },
+            "dnaCost": 0,
+            "effects": [
+                {
+                    "effectType": 2,
+                    "stat": 0,
+                    "ability": 2,
+                    "abilityProperty": 8,
+                    "operation": 0,
+                    "value": 1.0
+                }
+            ],
+            "position": {
+                "x": -424.50018310546877,
+                "y": -432.45928955078127
+            },
+            "size": {
+                "x": 200.0,
+                "y": 100.0
+            }
+        },
+        {
+            "guid": "fae4baa0c7de44a6be77312cb8f23ec4",
+            "nodeSpriteGuid": "311925a002f4447b3a28927169b83ea6",
+            "nodeSpriteLocalId": 7482667652216324306,
+            "nodeColor": {
+                "r": 0.3921568691730499,
+                "g": 0.3921568691730499,
+                "b": 0.3921568691730499,
+                "a": 1.0
+            },
+            "skillSpriteGuid": "",
+            "skillSpriteLocalId": 0,
+            "skillColor": {
+                "r": 0.3921568691730499,
+                "g": 0.3921568691730499,
+                "b": 0.3921568691730499,
+                "a": 1.0
+            },
+            "skillSpriteSizeRatio": {
+                "x": 0.6399999856948853,
+                "y": 0.6399999856948853
+            },
+            "nodeInfo": {
+                "mainText": "",
+                "fontGuid": "",
+                "description": "",
+                "statName": "",
+                "valueText": ""
+            },
+            "dnaCost": 0,
+            "effects": [
+                {
+                    "effectType": 1,
+                    "stat": 0,
+                    "ability": 4,
+                    "abilityProperty": 0,
+                    "operation": 0,
+                    "value": 0.0
+                }
+            ],
+            "position": {
+                "x": 129.075927734375,
+                "y": -435.8748779296875
             },
             "size": {
                 "x": 200.0,
@@ -1267,12 +1374,12 @@
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": -50.0,
-                    "y": 0.0
+                    "x": -51.05801010131836,
+                    "y": -0.000003814697265625
                 },
                 {
                     "x": -150.0,
-                    "y": 0.0
+                    "y": -0.000003814697265625
                 }
             ]
         },
@@ -1379,15 +1486,15 @@
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": 50.0,
-                    "y": 0.0
+                    "x": 48.94198989868164,
+                    "y": -0.000003814697265625
                 },
                 {
-                    "x": 100.0,
-                    "y": 0.0
+                    "x": 99.47099304199219,
+                    "y": -0.000003814697265625
                 },
                 {
-                    "x": 100.0,
+                    "x": 99.47099304199219,
                     "y": -200.0
                 },
                 {
@@ -1647,15 +1754,15 @@
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": 50.0,
-                    "y": 0.0
+                    "x": 48.94198989868164,
+                    "y": -0.000003814697265625
                 },
                 {
-                    "x": 100.0,
-                    "y": 0.0
+                    "x": 99.47099304199219,
+                    "y": -0.000003814697265625
                 },
                 {
-                    "x": 100.0,
+                    "x": 99.47099304199219,
                     "y": 200.0
                 },
                 {
@@ -1851,11 +1958,11 @@
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": 0.0,
-                    "y": 50.0
+                    "x": -1.0580101013183594,
+                    "y": 49.999996185302737
                 },
                 {
-                    "x": 0.0,
+                    "x": -1.0580101013183594,
                     "y": 169.84385681152345
                 },
                 {
@@ -1887,20 +1994,20 @@
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": 0.0,
-                    "y": 50.0
+                    "x": -1.0580101013183594,
+                    "y": 49.999996185302737
                 },
                 {
-                    "x": 0.0,
-                    "y": 233.48532104492188
+                    "x": -1.0580101013183594,
+                    "y": 224.4923095703125
                 },
                 {
-                    "x": 89.53671264648438,
-                    "y": 233.48532104492188
+                    "x": 115.98672485351563,
+                    "y": 224.4923095703125
                 },
                 {
-                    "x": 89.53671264648438,
-                    "y": 416.97064208984377
+                    "x": 115.98672485351563,
+                    "y": 398.984619140625
                 }
             ]
         },
@@ -1923,20 +2030,128 @@
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": 0.0,
-                    "y": -50.0
+                    "x": -1.0580101013183594,
+                    "y": -50.000003814697269
                 },
                 {
-                    "x": 0.0,
-                    "y": -157.4105682373047
+                    "x": -1.0580101013183594,
+                    "y": -214.37020874023438
                 },
                 {
-                    "x": 6.995994567871094,
-                    "y": -157.4105682373047
+                    "x": -114.29957580566406,
+                    "y": -214.37020874023438
                 },
                 {
-                    "x": 6.995994567871094,
-                    "y": -264.8211364746094
+                    "x": -114.29957580566406,
+                    "y": -378.74041748046877
+                }
+            ]
+        },
+        {
+            "color": {
+                "r": 0.6800000071525574,
+                "g": 0.7200000286102295,
+                "b": 0.7799999713897705,
+                "a": 1.0
+            },
+            "spriteGuid": "",
+            "spriteLocalId": 0,
+            "repeatSprite": false,
+            "parentNodeGuid": "4938bde133c04ce98c88b7f26fc97f0f",
+            "childNodeGuid": "5be1253309c04469a9a05b1c401624c4",
+            "startAnchor": 3,
+            "endAnchor": 1,
+            "routingMode": 0,
+            "bendPointCount": 2,
+            "hasCustomBendPointCount": false,
+            "pathPoints": [
+                {
+                    "x": -187.08956909179688,
+                    "y": 339.6877136230469
+                },
+                {
+                    "x": -242.19537353515626,
+                    "y": 339.6877136230469
+                },
+                {
+                    "x": -242.19537353515626,
+                    "y": 422.23779296875
+                },
+                {
+                    "x": -297.3011779785156,
+                    "y": 422.23779296875
+                }
+            ]
+        },
+        {
+            "color": {
+                "r": 0.6800000071525574,
+                "g": 0.7200000286102295,
+                "b": 0.7799999713897705,
+                "a": 1.0
+            },
+            "spriteGuid": "",
+            "spriteLocalId": 0,
+            "repeatSprite": false,
+            "parentNodeGuid": "070257b523f042118cc4cba2214cbb30",
+            "childNodeGuid": "1cad9cc137f6455bbfdebf84f2c47d86",
+            "startAnchor": 3,
+            "endAnchor": 1,
+            "routingMode": 0,
+            "bendPointCount": 2,
+            "hasCustomBendPointCount": false,
+            "pathPoints": [
+                {
+                    "x": -214.29957580566407,
+                    "y": -428.74041748046877
+                },
+                {
+                    "x": -269.3998718261719,
+                    "y": -428.74041748046877
+                },
+                {
+                    "x": -269.3998718261719,
+                    "y": -432.45928955078127
+                },
+                {
+                    "x": -324.50018310546877,
+                    "y": -432.45928955078127
+                }
+            ]
+        },
+        {
+            "color": {
+                "r": 0.6800000071525574,
+                "g": 0.7200000286102295,
+                "b": 0.7799999713897705,
+                "a": 1.0
+            },
+            "spriteGuid": "",
+            "spriteLocalId": 0,
+            "repeatSprite": false,
+            "parentNodeGuid": "dce22fa58f1c4486827a30fc6d5c8f1e",
+            "childNodeGuid": "fae4baa0c7de44a6be77312cb8f23ec4",
+            "startAnchor": 0,
+            "endAnchor": 2,
+            "routingMode": 0,
+            "bendPointCount": 2,
+            "hasCustomBendPointCount": false,
+            "pathPoints": [
+                {
+                    "x": -1.0580101013183594,
+                    "y": -50.000003814697269
+                },
+                {
+                    "x": -1.0580101013183594,
+                    "y": -217.93743896484376
+                },
+                {
+                    "x": 129.075927734375,
+                    "y": -217.93743896484376
+                },
+                {
+                    "x": 129.075927734375,
+                    "y": -385.8748779296875
                 }
             ]
         }

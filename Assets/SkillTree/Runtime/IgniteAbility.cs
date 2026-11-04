@@ -103,7 +103,8 @@ public sealed class IgniteAbility
                 DamagePopupManager.Instance.ShowDamage(new DamageResult(
                     ignite.Target,
                     damage,
-                    false));
+                    false,
+                    DamagePopupStyle.Ignite));
                 ignite.TimeUntilTick += m_Definition.TickInterval;
             }
 
@@ -142,7 +143,12 @@ public sealed class IgniteAbility
         foreach (var activeIgnite in m_ActiveIgnites)
         {
             if (activeIgnite.Target == target)
+            {
+                if (canSpread)
+                    TrySpread(target);
+
                 return;
+            }
         }
 
         m_ActiveIgnites.Add(new ActiveIgnite(
