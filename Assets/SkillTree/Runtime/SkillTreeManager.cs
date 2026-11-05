@@ -110,8 +110,14 @@ public sealed class SkillTreeManager : MonoBehaviour
     {
         if (!m_Initialized
             || !m_NodeData.TryGetValue(nodeGuid, out var nodeData)
-            || m_NodeStates[nodeGuid] != SkillNodeState.Open
-            || !CanUnlock(nodeData))
+            || m_NodeStates[nodeGuid] != SkillNodeState.Open)
+        {
+            return false;
+        }
+
+        if (nodeData.DNACost > 0
+            && (!DNAWallet.HasInstance
+                || !DNAWallet.Instance.TrySpendDNA(nodeData.DNACost)))
         {
             return false;
         }
@@ -119,11 +125,6 @@ public sealed class SkillTreeManager : MonoBehaviour
         m_UnlockedNodeGuids.Add(nodeGuid);
         RecalculateStates();
         OnNodeUnlocked?.Invoke(nodeData);
-        return true;
-    }
-
-    bool CanUnlock(SkillNodeData nodeData)
-    {
         return true;
     }
 

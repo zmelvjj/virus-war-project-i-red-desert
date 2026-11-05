@@ -10,10 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 46c4df587318ce240b67a6ddf53750b5, type: 3}
-  m_Name: NodeInfo_d4f845a5dc2445c5b745504e1e362d01
+  m_Name: NodeInfo_6148751aa03f4681aa9835c6d56cc8a2
   m_EditorClassIdentifier: Assembly-CSharp::NodeInfo
   mainText: "\uACF5\uACA9\uB825 \uC99D\uAC00"
   font: {fileID: 11400000, guid: 100eadabe4a777f42b43c01cfef7c3ed, type: 2}
+<<<<<<<< HEAD:Assets/Generated/SkillTree/Generated_9dd59d45816840adb8436cb611a7d7e2/NodeInfos/NodeInfo_d4f845a5dc2445c5b745504e1e362d01.asset
   description: 
   statName: "\uAE30\uBCF8 \uACF5\uACA9\uB825"
   valueText: +1
+========
+  description: "\uACF5\uACA9\uB825 \uC99D\uAC00"
+  statName: "\uACF5\uACA9\uB825"
+  valueText: +25%
+>>>>>>>> main:Assets/Generated/SkillTree/Generated_91387c67bb164263939d01754613dec6/NodeInfos/NodeInfo_6148751aa03f4681aa9835c6d56cc8a2.asset

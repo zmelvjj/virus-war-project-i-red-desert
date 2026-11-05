@@ -111,7 +111,7 @@ public static class SkillTreeGenerationProcessor
         serialized.FindProperty("skillColor").colorValue = draft.skillColor;
         serialized.FindProperty("skillSpriteSizeRatio").vector2Value = draft.skillSpriteSizeRatio;
         serialized.FindProperty("nodeInfo").objectReferenceValue = nodeInfo;
-        serialized.FindProperty("price").intValue = draft.price;
+        serialized.FindProperty("dnaCost").intValue = draft.dnaCost;
 
         var effectsProperty = serialized.FindProperty("effects");
         effectsProperty.arraySize = draft.effects.Count;

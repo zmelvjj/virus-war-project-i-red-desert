@@ -60,6 +60,7 @@ public sealed class PlayerStats : MonoBehaviour
     {
         var flat = 0f;
         var percent = 0f;
+        var value = baseValue;
 
         foreach (var modifier in m_Modifiers)
         {
@@ -68,10 +69,12 @@ public sealed class PlayerStats : MonoBehaviour
 
             if (modifier.Operation == SkillModifierOperation.Flat)
                 flat += modifier.Value;
-            else
+            else if (modifier.Operation == SkillModifierOperation.Percent)
                 percent += modifier.Value;
+            else if (modifier.Operation == SkillModifierOperation.Set)
+                value = modifier.Value;
         }
 
-        return Mathf.Max(0f, (baseValue + flat) * (1f + percent * 0.01f));
+        return Mathf.Max(0f, (value * (1f + percent / 100f)) + flat);
     }
 }

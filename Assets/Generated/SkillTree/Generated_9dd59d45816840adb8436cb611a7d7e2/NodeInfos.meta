@@ -1,5 +1,9 @@
 fileFormatVersion: 2
-guid: a6f5802695b6f8a4ea4756172cabedec
+<<<<<<<< HEAD:Assets/Generated/SkillTree/Generated_9dd59d45816840adb8436cb611a7d7e2/NodeInfos.meta
+guid: 17ef50628fcec2e49a7ab75b94cf811a
+========
+guid: e14a32cc55076bb46a55a7ec3b47c8eb
+>>>>>>>> main:Assets/Generated/SkillTree/Generated_91387c67bb164263939d01754613dec6/NodeInfos.meta
 folderAsset: yes
 DefaultImporter:
   externalObjects: {}

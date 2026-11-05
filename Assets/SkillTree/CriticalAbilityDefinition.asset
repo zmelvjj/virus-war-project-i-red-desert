@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 870e10be81fda374e9998282e092b12a, type: 3}
+  m_Name: CriticalAbilityDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::CriticalAbilityDefinition
+  baseChance: 0
+  baseDamageMultiplier: 2
+  baseBonusAttack: 0
+  baseBonusAttackDuration: 0
+  baseMark: 0

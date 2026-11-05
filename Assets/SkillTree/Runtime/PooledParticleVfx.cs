@@ -2,65 +2,110 @@ using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
-[RequireComponent(typeof(ParticleSystem))]
 public sealed class PooledParticleVfx : MonoBehaviour
 {
     ParticleVfxPoolManager m_Owner;
-    ParticleSystem m_ParticleSystem;
+    ParticleSystem[] m_ParticleSystems;
     Coroutine m_ReturnRoutine;
+    Transform m_FollowTarget;
+    Vector3 m_FollowOffset;
     bool m_IsPlaying;
 
-    public ParticleSystem SourcePrefab { get; private set; }
+    public GameObject SourcePrefab { get; private set; }
 
     public void Initialize(
         ParticleVfxPoolManager owner,
-        ParticleSystem sourcePrefab,
-        ParticleSystem particleSystem)
+        GameObject sourcePrefab)
     {
         m_Owner = owner;
         SourcePrefab = sourcePrefab;
-        m_ParticleSystem = particleSystem;
-
-        var main = m_ParticleSystem.main;
-        main.stopAction = ParticleSystemStopAction.Callback;
+        m_ParticleSystems = GetComponentsInChildren<ParticleSystem>(true);
     }
 
-    public void Play(Vector3 position, Quaternion rotation)
+    public void Play(
+        Vector3 position,
+        Quaternion rotation,
+        float scaleMultiplier,
+        Transform followTarget,
+        float duration)
     {
         StopReturnRoutine();
         transform.SetPositionAndRotation(position, rotation);
+        transform.localScale = SourcePrefab.transform.localScale * scaleMultiplier;
+        m_FollowTarget = followTarget;
+        m_FollowOffset = followTarget != null
+            ? position - followTarget.position
+            : Vector3.zero;
         gameObject.SetActive(true);
-        m_ParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        m_ParticleSystem.Clear(true);
+
+        foreach (var particleSystem in m_ParticleSystems)
+        {
+            particleSystem.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+            particleSystem.Clear(false);
+            particleSystem.Play(false);
+        }
+
         m_IsPlaying = true;
-        m_ParticleSystem.Play(true);
+        m_ReturnRoutine = duration > 0f
+            ? StartCoroutine(ReturnAfterDuration(duration))
+            : StartCoroutine(ReturnWhenAllParticlesStopped());
     }
 
     public void PrepareForPool()
     {
         StopReturnRoutine();
         m_IsPlaying = false;
-        m_ParticleSystem.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-        m_ParticleSystem.Clear(true);
+        m_FollowTarget = null;
+
+        foreach (var particleSystem in m_ParticleSystems)
+        {
+            particleSystem.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+            particleSystem.Clear(false);
+        }
+
         gameObject.SetActive(false);
     }
 
-    void OnParticleSystemStopped()
+    void LateUpdate()
     {
-        if (!m_IsPlaying || m_ReturnRoutine != null)
-            return;
-
-        m_ReturnRoutine = StartCoroutine(ReturnWhenAllParticlesStopped());
+        if (m_IsPlaying && m_FollowTarget != null)
+            transform.position = m_FollowTarget.position + m_FollowOffset;
     }
 
     IEnumerator ReturnWhenAllParticlesStopped()
     {
-        while (m_ParticleSystem.IsAlive(true))
+        while (AreParticlesAlive())
             yield return null;
 
         m_ReturnRoutine = null;
         m_IsPlaying = false;
         m_Owner.Return(this);
+    }
+
+    IEnumerator ReturnAfterDuration(float duration)
+    {
+        yield return new WaitForSeconds(duration);
+
+        foreach (var particleSystem in m_ParticleSystems)
+            particleSystem.Stop(false, ParticleSystemStopBehavior.StopEmitting);
+
+        while (AreParticlesAlive())
+            yield return null;
+
+        m_ReturnRoutine = null;
+        m_IsPlaying = false;
+        m_Owner.Return(this);
+    }
+
+    bool AreParticlesAlive()
+    {
+        foreach (var particleSystem in m_ParticleSystems)
+        {
+            if (particleSystem.IsAlive(false))
+                return true;
+        }
+
+        return false;
     }
 
     void StopReturnRoutine()

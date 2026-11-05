@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a10a5902fc36226409f43d5bd0cbf66c, type: 3}
+  m_Name: IgniteAbilityDefinition
+  m_EditorClassIdentifier: Assembly-CSharp::IgniteAbilityDefinition
+  baseProcChance: 0.1
+  baseDamageRatio: 1
+  baseDuration: 3
+  tickInterval: 1
+  baseSpreadChance: 0
+  baseSpreadRange: 100
+  vfxPrefab: {fileID: 4000667520668516784, guid: d0ec0a14054713c4cb454dc5f34fabb2, type: 3}
+  fixedGroundY: 0
+  vfxPositionOffset: {x: 0, y: 1, z: 0}

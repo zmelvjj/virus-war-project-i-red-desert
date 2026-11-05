@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 03be6d237e506414ab78d28a616d2552, type: 3}
+<<<<<<<< HEAD:Assets/Generated/SkillTree/Generated_9dd59d45816840adb8436cb611a7d7e2/Nodes/Node_9fe5244167184b36b67dc70014544d63.asset
+  m_Name: Node_9fe5244167184b36b67dc70014544d63
+  m_EditorClassIdentifier: Assembly-CSharp::SkillNodeData
+  guid: 9fe5244167184b36b67dc70014544d63
+  nodeSprite: {fileID: 21300000, guid: 4b3ce24394e2a634f8ba043a251b2d5d, type: 3}
+  nodeColor: {r: 1, g: 1, b: 1, a: 1}
+  skillSprite: {fileID: 0}
+  skillColor: {r: 1, g: 1, b: 1, a: 1}
+  skillSpriteSizeRatio: {x: 0.71, y: 0.64}
+  nodeInfo: {fileID: 11400000, guid: 77d787f0dfe42e54a956162c9dba93eb, type: 2}
+  price: 95
+  effects:
+  - effectType: 2
+    stat: 1
+    ability: 0
+    abilityProperty: 0
+    operation: 1
+    value: 2
+  position: {x: -50, y: -200}
+  size: {x: 100, y: 100}
+========
+  m_Name: Node_5be1253309c04469a9a05b1c401624c4
+  m_EditorClassIdentifier: Assembly-CSharp::SkillNodeData
+  guid: 5be1253309c04469a9a05b1c401624c4
+  nodeSprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
+  nodeColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  skillSprite: {fileID: 0}
+  skillColor: {r: 0.39215687, g: 0.39215687, b: 0.39215687, a: 1}
+  skillSpriteSizeRatio: {x: 0.64, y: 0.64}
+  nodeInfo: {fileID: 11400000, guid: 800b4fbc941f4344e9382bdb8a215a8b, type: 2}
+  dnaCost: 0
+  effects:
+  - effectType: 2
+    stat: 0
+    ability: 1
+    abilityProperty: 4
+    operation: 1
+    value: 50
+  position: {x: -395.69202, y: 388.28604}
+  size: {x: 200, y: 100}
+>>>>>>>> main:Assets/Generated/SkillTree/Generated_91387c67bb164263939d01754613dec6/Nodes/Node_5be1253309c04469a9a05b1c401624c4.asset

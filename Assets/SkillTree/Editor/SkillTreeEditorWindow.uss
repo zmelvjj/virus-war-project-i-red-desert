@@ -429,7 +429,7 @@
     white-space: normal;
 }
 
-.node-info-tooltip-price {
+.node-info-tooltip-dna-cost {
     margin-top: 4px;
     color: #e7c36d;
     -unity-text-align: middle-right;

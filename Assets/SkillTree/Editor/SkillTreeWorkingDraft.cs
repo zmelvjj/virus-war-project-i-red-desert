@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 [Serializable]
 public sealed class SkillNodeDraftData
@@ -14,7 +15,8 @@ public sealed class SkillNodeDraftData
     public Color skillColor = new(100f / 255f, 100f / 255f, 100f / 255f);
     public Vector2 skillSpriteSizeRatio = new(0.64f, 0.64f);
     public SkillNodeInfoDraftData nodeInfo = new();
-    public int price;
+    [FormerlySerializedAs("price")]
+    public int dnaCost;
     public List<SkillEffectDraftData> effects = new();
     public Vector2 position;
     public Vector2 size = new(200f, 100f);

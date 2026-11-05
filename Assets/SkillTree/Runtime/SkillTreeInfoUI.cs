@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [DisallowMultipleComponent]
 [RequireComponent(typeof(RectTransform))]
@@ -11,7 +12,8 @@ public sealed class SkillTreeInfoUI : MonoBehaviour
     [SerializeField] TextMeshProUGUI titleText;
     [SerializeField] TextMeshProUGUI stateText;
     [SerializeField] TextMeshProUGUI descriptionText;
-    [SerializeField] TextMeshProUGUI priceText;
+    [FormerlySerializedAs("priceText")]
+    [SerializeField] TextMeshProUGUI dnaCostText;
     [SerializeField] TextMeshProUGUI statNameText;
     [SerializeField] TextMeshProUGUI valueText;
     [SerializeField] Vector2 pointerOffset = new(18f, -18f);
@@ -27,7 +29,7 @@ public sealed class SkillTreeInfoUI : MonoBehaviour
         TextMeshProUGUI title,
         TextMeshProUGUI state,
         TextMeshProUGUI description,
-        TextMeshProUGUI price,
+        TextMeshProUGUI dnaCost,
         TextMeshProUGUI statName,
         TextMeshProUGUI value)
     {
@@ -36,7 +38,7 @@ public sealed class SkillTreeInfoUI : MonoBehaviour
         titleText = title;
         stateText = state;
         descriptionText = description;
-        priceText = price;
+        dnaCostText = dnaCost;
         statNameText = statName;
         valueText = value;
     }
@@ -127,7 +129,7 @@ public sealed class SkillTreeInfoUI : MonoBehaviour
         titleText.text = info.MainText;
         stateText.text = info.State == SkillNodeInfoState.Open ? "열림" : "잠김";
         descriptionText.text = info.Description;
-        priceText.text = $"가격  {nodeData.Price}";
+        dnaCostText.text = $"DNA  {nodeData.DNACost}";
         statNameText.text = info.StatName;
         valueText.text = info.ValueText;
     }
@@ -140,7 +142,7 @@ public sealed class SkillTreeInfoUI : MonoBehaviour
         titleText.font = font;
         stateText.font = font;
         descriptionText.font = font;
-        priceText.font = font;
+        dnaCostText.font = font;
         statNameText.font = font;
         valueText.font = font;
     }

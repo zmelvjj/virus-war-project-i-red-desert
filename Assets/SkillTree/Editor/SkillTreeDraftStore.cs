@@ -16,16 +16,26 @@ public sealed class SkillTreeDraftData
 
 public static class SkillTreeDraftStore
 {
-    const string k_DraftPath = "Library/SkillTreeEditor/SkillTreeDraft.json";
+    const string k_DraftPath = "ProjectSettings/SkillTreeEditor/SkillTreeDraft.json";
+    const string k_LegacyDraftPath = "Library/SkillTreeEditor/SkillTreeDraft.json";
+    const string k_LegacyDNACostKey = "\"price\":";
+    const string k_DNACostKey = "\"dnaCost\":";
 
     public static SkillTreeDraftData Load()
     {
-        if (!File.Exists(k_DraftPath))
+        var loadPath = File.Exists(k_DraftPath) ? k_DraftPath : k_LegacyDraftPath;
+        if (!File.Exists(loadPath))
             return new SkillTreeDraftData();
 
-        var draft = JsonUtility.FromJson<SkillTreeDraftData>(File.ReadAllText(k_DraftPath))
+        var json = File.ReadAllText(loadPath)
+            .Replace(k_LegacyDNACostKey, k_DNACostKey);
+        var draft = JsonUtility.FromJson<SkillTreeDraftData>(json)
             ?? new SkillTreeDraftData();
         Normalize(draft);
+
+        if (loadPath == k_LegacyDraftPath)
+            Save(draft);
+
         return draft;
     }
 

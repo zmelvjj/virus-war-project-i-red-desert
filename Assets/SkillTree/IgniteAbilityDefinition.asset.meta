@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+<<<<<<<< HEAD:Assets/MonsterSystem/DummyMonster 3.asset.meta
+guid: 653ef660ca952344aaec39a73a660c80
+========
+guid: e75b36e074500ff4fa3ab5b894b622b0
+>>>>>>>> main:Assets/SkillTree/IgniteAbilityDefinition.asset.meta
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

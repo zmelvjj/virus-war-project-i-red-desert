@@ -1,5 +1,9 @@
 fileFormatVersion: 2
-guid: 1bc0995c488f00a4dbb8046ce3a375b6
+<<<<<<<< HEAD:Assets/Generated/SkillTree/Generated_9dd59d45816840adb8436cb611a7d7e2/NodeInfos/NodeInfo_3fb543e431ea4870915389fd546cb479.asset.meta
+guid: 120b44f3bcc3c944cb432dcb925e19e4
+========
+guid: dbb7f5ca53f2e384989a5cbb7fa42448
+>>>>>>>> main:Assets/SkillTree/ShockwaveAbilityDefinition.asset.meta
 NativeFormatImporter:
   externalObjects: {}
   mainObjectFileID: 11400000

@@ -759,7 +759,7 @@ public sealed class SkillTreeGraphView : GraphView
             skillSpriteLocalId = source.skillSpriteLocalId,
             skillColor = source.skillColor,
             skillSpriteSizeRatio = source.skillSpriteSizeRatio,
-            price = source.price,
+            dnaCost = source.dnaCost,
             effects = CloneEffects(source.effects),
             nodeInfo = new SkillNodeInfoDraftData
             {

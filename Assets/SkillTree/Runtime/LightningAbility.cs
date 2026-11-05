@@ -1,46 +1,29 @@
-using System.Collections.Generic;
 using UnityEngine;
-
-public readonly struct AbilityModifier
-{
-    public readonly string SourceNodeGuid;
-    public readonly AbilityProperty Property;
-    public readonly SkillModifierOperation Operation;
-    public readonly float Value;
-
-    public AbilityModifier(
-        string sourceNodeGuid,
-        AbilityProperty property,
-        SkillModifierOperation operation,
-        float value)
-    {
-        SourceNodeGuid = sourceNodeGuid;
-        Property = property;
-        Operation = operation;
-        Value = value;
-    }
-}
 
 public sealed class LightningAbility
 {
     readonly LightningAbilityDefinition m_Definition;
     readonly PlayerStats m_PlayerStats;
-    readonly List<AbilityModifier> m_Modifiers = new();
+    readonly AbilityModifierCollection m_Modifiers = new();
 
     bool m_IsUnlocked;
 
     public bool IsUnlocked => m_IsUnlocked;
     public float ProcChance => Mathf.Clamp01(
-        Calculate(AbilityProperty.Chance, m_Definition.BaseProcChance));
+        m_Modifiers.CalculateChance(
+            AbilityProperty.Chance,
+            m_Definition.BaseProcChance));
     public float Range => Mathf.Max(
         0f,
         Calculate(AbilityProperty.Range, m_Definition.BaseRange));
     public float DamageRatio => Mathf.Max(
         0f,
-        m_Definition.BaseDamageRatio
+        m_Modifiers.GetSetValue(
+            AbilityProperty.Damage,
+            m_Definition.BaseDamageRatio)
             * (1f + SumModifiers(
                 AbilityProperty.Damage,
-                SkillModifierOperation.Percent)));
+                SkillModifierOperation.Percent) / 100f));
     public float FlatDamage => SumModifiers(
         AbilityProperty.Damage,
         SkillModifierOperation.Flat);
@@ -69,7 +52,7 @@ public sealed class LightningAbility
 
     public void RemoveModifiersFromSource(string sourceNodeGuid)
     {
-        m_Modifiers.RemoveAll(modifier => modifier.SourceNodeGuid == sourceNodeGuid);
+        m_Modifiers.RemoveFromSource(sourceNodeGuid);
     }
 
     public void Dispose()
@@ -89,6 +72,10 @@ public sealed class LightningAbility
             0f,
             m_PlayerStats.Damage * DamageRatio + FlatDamage));
         hit.Target.TakeDamage(damage);
+        DamagePopupManager.Instance.ShowDamage(new DamageResult(
+            hit.Target,
+            damage,
+            false));
 
         var effectPosition = new Vector3(
             hit.Position.x,
@@ -102,26 +89,13 @@ public sealed class LightningAbility
 
     float Calculate(AbilityProperty property, float baseValue)
     {
-        var flat = SumModifiers(property, SkillModifierOperation.Flat);
-        var percent = SumModifiers(property, SkillModifierOperation.Percent);
-
-        return (baseValue + flat) * (1f + percent);
+        return m_Modifiers.Calculate(property, baseValue);
     }
 
     float SumModifiers(
         AbilityProperty property,
         SkillModifierOperation operation)
     {
-        var total = 0f;
-
-        foreach (var modifier in m_Modifiers)
-        {
-            if (modifier.Property != property || modifier.Operation != operation)
-                continue;
-
-            total += modifier.Value;
-        }
-
-        return total;
+        return m_Modifiers.Sum(property, operation);
     }
 }

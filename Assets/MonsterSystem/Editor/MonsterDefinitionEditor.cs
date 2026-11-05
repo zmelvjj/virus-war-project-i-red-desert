@@ -7,6 +7,7 @@ public class MonsterDefinitionEditor : Editor
 {
     SerializedProperty m_MonsterName;
     SerializedProperty m_BaseHp;
+    SerializedProperty m_RewardDNA;
     SerializedProperty m_ModelPrefab;
     SerializedProperty m_ScaleCorrection;
     SerializedProperty m_RotationSpeed;
@@ -29,6 +30,7 @@ public class MonsterDefinitionEditor : Editor
     {
         m_MonsterName = serializedObject.FindProperty("monsterName");
         m_BaseHp = serializedObject.FindProperty("baseHp");
+        m_RewardDNA = serializedObject.FindProperty("rewardDNA");
         m_ModelPrefab = serializedObject.FindProperty("modelPrefab");
         m_ScaleCorrection = serializedObject.FindProperty("scaleCorrection");
         m_RotationSpeed = serializedObject.FindProperty("rotationSpeed");
@@ -54,6 +56,13 @@ public class MonsterDefinitionEditor : Editor
 
         EditorGUILayout.PropertyField(m_MonsterName);
         EditorGUILayout.PropertyField(m_BaseHp);
+        EditorGUILayout.PropertyField(m_RewardDNA);
+        if (m_RewardDNA.intValue < 5 || m_RewardDNA.intValue % 5 != 0)
+        {
+            EditorGUILayout.HelpBox(
+                "Reward DNA must be at least 5 and divisible by 5.",
+                MessageType.Warning);
+        }
         EditorGUILayout.PropertyField(m_ModelPrefab);
         EditorGUILayout.PropertyField(m_ScaleCorrection);
         EditorGUILayout.PropertyField(m_MovementType);
