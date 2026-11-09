@@ -5,7 +5,7 @@
         "y": 1080.0
     },
     "assetOutputPath": "Assets/Generated/SkillTree",
-    "uguiParentGlobalObjectId": "",
+    "uguiParentGlobalObjectId": "GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-2122757247-0",
     "nodes": [
         {
             "guid": "dce22fa58f1c4486827a30fc6d5c8f1e",
@@ -83,8 +83,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 0.0
+                    "value": 0.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -132,8 +135,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -181,8 +187,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 2,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 10.0
+                    "value": 10.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -230,8 +239,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 1,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 20.0
+                    "value": 20.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -275,17 +287,20 @@
             "dnaCost": 0,
             "effects": [
                 {
-                    "effectType": 0,
+                    "effectType": 3,
                     "stat": 1,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 5,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
-                "x": 200.0,
-                "y": -200.0
+                "x": 199.20001220703126,
+                "y": -212.73599243164063
             },
             "size": {
                 "x": 100.0,
@@ -328,8 +343,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -377,8 +395,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 2,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 10.0
+                    "value": 10.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -426,8 +447,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 1,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 20.0
+                    "value": 20.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -475,8 +499,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -524,8 +551,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 2,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 10.0
+                    "value": 10.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -573,8 +603,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 1,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 20.0
+                    "value": 20.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -622,8 +655,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -671,8 +707,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 1,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 20.0
+                    "value": 20.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -720,8 +759,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -765,17 +807,20 @@
             "dnaCost": 0,
             "effects": [
                 {
-                    "effectType": 0,
+                    "effectType": 3,
                     "stat": 1,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 2,
+                    "otherUpgradeProperty": 5,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
-                "x": 400.0,
-                "y": -200.0
+                "x": 408.5440368652344,
+                "y": -207.00799560546876
             },
             "size": {
                 "x": 100.0,
@@ -818,8 +863,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -867,8 +915,11 @@
                     "stat": 1,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -916,8 +967,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -965,8 +1019,11 @@
                     "stat": 1,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1014,8 +1071,11 @@
                     "stat": 0,
                     "ability": 0,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 25.0
+                    "value": 25.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1063,24 +1123,33 @@
                     "stat": 0,
                     "ability": 3,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 0.0
+                    "value": 0.0,
+                    "secondaryValue": 0.0
                 },
                 {
                     "effectType": 2,
                     "stat": 0,
                     "ability": 3,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 100.0
+                    "value": 100.0,
+                    "secondaryValue": 0.0
                 },
                 {
                     "effectType": 2,
                     "stat": 0,
                     "ability": 3,
                     "abilityProperty": 1,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 20.0
+                    "value": 20.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1128,16 +1197,22 @@
                     "stat": 0,
                     "ability": 1,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 0.0
+                    "value": 0.0,
+                    "secondaryValue": 0.0
                 },
                 {
                     "effectType": 2,
                     "stat": 0,
                     "ability": 1,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 100.0
+                    "value": 100.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1185,16 +1260,22 @@
                     "stat": 0,
                     "ability": 2,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 0.0
+                    "value": 0.0,
+                    "secondaryValue": 0.0
                 },
                 {
                     "effectType": 2,
                     "stat": 0,
                     "ability": 2,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 50.0
+                    "value": 50.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1242,8 +1323,11 @@
                     "stat": 0,
                     "ability": 1,
                     "abilityProperty": 4,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 1,
-                    "value": 50.0
+                    "value": 50.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1291,8 +1375,11 @@
                     "stat": 0,
                     "ability": 2,
                     "abilityProperty": 8,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 1.0
+                    "value": 1.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1340,8 +1427,11 @@
                     "stat": 0,
                     "ability": 4,
                     "abilityProperty": 0,
+                    "otherAbility": 0,
+                    "otherUpgradeProperty": 0,
                     "operation": 0,
-                    "value": 0.0
+                    "value": 0.0,
+                    "secondaryValue": 0.0
                 }
             ],
             "position": {
@@ -1490,16 +1580,16 @@
                     "y": -0.000003814697265625
                 },
                 {
-                    "x": 99.47099304199219,
+                    "x": 99.07099914550781,
                     "y": -0.000003814697265625
                 },
                 {
-                    "x": 99.47099304199219,
-                    "y": -200.0
+                    "x": 99.07099914550781,
+                    "y": -212.73599243164063
                 },
                 {
-                    "x": 150.0,
-                    "y": -200.0
+                    "x": 149.20001220703126,
+                    "y": -212.73599243164063
                 }
             ]
         },
@@ -1786,16 +1876,24 @@
             "startAnchor": 1,
             "endAnchor": 3,
             "routingMode": 0,
-            "bendPointCount": 0,
+            "bendPointCount": 2,
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": 250.0,
-                    "y": -200.0
+                    "x": 249.20001220703126,
+                    "y": -212.73599243164063
                 },
                 {
-                    "x": 350.0,
-                    "y": -200.0
+                    "x": 303.87200927734377,
+                    "y": -212.73599243164063
+                },
+                {
+                    "x": 303.87200927734377,
+                    "y": -207.00799560546876
+                },
+                {
+                    "x": 358.5440368652344,
+                    "y": -207.00799560546876
                 }
             ]
         },
@@ -1898,11 +1996,19 @@
             "startAnchor": 1,
             "endAnchor": 3,
             "routingMode": 0,
-            "bendPointCount": 0,
+            "bendPointCount": 2,
             "hasCustomBendPointCount": false,
             "pathPoints": [
                 {
-                    "x": 450.0,
+                    "x": 458.5440368652344,
+                    "y": -207.00799560546876
+                },
+                {
+                    "x": 504.27203369140627,
+                    "y": -207.00799560546876
+                },
+                {
+                    "x": 504.27203369140627,
                     "y": -200.0
                 },
                 {

@@ -786,8 +786,11 @@ public sealed class SkillTreeGraphView : GraphView
                 stat = effect.stat,
                 ability = effect.ability,
                 abilityProperty = effect.abilityProperty,
+                otherAbility = effect.otherAbility,
+                otherUpgradeProperty = effect.otherUpgradeProperty,
                 operation = effect.operation,
-                value = effect.value
+                value = effect.value,
+                secondaryValue = effect.secondaryValue
             });
         }
 

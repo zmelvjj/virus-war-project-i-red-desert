@@ -39,8 +39,11 @@ public sealed class SkillEffectDraftData
     public PlayerStatType stat;
     public AbilityType ability;
     public AbilityProperty abilityProperty;
+    public OtherAbilityType otherAbility;
+    public OtherUpgradeProperty otherUpgradeProperty;
     public SkillModifierOperation operation;
     public float value;
+    public float secondaryValue;
 }
 
 [Serializable]

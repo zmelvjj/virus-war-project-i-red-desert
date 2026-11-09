@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 
 public class MonsterManager : MonoBehaviour
@@ -22,6 +23,23 @@ public class MonsterManager : MonoBehaviour
 
     public IReadOnlyList<MonsterEntity> Monsters => m_Monsters;
     public int ActiveCount => m_Monsters.Count;
+    public int LivingCount
+    {
+        get
+        {
+            var count = 0;
+            foreach (var monster in m_Monsters)
+            {
+                if (monster != null && monster.CurrentHp > 0)
+                    count++;
+            }
+
+            return count;
+        }
+    }
+
+    public event Action<MonsterEntity> MonsterKilled;
+    public event Action<int> LivingCountChanged;
 
     void Awake()
     {
@@ -49,11 +67,19 @@ public class MonsterManager : MonoBehaviour
     public void Register(MonsterEntity monster)
     {
         m_Monsters.Add(monster);
+        LivingCountChanged?.Invoke(LivingCount);
     }
 
     public void Unregister(MonsterEntity monster)
     {
         m_Monsters.Remove(monster);
+        LivingCountChanged?.Invoke(LivingCount);
+    }
+
+    public void NotifyMonsterKilled(MonsterEntity monster)
+    {
+        MonsterKilled?.Invoke(monster);
+        LivingCountChanged?.Invoke(LivingCount);
     }
 
     public void QueueNavigation(MonsterNavMeshMovement movement)
@@ -130,6 +156,7 @@ public class MonsterManager : MonoBehaviour
         }
 
         m_Monsters.Clear();
+        LivingCountChanged?.Invoke(0);
         m_NavigationQueue.Clear();
         m_NavigationDistribution.Reset();
     }

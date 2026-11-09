@@ -63,6 +63,9 @@ public class MonsterEntity : MonoBehaviour
             if (m_NavMeshMovement != null)
                 m_NavMeshMovement.enabled = false;
 
+            if (MonsterManager.HasInstance)
+                MonsterManager.Instance.NotifyMonsterKilled(this);
+
             if (DNADropSystem.HasInstance)
                 DNADropSystem.Instance.Drop(Definition.RewardDNA, transform.position);
 
