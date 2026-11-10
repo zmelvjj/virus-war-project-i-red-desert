@@ -1,11 +1,9 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class MonsterSpawner : MonoBehaviour
 {
     [SerializeField] Transform spawnArea;
-    [SerializeField] List<MonsterDefinition> monsters = new List<MonsterDefinition>();
     [SerializeField] float range = 10f;
     [SerializeField] float spawnInterval = 1f;
     [SerializeField] int maxMonsters = 10;
@@ -24,9 +22,15 @@ public class MonsterSpawner : MonoBehaviour
             if (MonsterManager.Instance.ActiveCount >= maxMonsters)
                 continue;
 
+            if (!StageManager.HasInstance
+                || !StageManager.Instance.TrySelectMonster(out var definition))
+            {
+                continue;
+            }
+
             var spawnPosition = RandomPointInArea();
             MonsterFactory.Instance
-                .Create(monsters[Random.Range(0, monsters.Count)])
+                .Create(definition)
                 .At(spawnPosition)
                 .Within(transform.position, range)
                 .Build()
