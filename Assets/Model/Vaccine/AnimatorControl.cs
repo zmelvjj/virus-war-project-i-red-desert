@@ -4,29 +4,54 @@ using System.Collections.Generic;
 public class AnimatorControl : MonoBehaviour
 {
     [SerializeField] private Animator anime;
-    [SerializeField] private List<Transform> rotateList = new List<Transform>();
-    private Quaternion[] rotateListBaseRotations;
+    [SerializeField] private List<GameObject> rigidObjects = new List<GameObject>();
+    [SerializeField] private List<GameObject> animeObjects = new List<GameObject>();
 
     void Awake()
     {
         anime = GetComponent<Animator>();
         anime.applyRootMotion = true;
-
-        rotateListBaseRotations = new Quaternion[rotateList.Count];
-        for (var i = 0; i < rotateList.Count; i++)
-            rotateListBaseRotations[i] = rotateList[i].localRotation;
     }
 
 
     public void GetReady()
     {
         anime.applyRootMotion = false;
-        anime?.SetInteger("Random", Random.Range(0, 3));
         GetComponent<MonsterNavMeshMovement>().enabled = false;
-        gameObject.transform.rotation = Quaternion.Euler(0, gameObject.transform.eulerAngles.y, 0);
 
-        for (var i = 0; i < rotateList.Count; i++)
-            rotateList[i].localRotation = rotateListBaseRotations[i];
+        foreach (GameObject item in rigidObjects)
+        {
+            if(item == null) continue;
+            
+            item.AddComponent<Rigidbody>();
+        }
+
+        foreach (GameObject item in animeObjects)
+        {
+            if(item == null || item.GetComponent<Animator>() == null) continue;
+            
+            item.GetComponent<Animator>().enabled = false;
+        }
+    }
+
+    public void AnimeOn()
+    {
+        foreach (GameObject item in animeObjects)
+        {
+            if(item == null || item.GetComponent<Animator>() == null) continue;
+            
+            item.GetComponent<Animator>().enabled = true;
+        }
+    }
+
+    public void AnimeOff()
+    {
+        foreach (GameObject item in animeObjects)
+        {
+            if(item == null || item.GetComponent<Animator>() == null) continue;
+            
+            item.GetComponent<Animator>().enabled = false;
+        }
     }
 
     public void Dest()

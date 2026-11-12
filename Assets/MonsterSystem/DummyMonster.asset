@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: DummyMonster
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
   monsterName: Dummy
-  baseHp: 5
-  modelPrefab: {fileID: 6488921758625308738, guid: 1bf9f35337d7b72488224395ed861dea, type: 3}
+  baseHp: 10
+  rewardDNA: 5
+  modelPrefab: {fileID: 3126909582413214005, guid: cdc3aa6904260ee47987dae0e80c4c93, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
   rotationSpeed: 100
   movementType: 1
@@ -31,9 +32,20 @@ MonoBehaviour:
   isRotated: 1
   rotationPointPaths:
   - Capsule
-  - body
   - barrier_damagedOutline
   - barrier_damaged
   - barrier_chipped
   - barrier
+  - barrier_chippedOutline
+  - barrier_cap
+  - barrier_cap.001
+  - barrier_cap.002
+  - barrier_cap.003
+  - barrier_cap.004
+  - barrier_cap.005
+  - barrier_cap.006
+  - barrier_cap.007
+  - barrier_cap.008
+  - body
+  - anime/body
   diameter: 1

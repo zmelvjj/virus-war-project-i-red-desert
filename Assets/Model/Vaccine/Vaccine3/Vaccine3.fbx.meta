@@ -19,6 +19,11 @@ ModelImporter:
       assembly: UnityEngine.CoreModule
       name: Outline
     second: {fileID: 2100000, guid: 569ba97663ec2274995f41dcb2444073, type: 2}
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: barrier_crack
+    second: {fileID: 2100000, guid: 4495fa0e59755f948b2f027ff910189d, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0

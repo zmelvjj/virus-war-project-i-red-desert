@@ -136,7 +136,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_IsActive
-    path: barrier_damagedOutline
+    path: crack_particle
     classID: 1
     script: {fileID: 0}
     flags: 16
@@ -176,7 +176,7 @@ AnimationClip:
       isIntCurve: 0
       isSerializeReferenceCurve: 0
     - serializedVersion: 2
-      path: 772445209
+      path: 914684684
       attribute: 2086281974
       script: {fileID: 0}
       typeID: 1
@@ -334,7 +334,7 @@ AnimationClip:
       m_PostInfinity: 2
       m_RotationOrder: 4
     attribute: m_IsActive
-    path: barrier_damagedOutline
+    path: crack_particle
     classID: 1
     script: {fileID: 0}
     flags: 16
