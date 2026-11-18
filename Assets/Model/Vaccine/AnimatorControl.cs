@@ -17,7 +17,8 @@ public class AnimatorControl : MonoBehaviour
     public void GetReady()
     {
         anime.applyRootMotion = false;
-        GetComponent<MonsterNavMeshMovement>().enabled = false;
+        if(GetComponent<MonsterNavMeshMovement>() != null)
+            GetComponent<MonsterNavMeshMovement>().enabled = false;
 
         foreach (GameObject item in rigidObjects)
         {

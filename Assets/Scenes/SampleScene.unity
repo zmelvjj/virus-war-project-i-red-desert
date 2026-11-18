@@ -16745,7 +16745,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameStaminaController
   baseMaxStamina: 100
-  baseDrainPerSecond: 0
+  baseDrainPerSecond: 6.8
 --- !u!1 &1900121574
 GameObject:
   m_ObjectHideFlags: 0
