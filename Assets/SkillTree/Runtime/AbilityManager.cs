@@ -39,20 +39,33 @@ public sealed class AbilityManager : MonoBehaviour
 
     void Update()
     {
+        if (!GameFlowManager.IsMainGame)
+            return;
+
         m_Ignite?.Tick(Time.deltaTime);
         m_Critical?.Tick(Time.deltaTime);
     }
 
     void OnDestroy()
     {
+        ResetAbilities();
+
+        if (Instance == this)
+            Instance = null;
+    }
+
+    public void ResetAbilities()
+    {
         m_Lightning?.Dispose();
         m_Ignite?.Dispose();
         m_Critical?.Dispose();
         m_Shockwave?.Dispose();
         m_Combo?.Dispose();
-
-        if (Instance == this)
-            Instance = null;
+        m_Lightning = null;
+        m_Ignite = null;
+        m_Critical = null;
+        m_Shockwave = null;
+        m_Combo = null;
     }
 
     public void Unlock(AbilityType ability)

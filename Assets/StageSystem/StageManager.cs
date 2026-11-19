@@ -79,7 +79,7 @@ public sealed class StageManager : MonoBehaviour
 
     public void ResetRun()
     {
-        if (!m_IsInitialized)
+        if (!m_IsInitialized || !RunManager.IsNormalRun)
             return;
 
         m_CurrentStageListIndex = 0;
@@ -92,7 +92,7 @@ public sealed class StageManager : MonoBehaviour
 
     public void NotifyMonsterKilled()
     {
-        if (!m_IsInitialized)
+        if (!m_IsInitialized || !RunManager.IsNormalRun)
             return;
 
         CurrentKillCount++;
@@ -113,6 +113,9 @@ public sealed class StageManager : MonoBehaviour
     public bool TrySelectMonster(out MonsterDefinition definition)
     {
         definition = null;
+        if (!RunManager.IsNormalRun)
+            return false;
+
         var stage = CurrentStageData;
         if (stage == null)
             return false;

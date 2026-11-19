@@ -9,6 +9,8 @@ public class MonsterNavMeshMovement : MonoBehaviour
     Vector3 m_AreaCenter;
     float m_AreaRange;
     float m_RotationSpeed;
+    float m_BaseMovementSpeed;
+    float m_SpeedMultiplier = 1f;
     float m_Diameter;
     Transform[] m_RotationPoints;
     Quaternion[] m_RotationPointBaseRotations;
@@ -60,6 +62,7 @@ public class MonsterNavMeshMovement : MonoBehaviour
         m_AreaCenter = areaCenter;
         m_AreaRange = areaRange;
         m_RotationSpeed = rotationSpeed;
+        m_BaseMovementSpeed = agent.speed;
         m_Diameter = diameter;
         m_RotationPoints = rotationPoints;
         m_RotationCompensationPoints = rotationCompensationPoints;
@@ -76,6 +79,12 @@ public class MonsterNavMeshMovement : MonoBehaviour
         ResetStuckObservation();
         ResetBlockedMovementObservation();
         QueueNextPath();
+    }
+
+    public void SetSpeedMultiplier(float multiplier)
+    {
+        m_SpeedMultiplier = multiplier;
+        m_Agent.speed = m_BaseMovementSpeed * multiplier;
     }
 
     void OnEnable()
@@ -118,6 +127,13 @@ public class MonsterNavMeshMovement : MonoBehaviour
 
     void Update()
     {
+        if (GameFlowManager.IsPaused)
+        {
+            if (m_Agent.isOnNavMesh)
+                m_Agent.isStopped = true;
+            return;
+        }
+
         if (!GameFlowManager.IsMainGame)
         {
             if (m_Agent.isOnNavMesh)
@@ -184,7 +200,7 @@ public class MonsterNavMeshMovement : MonoBehaviour
         var nextRotation = Quaternion.RotateTowards(
             transform.rotation,
             targetRotation,
-            m_RotationSpeed * Time.deltaTime);
+            m_RotationSpeed * m_SpeedMultiplier * Time.deltaTime);
         SetRootRotation(nextRotation);
 
         if (Quaternion.Angle(transform.rotation, targetRotation) > k_FacingTolerance)

@@ -47,7 +47,9 @@ public sealed class DamagePopupManager : MonoBehaviour
 
     public void ShowDamage(DamageResult result)
     {
-        if (result.Target == null)
+        if (result.Target == null
+            || (GameSettings.HasInstance
+                && !GameSettings.Instance.DamageDisplayVisible))
             return;
 
         var popup = m_Pool.Count > 0

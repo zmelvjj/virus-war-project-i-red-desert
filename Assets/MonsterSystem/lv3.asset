@@ -10,10 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb753e0424e014941b974868ea1d6f97, type: 3}
-  m_Name: DummyMonster 1
+  m_Name: lv3
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
-  monsterName: Dummy
-  baseHp: 10
+  monsterName: lv2
+  baseHp: 45
+  minimumRewardDNA: 25
+  maximumRewardDNA: 30
   modelPrefab: {fileID: 3829766441677795099, guid: 6be75bdf82facc14c99119c0cae1a218, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
   rotationSpeed: 100

@@ -34,6 +34,12 @@ public sealed class DNAWallet : MonoBehaviour
         OnDNAChanged?.Invoke(CurrentDNA);
     }
 
+    public void SetDNA(int amount)
+    {
+        CurrentDNA = Mathf.Max(0, amount);
+        OnDNAChanged?.Invoke(CurrentDNA);
+    }
+
     public bool CanSpendDNA(int amount)
     {
         return amount >= 0 && CurrentDNA >= amount;

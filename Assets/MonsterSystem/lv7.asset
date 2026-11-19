@@ -10,11 +10,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fb753e0424e014941b974868ea1d6f97, type: 3}
-  m_Name: DummyMonster
+  m_Name: lv7
   m_EditorClassIdentifier: Assembly-CSharp::MonsterDefinition
-  monsterName: Dummy
-  baseHp: 5
-  modelPrefab: {fileID: 6488921758625308738, guid: 1bf9f35337d7b72488224395ed861dea, type: 3}
+  monsterName: lv2
+  baseHp: 360
+  minimumRewardDNA: 90
+  maximumRewardDNA: 110
+  traits: 03000000
+  modelPrefab: {fileID: 3829766441677795099, guid: 6be75bdf82facc14c99119c0cae1a218, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
   rotationSpeed: 100
   movementType: 1
@@ -36,4 +39,5 @@ MonoBehaviour:
   - barrier_damaged
   - barrier_chipped
   - barrier
+  - bubble
   diameter: 1

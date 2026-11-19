@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4eb1e3685d91dca4bac3db8efa05d8b8, type: 3}
+  m_Name: Stage_8
+  m_EditorClassIdentifier: Assembly-CSharp::StageData
+  stageIndex: 7
+  requiredKillCount: 55
+  monsterSpawnEntries:
+  - monsterDefinition: {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
+    spawnWeight: 1.5
+  - monsterDefinition: {fileID: 11400000, guid: 6ba93c1da2271884099b0dee8394cc71, type: 2}
+    spawnWeight: 3
+  - monsterDefinition: {fileID: 11400000, guid: 7e3d0c75627557f418df6958ff204f5e, type: 2}
+    spawnWeight: 5.3
+  - monsterDefinition: {fileID: 11400000, guid: 6647e8b8bfe79ce47addb42573a49997, type: 2}
+    spawnWeight: 8.3
+  - monsterDefinition: {fileID: 11400000, guid: 1844f52d5c4d7b741930f270be28b20a, type: 2}
+    spawnWeight: 12.1
+  - monsterDefinition: {fileID: 11400000, guid: 40f37a87b29db414f86a141e833795ae, type: 2}
+    spawnWeight: 16.7
+  - monsterDefinition: {fileID: 11400000, guid: e3e908a126d174a4ab84cecefa97e18a, type: 2}
+    spawnWeight: 22.7
+  - monsterDefinition: {fileID: 11400000, guid: c94e31a9d74d01f4a9653b116563fe3c, type: 2}
+    spawnWeight: 30.3

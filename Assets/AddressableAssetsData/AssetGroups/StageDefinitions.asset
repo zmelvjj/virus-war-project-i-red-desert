@@ -15,8 +15,50 @@ MonoBehaviour:
   m_GroupName: StageDefinitions
   m_GUID: 6b531bb8fcfd42441a4d8f8a9a8ddc85
   m_SerializeEntries:
+  - m_GUID: 002313a51fce7d546932fdf3919a5c92
+    m_Address: Stage_5
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StageData
+    FlaggedDuringContentUpdateRestriction: 0
   - m_GUID: 030d2dd6f1a801c49b724c372458e161
     m_Address: Stage_0
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StageData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6404a0db92f1e284d9c79d8d820a80a6
+    m_Address: Stage_2
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StageData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 6bed6c7a97e8a684a813ebe6bb97be41
+    m_Address: Stage_4
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StageData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 785fda6a02a9c89479fceafdb7a1799d
+    m_Address: Stage_7
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StageData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 793347d4ab27a8d4084a611725cca493
+    m_Address: Stage_1
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StageData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: 9613c8fb5bbdc764cad5dbd6596887b7
+    m_Address: Stage_3
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - StageData
+    FlaggedDuringContentUpdateRestriction: 0
+  - m_GUID: f541fe0351ed68648a0ce6dd17420bfa
+    m_Address: Stage_6
     m_ReadOnly: 0
     m_SerializedLabels:
     - StageData

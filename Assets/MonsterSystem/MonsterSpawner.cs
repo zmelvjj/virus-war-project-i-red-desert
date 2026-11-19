@@ -16,7 +16,7 @@ public class MonsterSpawner : MonoBehaviour
         {
             yield return wait;
 
-            if (!GameFlowManager.IsMainGame)
+            if (!GameFlowManager.IsMainGame || !RunManager.IsNormalRun)
                 continue;
 
             if (MonsterManager.Instance.ActiveCount >= maxMonsters)

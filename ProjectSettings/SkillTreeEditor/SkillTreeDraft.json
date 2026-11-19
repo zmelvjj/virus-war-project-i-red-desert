@@ -5,7 +5,7 @@
         "y": 1080.0
     },
     "assetOutputPath": "Assets/Generated/SkillTree",
-    "uguiParentGlobalObjectId": "GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-2122757247-0",
+    "uguiParentGlobalObjectId": "",
     "nodes": [
         {
             "guid": "dce22fa58f1c4486827a30fc6d5c8f1e",

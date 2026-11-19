@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 
 [DisallowMultipleComponent]
@@ -8,11 +9,18 @@ public sealed class GameFlowManager : MonoBehaviour
     [SerializeField] GameFlowUIController uiController;
 
     bool m_HasState;
+    bool m_IsPaused;
+    float m_TimeScaleBeforePause = 1f;
 
     public static GameFlowManager Instance { get; private set; }
     public static bool HasInstance => Instance != null;
+    public static bool IsPaused => HasInstance && Instance.m_IsPaused;
+    public static bool IsMainGameState =>
+        HasInstance
+        && Instance.m_HasState
+        && Instance.CurrentState == GameFlowState.MainGame;
     public static bool IsMainGame =>
-        HasInstance && Instance.CurrentState == GameFlowState.MainGame;
+        IsMainGameState && !IsPaused;
 
     public GameFlowState CurrentState { get; private set; }
     public GameStaminaController StaminaController => staminaController;
@@ -20,6 +28,7 @@ public sealed class GameFlowManager : MonoBehaviour
     public event Action<GameFlowState> OnGameFlowStateChanged;
     public event Action OnRunRestarted;
     public event Action OnGameOver;
+    public event Action<bool> OnPauseChanged;
 
     void Awake()
     {
@@ -31,10 +40,15 @@ public sealed class GameFlowManager : MonoBehaviour
         staminaController.StaminaDepleted += HandleStaminaDepleted;
     }
 
-    void Start()
+    IEnumerator Start()
     {
+        if (RunManager.HasInstance)
+            yield return RunManager.Instance.Initialize();
+
         staminaController.BeginRun();
         ChangeState(GameFlowState.MainGame);
+        if (RunManager.HasInstance)
+            RunManager.Instance.BeginPreparedRun();
     }
 
     void OnDisable()
@@ -44,12 +58,42 @@ public sealed class GameFlowManager : MonoBehaviour
 
     void OnDestroy()
     {
+        if (m_IsPaused)
+            Time.timeScale = m_TimeScaleBeforePause;
+
         if (Instance == this)
             Instance = null;
     }
 
+    public void SetPaused(bool paused)
+    {
+        if (m_IsPaused == paused)
+            return;
+
+        m_IsPaused = paused;
+        if (paused)
+        {
+            m_TimeScaleBeforePause = Time.timeScale;
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            Time.timeScale = m_TimeScaleBeforePause;
+        }
+
+        OnPauseChanged?.Invoke(paused);
+    }
+
+    public void ResumeGame()
+    {
+        SetPaused(false);
+    }
+
     public void ChangeState(GameFlowState state)
     {
+        if (state != GameFlowState.MainGame && m_IsPaused)
+            SetPaused(false);
+
         if (m_HasState && CurrentState == state)
             return;
 
@@ -69,14 +113,31 @@ public sealed class GameFlowManager : MonoBehaviour
 
     public void RestartRun()
     {
+        SetPaused(false);
+        if (RunManager.HasInstance)
+            RunManager.Instance.PrepareNextRun();
+
         staminaController.BeginRun();
         OnRunRestarted?.Invoke();
         ChangeState(GameFlowState.MainGame);
+        if (RunManager.HasInstance)
+            RunManager.Instance.BeginPreparedRun();
+    }
+
+    public void EndRun()
+    {
+        if (CurrentState != GameFlowState.MainGame)
+            return;
+
+        if (RunManager.HasInstance)
+            RunManager.Instance.NotifyRunEnded();
+
+        ChangeState(GameFlowState.GameOver);
     }
 
     void HandleStaminaDepleted()
     {
         if (CurrentState == GameFlowState.MainGame)
-            ChangeState(GameFlowState.GameOver);
+            EndRun();
     }
 }

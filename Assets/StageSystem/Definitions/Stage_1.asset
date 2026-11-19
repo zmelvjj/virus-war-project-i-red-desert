@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4eb1e3685d91dca4bac3db8efa05d8b8, type: 3}
-  m_Name: Stage_0
+  m_Name: Stage_1
   m_EditorClassIdentifier: Assembly-CSharp::StageData
   stageIndex: 0
   requiredKillCount: 0
   monsterSpawnEntries:
   - monsterDefinition: {fileID: 11400000, guid: 7a9eaf98391414b4fa0ae710b054e90d, type: 2}
-    spawnWeight: 1
+    spawnWeight: 100

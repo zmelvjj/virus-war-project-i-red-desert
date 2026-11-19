@@ -31,6 +31,39 @@ public static class StageAddressablesEditor
         RegisterFolder(path);
     }
 
+    [MenuItem("Tools/Stage/Register Selected SpecialStageData")]
+    static void RegisterSelectedSpecialStages()
+    {
+        RegisterSpecialAssets(Selection.objects.OfType<SpecialStageData>());
+    }
+
+    [MenuItem("Tools/Stage/Register Selected SpecialStageData", true)]
+    static bool ValidateRegisterSelectedSpecialStages()
+    {
+        return Selection.objects.OfType<SpecialStageData>().Any();
+    }
+
+    [MenuItem("Tools/Stage/Register SpecialStageData Folder")]
+    static void RegisterSelectedSpecialStageFolder()
+    {
+        var path = AssetDatabase.GetAssetPath(Selection.activeObject);
+        if (!AssetDatabase.IsValidFolder(path))
+            path = Path.GetDirectoryName(path)?.Replace('\\', '/');
+
+        if (string.IsNullOrEmpty(path) || !AssetDatabase.IsValidFolder(path))
+        {
+            Debug.LogError("[StageAddressables] 유효한 SpecialStageData 폴더를 선택하세요.");
+            return;
+        }
+
+        var assets = AssetDatabase.FindAssets(
+                "t:SpecialStageData",
+                new[] { path })
+            .Select(AssetDatabase.GUIDToAssetPath)
+            .Select(AssetDatabase.LoadAssetAtPath<SpecialStageData>);
+        RegisterSpecialAssets(assets);
+    }
+
     public static void RegisterFolder(string folderPath)
     {
         if (string.IsNullOrEmpty(folderPath)
@@ -87,5 +120,59 @@ public static class StageAddressablesEditor
         EditorUtility.SetDirty(settings);
         AssetDatabase.SaveAssets();
         Debug.Log($"[StageAddressables] StageData {stageData.Count}개 등록 완료.");
+    }
+
+    public static void RegisterSpecialAssets(
+        IEnumerable<SpecialStageData> assets)
+    {
+        var specialStages = assets.Where(stage => stage != null).ToList();
+        if (specialStages.Count == 0)
+        {
+            Debug.LogError("[StageAddressables] 등록할 SpecialStageData가 없습니다.");
+            return;
+        }
+
+        var invalidId = specialStages.FirstOrDefault(
+            stage => string.IsNullOrWhiteSpace(stage.SpecialStageId));
+        if (invalidId != null)
+        {
+            Debug.LogError("[StageAddressables] SpecialStageId가 비어 있습니다.", invalidId);
+            return;
+        }
+
+        var duplicate = specialStages
+            .GroupBy(stage => stage.SpecialStageId)
+            .FirstOrDefault(group => group.Count() > 1);
+        if (duplicate != null)
+        {
+            Debug.LogError($"[StageAddressables] 중복 SpecialStageId: {duplicate.Key}");
+            return;
+        }
+
+        var settings = AddressableAssetSettingsDefaultObject.GetSettings(true);
+        var group = settings.FindGroup(SpecialStageAddressKeys.GroupName)
+            ?? settings.CreateGroup(
+                SpecialStageAddressKeys.GroupName,
+                false,
+                false,
+                true,
+                null,
+                typeof(BundledAssetGroupSchema),
+                typeof(ContentUpdateGroupSchema));
+
+        foreach (var stage in specialStages)
+        {
+            var path = AssetDatabase.GetAssetPath(stage);
+            var guid = AssetDatabase.AssetPathToGUID(path);
+            var entry = settings.CreateOrMoveEntry(guid, group);
+            entry.address = SpecialStageAddressKeys.GetAddress(
+                stage.SpecialStageId);
+            entry.SetLabel(SpecialStageAddressKeys.Label, true, true);
+        }
+
+        EditorUtility.SetDirty(settings);
+        AssetDatabase.SaveAssets();
+        Debug.Log(
+            $"[StageAddressables] SpecialStageData {specialStages.Count}개 등록 완료.");
     }
 }

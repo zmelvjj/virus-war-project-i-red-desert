@@ -39,6 +39,7 @@ public class MonsterManager : MonoBehaviour
     }
 
     public event Action<MonsterEntity> MonsterKilled;
+    public event Action<MonsterEntity> MonsterDied;
     public event Action<int> LivingCountChanged;
 
     void Awake()
@@ -80,6 +81,11 @@ public class MonsterManager : MonoBehaviour
     {
         MonsterKilled?.Invoke(monster);
         LivingCountChanged?.Invoke(LivingCount);
+    }
+
+    public void NotifyMonsterDied(MonsterEntity monster)
+    {
+        MonsterDied?.Invoke(monster);
     }
 
     public void QueueNavigation(MonsterNavMeshMovement movement)

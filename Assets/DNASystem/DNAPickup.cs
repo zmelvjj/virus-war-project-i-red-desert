@@ -22,8 +22,12 @@ public sealed class DNAPickup : MonoBehaviour
     Transform m_Target;
     PickupState m_State;
     float m_StateElapsed;
+    float m_CurrentMagnetDelay;
     int m_DNAValue;
     float m_CollectRadius;
+    int m_BatchId;
+
+    internal int BatchId => m_BatchId;
 
     public void Initialize(DNADropSystem owner)
     {
@@ -36,11 +40,17 @@ public sealed class DNAPickup : MonoBehaviour
         Transform target,
         int dnaValue,
         float collectRadius,
-        Vector3 impulse)
+        Vector3 impulse,
+        float collectLockDuration,
+        int batchId)
     {
         m_Target = target;
         m_DNAValue = dnaValue;
         m_CollectRadius = collectRadius;
+        m_CurrentMagnetDelay = collectLockDuration >= 0f
+            ? collectLockDuration
+            : magnetDelay;
+        m_BatchId = batchId;
         m_State = PickupState.Scatter;
         m_StateElapsed = 0f;
 
@@ -59,6 +69,8 @@ public sealed class DNAPickup : MonoBehaviour
         m_StateElapsed = 0f;
         m_DNAValue = 0;
         m_CollectRadius = 0f;
+        m_CurrentMagnetDelay = 0f;
+        m_BatchId = 0;
         m_Target = null;
 
         if (m_Rigidbody != null)
@@ -84,7 +96,7 @@ public sealed class DNAPickup : MonoBehaviour
         m_StateElapsed += Time.fixedDeltaTime;
         if (m_State == PickupState.Scatter)
         {
-            if (m_StateElapsed < magnetDelay)
+            if (m_StateElapsed < m_CurrentMagnetDelay)
                 return;
 
             m_State = PickupState.Magnet;
