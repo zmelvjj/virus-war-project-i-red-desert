@@ -63,7 +63,10 @@ public sealed class DNADropSystem : MonoBehaviour
 
     public void Drop(int rewardDNA, Vector3 deathPosition)
     {
-        var spawnCount = rewardDNA / dnaValuePerPickup;
+        if (SkillEffectSystem.HasInstance)
+            rewardDNA = SkillEffectSystem.Instance.CalculateDNAReward(rewardDNA);
+
+        var spawnCount = Mathf.CeilToInt((float)rewardDNA / dnaValuePerPickup);
         if (spawnCount <= 0)
             return;
 
@@ -84,10 +87,13 @@ public sealed class DNADropSystem : MonoBehaviour
                 + Vector3.up * upwardImpulse;
             var pickup = m_Pool.Count > 0 ? m_Pool.Dequeue() : CreateInstance();
             m_ActivePickups.Add(pickup);
+            var pickupDNA = Mathf.Min(
+                dnaValuePerPickup,
+                rewardDNA - i * dnaValuePerPickup);
             pickup.Spawn(
                 position,
                 playerTarget,
-                dnaValuePerPickup,
+                pickupDNA,
                 collectRadius,
                 impulse);
         }

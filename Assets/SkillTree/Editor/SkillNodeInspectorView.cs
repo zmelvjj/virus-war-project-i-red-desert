@@ -49,7 +49,8 @@ public sealed class SkillNodeInspectorView : VisualElement
     static readonly List<SkillModifierOperation> s_StatOperations = new()
     {
         SkillModifierOperation.Flat,
-        SkillModifierOperation.Percent
+        SkillModifierOperation.Percent,
+        SkillModifierOperation.Set
     };
 
     static readonly List<SkillModifierOperation> s_AbilityOperations = new()
@@ -533,11 +534,15 @@ public sealed class SkillNodeInspectorView : VisualElement
         header.AddToClassList("effect-item-header");
         container.Add(header);
 
-        var typeField = new EnumField("효과 종류", effect.effectType);
+        var typeField = CreateLocalizedPopup(
+            "효과 종류",
+            new List<SkillEffectType>((SkillEffectType[])Enum.GetValues(
+                typeof(SkillEffectType))),
+            effect.effectType);
         typeField.AddToClassList("effect-type-field");
         typeField.RegisterValueChangedCallback(evt =>
         {
-            effect.effectType = (SkillEffectType)evt.newValue;
+            effect.effectType = evt.newValue;
             RefreshEffectFields();
             DraftChanged?.Invoke();
         });
@@ -577,9 +582,22 @@ public sealed class SkillNodeInspectorView : VisualElement
             case SkillEffectType.AbilityModifier:
                 AddAbilityModifierFields(container, effect);
                 break;
+
+            case SkillEffectType.OtherAbilityUnlock:
+                AddEnumEffectField(
+                    container,
+                    "기타 어빌리티",
+                    effect.otherAbility,
+                    value => effect.otherAbility = (OtherAbilityType)value);
+                break;
+
+            case SkillEffectType.OtherUpgrade:
+                AddOtherUpgradeFields(container, effect);
+                break;
         }
 
         if (effect.effectType != SkillEffectType.AbilityUnlock
+            && effect.effectType != SkillEffectType.OtherAbilityUnlock
             && effect.operation != SkillModifierOperation.Set
             && Mathf.Approximately(effect.value, 0f))
         {
@@ -594,7 +612,8 @@ public sealed class SkillNodeInspectorView : VisualElement
     void AddModifierFields(
         VisualElement container,
         SkillEffectDraftData effect,
-        bool allowSet)
+        bool allowSet,
+        string valueLabel = "값")
     {
         var operations = allowSet ? s_AbilityOperations : s_StatOperations;
         if (!operations.Contains(effect.operation))
@@ -604,6 +623,7 @@ public sealed class SkillNodeInspectorView : VisualElement
             "연산",
             operations,
             effect.operation);
+        ApplyLocalizedFormat(operationField);
         operationField.RegisterValueChangedCallback(evt =>
         {
             effect.operation = evt.newValue;
@@ -612,7 +632,7 @@ public sealed class SkillNodeInspectorView : VisualElement
         });
         AddEffectField(container, operationField);
 
-        var valueField = new FloatField("값");
+        var valueField = new FloatField(valueLabel);
         valueField.SetValueWithoutNotify(effect.value);
         valueField.RegisterValueChangedCallback(evt =>
         {
@@ -626,10 +646,13 @@ public sealed class SkillNodeInspectorView : VisualElement
         VisualElement container,
         SkillEffectDraftData effect)
     {
-        var abilityField = new EnumField("어빌리티", effect.ability);
+        var abilityField = CreateLocalizedPopup(
+            "어빌리티",
+            new List<AbilityType>((AbilityType[])Enum.GetValues(typeof(AbilityType))),
+            effect.ability);
         abilityField.RegisterValueChangedCallback(evt =>
         {
-            effect.ability = (AbilityType)evt.newValue;
+            effect.ability = evt.newValue;
             var properties = GetAbilityProperties(effect.ability);
             if (!properties.Contains(effect.abilityProperty))
                 effect.abilityProperty = properties[0];
@@ -647,6 +670,7 @@ public sealed class SkillNodeInspectorView : VisualElement
             "속성",
             supportedProperties,
             effect.abilityProperty);
+        ApplyLocalizedFormat(propertyField);
         propertyField.RegisterValueChangedCallback(evt =>
         {
             effect.abilityProperty = evt.newValue;
@@ -655,6 +679,59 @@ public sealed class SkillNodeInspectorView : VisualElement
         AddEffectField(container, propertyField);
 
         AddModifierFields(container, effect, true);
+    }
+
+    void AddOtherUpgradeFields(
+        VisualElement container,
+        SkillEffectDraftData effect)
+    {
+        var propertyField = CreateLocalizedPopup(
+            "기타 업그레이드",
+            new List<OtherUpgradeProperty>(
+                (OtherUpgradeProperty[])Enum.GetValues(
+                    typeof(OtherUpgradeProperty))),
+            effect.otherUpgradeProperty);
+        propertyField.RegisterValueChangedCallback(evt =>
+        {
+            effect.otherUpgradeProperty = evt.newValue;
+            RefreshEffectFields();
+            DraftChanged?.Invoke();
+        });
+        AddEffectField(container, propertyField);
+
+        if (effect.otherUpgradeProperty == OtherUpgradeProperty.LowStaminaDamage)
+        {
+            var thresholdField = new FloatField("발동 스태미나 (%)");
+            thresholdField.SetValueWithoutNotify(effect.secondaryValue);
+            thresholdField.RegisterValueChangedCallback(evt =>
+            {
+                effect.secondaryValue = Mathf.Clamp(evt.newValue, 0f, 100f);
+                thresholdField.SetValueWithoutNotify(effect.secondaryValue);
+                DraftChanged?.Invoke();
+            });
+            AddEffectField(container, thresholdField);
+            AddModifierFields(container, effect, true, "추가 공격력");
+            return;
+        }
+
+        AddModifierFields(
+            container,
+            effect,
+            true,
+            GetOtherUpgradeValueLabel(effect.otherUpgradeProperty));
+    }
+
+    static string GetOtherUpgradeValueLabel(OtherUpgradeProperty property)
+    {
+        return property switch
+        {
+            OtherUpgradeProperty.KillStaminaRecoveryChance => "스태미나 회복 확률",
+            OtherUpgradeProperty.KillStaminaRecoveryAmount => "스태미나 회복 수치",
+            OtherUpgradeProperty.DamagePer20StaminaConsumed => "20 소모당 추가 공격력",
+            OtherUpgradeProperty.DNAGain => "DNA 획득 증가",
+            OtherUpgradeProperty.DamagePerLivingAgent => "생존 Agent당 추가 공격력",
+            _ => "값"
+        };
     }
 
     static List<AbilityProperty> GetAbilityProperties(AbilityType ability)
@@ -675,13 +752,88 @@ public sealed class SkillNodeInspectorView : VisualElement
         Enum value,
         Action<Enum> changed)
     {
-        var field = new EnumField(label, value);
+        var values = new List<Enum>();
+        foreach (Enum enumValue in Enum.GetValues(value.GetType()))
+            values.Add(enumValue);
+
+        var field = new PopupField<Enum>(label, values, value);
+        field.formatListItemCallback = GetLocalizedEnumName;
+        field.formatSelectedValueCallback = GetLocalizedEnumName;
         field.RegisterValueChangedCallback(evt =>
         {
             changed(evt.newValue);
             DraftChanged?.Invoke();
         });
         AddEffectField(container, field);
+    }
+
+    static PopupField<T> CreateLocalizedPopup<T>(
+        string label,
+        List<T> choices,
+        T value)
+        where T : Enum
+    {
+        var field = new PopupField<T>(label, choices, value);
+        ApplyLocalizedFormat(field);
+        return field;
+    }
+
+    static void ApplyLocalizedFormat<T>(PopupField<T> field)
+        where T : Enum
+    {
+        field.formatListItemCallback = value => GetLocalizedEnumName(value);
+        field.formatSelectedValueCallback = value => GetLocalizedEnumName(value);
+    }
+
+    static string GetLocalizedEnumName(Enum value)
+    {
+        return value switch
+        {
+            SkillEffectType.StatModifier => "스탯 강화",
+            SkillEffectType.AbilityUnlock => "어빌 해금",
+            SkillEffectType.AbilityModifier => "어빌 강화",
+            SkillEffectType.OtherUpgrade => "기타 강화",
+            SkillEffectType.OtherAbilityUnlock => "기타 해금",
+
+            PlayerStatType.Damage => "공격력",
+            PlayerStatType.AttackSpeed => "공속",
+            PlayerStatType.MaxStamina => "최대 스태미나",
+            PlayerStatType.StaminaDrainReduction => "소모 감소",
+
+            SkillModifierOperation.Flat => "수치",
+            SkillModifierOperation.Percent => "비율",
+            SkillModifierOperation.Set => "설정",
+
+            AbilityType.Lightning => "번개",
+            AbilityType.Ignite => "발화",
+            AbilityType.Critical => "치명타",
+            AbilityType.Shockwave => "충격파",
+            AbilityType.Combo => "콤보",
+
+            AbilityProperty.Chance => "확률",
+            AbilityProperty.Range => "범위",
+            AbilityProperty.Damage => "피해",
+            AbilityProperty.Duration => "지속",
+            AbilityProperty.SpreadChance => "확산 확률",
+            AbilityProperty.SpreadRange => "확산 범위",
+            AbilityProperty.BonusAttack => "추가 공격",
+            AbilityProperty.BonusAttackDuration => "추가 지속",
+            AbilityProperty.Mark => "표식",
+            AbilityProperty.BonusDamage => "추가 피해",
+            AbilityProperty.AngleReduction => "각도 감소",
+
+            OtherAbilityType.DNAPer10Kills => "10킬 DNA",
+            OtherAbilityType.DamagePerKill => "킬당 공격",
+            OtherAbilityType.MultiTargetDamage => "다중 타격",
+
+            OtherUpgradeProperty.KillStaminaRecoveryChance => "처치 회복 확률",
+            OtherUpgradeProperty.KillStaminaRecoveryAmount => "처치 회복량",
+            OtherUpgradeProperty.DamagePer20StaminaConsumed => "20 소모 공격",
+            OtherUpgradeProperty.LowStaminaDamage => "저스태미나 공격",
+            OtherUpgradeProperty.DNAGain => "DNA 증가",
+            OtherUpgradeProperty.DamagePerLivingAgent => "생존당 공격",
+            _ => value.ToString()
+        };
     }
 
     static void AddEffectField(VisualElement container, VisualElement field)

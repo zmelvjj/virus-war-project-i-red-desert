@@ -133,8 +133,13 @@ public static class SkillTreeGenerationProcessor
         property.FindPropertyRelative("ability").enumValueIndex = (int)draft.ability;
         property.FindPropertyRelative("abilityProperty").enumValueIndex =
             (int)draft.abilityProperty;
+        property.FindPropertyRelative("otherAbility").enumValueIndex =
+            (int)draft.otherAbility;
+        property.FindPropertyRelative("otherUpgradeProperty").enumValueIndex =
+            (int)draft.otherUpgradeProperty;
         property.FindPropertyRelative("operation").enumValueIndex = (int)draft.operation;
         property.FindPropertyRelative("value").floatValue = draft.value;
+        property.FindPropertyRelative("secondaryValue").floatValue = draft.secondaryValue;
     }
 
     static void WriteTreeData(

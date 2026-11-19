@@ -63,8 +63,13 @@ public sealed class DNAPickup : MonoBehaviour
 
         if (m_Rigidbody != null)
         {
-            m_Rigidbody.linearVelocity = Vector3.zero;
-            m_Rigidbody.angularVelocity = Vector3.zero;
+            if (!m_Rigidbody.isKinematic)
+            {
+                m_Rigidbody.linearVelocity = Vector3.zero;
+                m_Rigidbody.angularVelocity = Vector3.zero;
+            }
+
+            m_Rigidbody.useGravity = false;
             m_Rigidbody.isKinematic = true;
         }
 

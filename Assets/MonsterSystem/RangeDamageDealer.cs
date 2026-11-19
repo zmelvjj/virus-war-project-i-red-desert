@@ -15,6 +15,7 @@ public class RangeDamageDealer : MonoBehaviour
     MaterialPropertyBlock m_RangePropertyBlock;
     readonly List<AttackPulse> m_Pulses = new();
     readonly Collider[] m_OverlapResults = new Collider[32];
+    readonly HashSet<MonsterEntity> m_PotentialTargets = new();
     float m_AttackElapsed;
     bool m_IsComboColor;
 
@@ -62,20 +63,67 @@ public class RangeDamageDealer : MonoBehaviour
             colliderCenter.z + halfSize.z));
         var direction = end - start;
         var distance = direction.magnitude;
+        var normalizedDirection = direction / distance;
+        var width = transform.TransformVector(
+            Vector3.right * m_RangeCollider.size.x).magnitude;
+        var height = transform.TransformVector(
+            Vector3.up * m_RangeCollider.size.y).magnitude;
         var baseDamage = AbilityManager.Instance.ResolveBasicAttackBaseDamage(
             PlayerStats.Instance.Damage,
             out var comboTriggered);
+        if (SkillEffectSystem.HasInstance)
+        {
+            baseDamage = SkillEffectSystem.Instance.ApplyMultiTargetDamage(
+                baseDamage,
+                HasMultipleTargets(
+                    start,
+                    normalizedDirection,
+                    transform.rotation,
+                    width,
+                    height,
+                    distance));
+        }
         SetRangeColor(comboTriggered);
 
         m_Pulses.Add(new AttackPulse(
             start,
-            direction / distance,
+            normalizedDirection,
             transform.rotation,
-            transform.TransformVector(Vector3.right * m_RangeCollider.size.x).magnitude,
-            transform.TransformVector(Vector3.up * m_RangeCollider.size.y).magnitude,
+            width,
+            height,
             distance,
             projectileSpeed,
             baseDamage));
+    }
+
+    bool HasMultipleTargets(
+        Vector3 start,
+        Vector3 direction,
+        Quaternion rotation,
+        float width,
+        float height,
+        float distance)
+    {
+        m_PotentialTargets.Clear();
+        var hitCount = Physics.OverlapBoxNonAlloc(
+            start + direction * (distance * 0.5f),
+            new Vector3(width * 0.5f, height * 0.5f, distance * 0.5f),
+            m_OverlapResults,
+            rotation);
+
+        for (var i = 0; i < hitCount; i++)
+        {
+            var monster = m_OverlapResults[i].GetComponentInParent<MonsterEntity>();
+            if (monster != null
+                && monster.CurrentHp > 0
+                && m_PotentialTargets.Add(monster)
+                && m_PotentialTargets.Count >= 2)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     void AdvancePulses(float deltaTime)

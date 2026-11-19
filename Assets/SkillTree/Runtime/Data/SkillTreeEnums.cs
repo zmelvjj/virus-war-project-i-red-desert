@@ -2,13 +2,34 @@ public enum SkillEffectType
 {
     StatModifier,
     AbilityUnlock,
-    AbilityModifier
+    AbilityModifier,
+    OtherUpgrade,
+    OtherAbilityUnlock
 }
 
 public enum PlayerStatType
 {
     Damage,
-    AttackSpeed
+    AttackSpeed,
+    MaxStamina,
+    StaminaDrainReduction
+}
+
+public enum OtherUpgradeProperty
+{
+    KillStaminaRecoveryChance,
+    KillStaminaRecoveryAmount,
+    DamagePer20StaminaConsumed,
+    LowStaminaDamage,
+    DNAGain,
+    DamagePerLivingAgent
+}
+
+public enum OtherAbilityType
+{
+    DNAPer10Kills,
+    DamagePerKill,
+    MultiTargetDamage
 }
 
 public enum SkillModifierOperation

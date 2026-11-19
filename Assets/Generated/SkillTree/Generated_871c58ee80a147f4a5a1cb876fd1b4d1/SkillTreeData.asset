@@ -1,0 +1,348 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 207597a39f17530419d9a651a63b07b2, type: 3}
+  m_Name: SkillTreeData
+  m_EditorClassIdentifier: Assembly-CSharp::SkillTreeData
+  baseSize: {x: 1920, y: 1080}
+  nodes:
+  - {fileID: 11400000, guid: 896f02505f7c37441a7a6b58876e1926, type: 2}
+  - {fileID: 11400000, guid: c89f2d07e3003534686be215d8b2328f, type: 2}
+  - {fileID: 11400000, guid: f5bb733c79e726246878e7e3d0c827d0, type: 2}
+  - {fileID: 11400000, guid: e5be97dd8406a1946b1c47950d4050df, type: 2}
+  - {fileID: 11400000, guid: 5e9d8b67d4fc17648a1c505c2fff9ead, type: 2}
+  - {fileID: 11400000, guid: 7cf66541f20886342b808bf9546a5374, type: 2}
+  - {fileID: 11400000, guid: a5426038705d8a646aa5cca15b256b83, type: 2}
+  - {fileID: 11400000, guid: 46d0e2c2c0c5a094da754b8d8e5fa0b2, type: 2}
+  - {fileID: 11400000, guid: bb5ce11b8b092d349827dde67f022cfc, type: 2}
+  - {fileID: 11400000, guid: e8b13ae62546f1f488585f72d034f709, type: 2}
+  - {fileID: 11400000, guid: 8dafe6811b48a1845ba1f6047a6a40b5, type: 2}
+  - {fileID: 11400000, guid: db46b60272ce7214cb3f05eb1d36e8a9, type: 2}
+  - {fileID: 11400000, guid: 1b5a8e4f5eb573a46b7b32aa695b6bc6, type: 2}
+  - {fileID: 11400000, guid: dfd7c313aa75ed045a9cccbb5596f7af, type: 2}
+  - {fileID: 11400000, guid: 1a04902c65dc62a4abd1116ef315d494, type: 2}
+  - {fileID: 11400000, guid: e95e80160ce1208448489a2bf71e62b1, type: 2}
+  - {fileID: 11400000, guid: 84addf0ce24c5eb428ebb30e4581fff8, type: 2}
+  - {fileID: 11400000, guid: 9fa46ea32c72feb4b81d25e40c3bb70a, type: 2}
+  - {fileID: 11400000, guid: c11be729fe9bac341b0d07a682a2ae15, type: 2}
+  - {fileID: 11400000, guid: a3da0151a7486b04baf6874804ecaa46, type: 2}
+  - {fileID: 11400000, guid: 025887023dba0e046b0a33fa8c650915, type: 2}
+  - {fileID: 11400000, guid: a2bdaebe2c0d0404392eaf6da2792d17, type: 2}
+  - {fileID: 11400000, guid: 699c490b62b86894fb7465083ce14f9c, type: 2}
+  - {fileID: 11400000, guid: bf3c8bbe44929d240a677c5345922bea, type: 2}
+  - {fileID: 11400000, guid: e3f854f77275ab9439f8510bf03217fd, type: 2}
+  - {fileID: 11400000, guid: f23a858f78d6f6440bdae9b2329c0e2b, type: 2}
+  - {fileID: 11400000, guid: 86e4b94520a98224099767ec1bd93502, type: 2}
+  connections:
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: dce22fa58f1c4486827a30fc6d5c8f1e
+    childNodeGuid: 039168860f1e42d881714da5824dd2ee
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -51.05801, y: -0.0000038146973}
+    - {x: -150, y: -0.0000038146973}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 039168860f1e42d881714da5824dd2ee
+    childNodeGuid: 8fec7974c5314b9c87d8cbb23c8f21fa
+    startAnchor: 0
+    endAnchor: 2
+    routingMode: 0
+    pathPoints:
+    - {x: -200, y: -50}
+    - {x: -200, y: -150}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 039168860f1e42d881714da5824dd2ee
+    childNodeGuid: 7a7a066d00f74bea8076d31bc1c7e2c8
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -250, y: 0}
+    - {x: -350, y: 0}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 039168860f1e42d881714da5824dd2ee
+    childNodeGuid: ebd19e8cf30c425a862d2508b8f2fcac
+    startAnchor: 2
+    endAnchor: 0
+    routingMode: 0
+    pathPoints:
+    - {x: -200, y: 50}
+    - {x: -200, y: 148.14954}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: dce22fa58f1c4486827a30fc6d5c8f1e
+    childNodeGuid: 984034dcd9444b5cb780ee0603193257
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 48.94199, y: -0.0000038146973}
+    - {x: 99.47099, y: -0.0000038146973}
+    - {x: 99.47099, y: -200}
+    - {x: 150, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: ebd19e8cf30c425a862d2508b8f2fcac
+    childNodeGuid: d7f9d7bfb2064e4aa47fba76b6737294
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -250, y: 198.14954}
+    - {x: -300, y: 198.14954}
+    - {x: -300, y: 200}
+    - {x: -350, y: 200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: d7f9d7bfb2064e4aa47fba76b6737294
+    childNodeGuid: af74f72ae8df4c1fa5f38775bafce169
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -450, y: 200}
+    - {x: -550.80005, y: 200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 7a7a066d00f74bea8076d31bc1c7e2c8
+    childNodeGuid: 12f91542afde415e8dcd6ecf3bc6dbc6
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -450, y: -0.000030517578}
+    - {x: -550.8, y: -0.000030517578}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 8fec7974c5314b9c87d8cbb23c8f21fa
+    childNodeGuid: a7d872c7866c486aabc2b0eb685d2537
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -250, y: -200}
+    - {x: -350, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: a7d872c7866c486aabc2b0eb685d2537
+    childNodeGuid: 2f283454f2c949a7933845f25f033b56
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -450, y: -200}
+    - {x: -550, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 2f283454f2c949a7933845f25f033b56
+    childNodeGuid: cccb44f24a7e4b74a5055ff3b79281de
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -650, y: -200}
+    - {x: -750, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 12f91542afde415e8dcd6ecf3bc6dbc6
+    childNodeGuid: 01112160f8e54e81872a6148361b6dcb
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -650.8, y: -0.000045776367}
+    - {x: -750, y: -0.000045776367}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: af74f72ae8df4c1fa5f38775bafce169
+    childNodeGuid: eab4d1f884344323935a3a7f87bc536f
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -650.80005, y: 200}
+    - {x: -750, y: 200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: dce22fa58f1c4486827a30fc6d5c8f1e
+    childNodeGuid: 7a047efda95449e6a93e637175b9d52c
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 48.94199, y: -0.0000038146973}
+    - {x: 99.47099, y: -0.0000038146973}
+    - {x: 99.47099, y: 200}
+    - {x: 150, y: 200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 984034dcd9444b5cb780ee0603193257
+    childNodeGuid: b09d02c673df4498854740ec3a172fe6
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 250, y: -200}
+    - {x: 350, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 7a047efda95449e6a93e637175b9d52c
+    childNodeGuid: f77906f3897645dda3162d33bf36ac9a
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 250, y: 200}
+    - {x: 350, y: 200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: f77906f3897645dda3162d33bf36ac9a
+    childNodeGuid: e089ad7ac8c9414da6b64698a11f6332
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 450, y: 200}
+    - {x: 548.7833, y: 200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: e089ad7ac8c9414da6b64698a11f6332
+    childNodeGuid: 6148751aa03f4681aa9835c6d56cc8a2
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 648.7833, y: 200}
+    - {x: 750, y: 200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: b09d02c673df4498854740ec3a172fe6
+    childNodeGuid: 12c221b41f624c8d9a936450ad74b0c1
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 450, y: -200}
+    - {x: 550, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 12c221b41f624c8d9a936450ad74b0c1
+    childNodeGuid: 89ed60dc01e94ccb8598b293a2939187
+    startAnchor: 1
+    endAnchor: 3
+    routingMode: 0
+    pathPoints:
+    - {x: 650, y: -200}
+    - {x: 750, y: -200}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: dce22fa58f1c4486827a30fc6d5c8f1e
+    childNodeGuid: 4938bde133c04ce98c88b7f26fc97f0f
+    startAnchor: 2
+    endAnchor: 0
+    routingMode: 0
+    pathPoints:
+    - {x: -1.0580101, y: 49.999996}
+    - {x: -1.0580101, y: 169.84386}
+    - {x: -87.08957, y: 169.84386}
+    - {x: -87.08957, y: 289.6877}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: dce22fa58f1c4486827a30fc6d5c8f1e
+    childNodeGuid: a7a2d6335812426cb92c9e4e41f4f011
+    startAnchor: 2
+    endAnchor: 0
+    routingMode: 0
+    pathPoints:
+    - {x: -1.0580101, y: 49.999996}
+    - {x: -1.0580101, y: 224.49231}
+    - {x: 115.986725, y: 224.49231}
+    - {x: 115.986725, y: 398.98462}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: dce22fa58f1c4486827a30fc6d5c8f1e
+    childNodeGuid: 070257b523f042118cc4cba2214cbb30
+    startAnchor: 0
+    endAnchor: 2
+    routingMode: 0
+    pathPoints:
+    - {x: -1.0580101, y: -50.000004}
+    - {x: -1.0580101, y: -214.37021}
+    - {x: -114.299576, y: -214.37021}
+    - {x: -114.299576, y: -378.74042}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 4938bde133c04ce98c88b7f26fc97f0f
+    childNodeGuid: 5be1253309c04469a9a05b1c401624c4
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -187.08957, y: 339.6877}
+    - {x: -242.19537, y: 339.6877}
+    - {x: -242.19537, y: 422.2378}
+    - {x: -297.30118, y: 422.2378}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: 070257b523f042118cc4cba2214cbb30
+    childNodeGuid: 1cad9cc137f6455bbfdebf84f2c47d86
+    startAnchor: 3
+    endAnchor: 1
+    routingMode: 0
+    pathPoints:
+    - {x: -214.29958, y: -428.74042}
+    - {x: -269.39987, y: -428.74042}
+    - {x: -269.39987, y: -432.4593}
+    - {x: -324.50018, y: -432.4593}
+  - color: {r: 0.68, g: 0.72, b: 0.78, a: 1}
+    sprite: {fileID: 0}
+    repeatSprite: 0
+    parentNodeGuid: dce22fa58f1c4486827a30fc6d5c8f1e
+    childNodeGuid: fae4baa0c7de44a6be77312cb8f23ec4
+    startAnchor: 0
+    endAnchor: 2
+    routingMode: 0
+    pathPoints:
+    - {x: -1.0580101, y: -50.000004}
+    - {x: -1.0580101, y: -217.93744}
+    - {x: 129.07593, y: -217.93744}
+    - {x: 129.07593, y: -385.87488}

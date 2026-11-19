@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46c4df587318ce240b67a6ddf53750b5, type: 3}
+  m_Name: NodeInfo_e089ad7ac8c9414da6b64698a11f6332
+  m_EditorClassIdentifier: Assembly-CSharp::NodeInfo
+  mainText: "\uACF5\uACA9\uB825"
+  font: {fileID: 11400000, guid: 100eadabe4a777f42b43c01cfef7c3ed, type: 2}
+  description: "\uACF5\uACA9\uB825 \uC99D\uAC00"
+  statName: "\uACF5\uACA9\uB825"
+  valueText: +25%

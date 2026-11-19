@@ -15,6 +15,7 @@ public sealed class GameFlowManager : MonoBehaviour
         HasInstance && Instance.CurrentState == GameFlowState.MainGame;
 
     public GameFlowState CurrentState { get; private set; }
+    public GameStaminaController StaminaController => staminaController;
 
     public event Action<GameFlowState> OnGameFlowStateChanged;
     public event Action OnRunRestarted;
