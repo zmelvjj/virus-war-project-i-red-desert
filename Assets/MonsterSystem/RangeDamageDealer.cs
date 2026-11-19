@@ -18,6 +18,8 @@ public class RangeDamageDealer : MonoBehaviour
     readonly HashSet<MonsterEntity> m_PotentialTargets = new();
     float m_AttackElapsed;
     bool m_IsComboColor;
+    bool m_HasPreviousMouthOpen;
+    float m_PreviousMouthOpen;
 
     void Awake()
     {
@@ -29,10 +31,14 @@ public class RangeDamageDealer : MonoBehaviour
 
     void Update()
     {
-        if (!GameFlowManager.IsMainGame)
+        if (GameFlowManager.IsPaused)
+            return;
+
+        if (!GameFlowManager.IsMainGameState)
         {
             m_AttackElapsed = 0f;
             m_Pulses.Clear();
+            m_HasPreviousMouthOpen = false;
             SetRangeColor(false);
             return;
         }
@@ -84,6 +90,7 @@ public class RangeDamageDealer : MonoBehaviour
                     distance));
         }
         SetRangeColor(comboTriggered);
+        SampleMouthOpen(out var mouthOpenDecrease, out var mouthOpenDifference);
 
         m_Pulses.Add(new AttackPulse(
             start,
@@ -93,7 +100,33 @@ public class RangeDamageDealer : MonoBehaviour
             height,
             distance,
             projectileSpeed,
-            baseDamage));
+            baseDamage,
+            mouthOpenDecrease,
+            mouthOpenDifference));
+    }
+
+    void SampleMouthOpen(
+        out float mouthOpenDecrease,
+        out float mouthOpenDifference)
+    {
+        mouthOpenDecrease = 0f;
+        mouthOpenDifference = 0f;
+        if (!MouthOpenTracker.HasInstance || !MouthOpenTracker.Instance.HasFace)
+        {
+            m_HasPreviousMouthOpen = false;
+            return;
+        }
+
+        var currentMouthOpen = MouthOpenTracker.Instance.MouthOpen;
+        if (m_HasPreviousMouthOpen)
+        {
+            var delta = currentMouthOpen - m_PreviousMouthOpen;
+            mouthOpenDecrease = Mathf.Max(0f, -delta);
+            mouthOpenDifference = Mathf.Abs(delta);
+        }
+
+        m_PreviousMouthOpen = currentMouthOpen;
+        m_HasPreviousMouthOpen = true;
     }
 
     bool HasMultipleTargets(
@@ -170,6 +203,16 @@ public class RangeDamageDealer : MonoBehaviour
             var damageResult = AbilityManager.Instance.ResolveBasicAttackDamage(
                 pulse.BaseDamage,
                 monster);
+            var finalDamage = monster.ApplyBasicAttackTraitDamage(
+                pulse.BaseDamage,
+                pulse.MouthOpenDecrease,
+                pulse.MouthOpenDifference,
+                damageResult.FinalDamage);
+            damageResult = new DamageResult(
+                monster,
+                finalDamage,
+                damageResult.IsCritical,
+                damageResult.PopupStyle);
             monster.TakeDamage(
                 damageResult.FinalDamage,
                 hitMaterial);
@@ -205,6 +248,8 @@ public class RangeDamageDealer : MonoBehaviour
         public readonly float Distance;
         public readonly float Speed;
         public readonly float BaseDamage;
+        public readonly float MouthOpenDecrease;
+        public readonly float MouthOpenDifference;
         public readonly HashSet<MonsterEntity> HitTargets = new();
 
         public float TravelledDistance;
@@ -217,7 +262,9 @@ public class RangeDamageDealer : MonoBehaviour
             float height,
             float distance,
             float speed,
-            float baseDamage)
+            float baseDamage,
+            float mouthOpenDecrease,
+            float mouthOpenDifference)
         {
             Start = start;
             Direction = direction;
@@ -227,6 +274,8 @@ public class RangeDamageDealer : MonoBehaviour
             Distance = distance;
             Speed = speed;
             BaseDamage = baseDamage;
+            MouthOpenDecrease = mouthOpenDecrease;
+            MouthOpenDifference = mouthOpenDifference;
         }
     }
 }

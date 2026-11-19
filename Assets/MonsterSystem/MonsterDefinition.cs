@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Serialization;
+using System.Collections.Generic;
 
 public enum MonsterMovementType
 {
@@ -12,7 +14,10 @@ public class MonsterDefinition : ScriptableObject
 {
     [SerializeField] string monsterName;
     [SerializeField] int baseHp = 100;
-    [SerializeField] int rewardDNA = 5;
+    [FormerlySerializedAs("rewardDNA")]
+    [SerializeField] int minimumRewardDNA = 5;
+    [SerializeField] int maximumRewardDNA = 5;
+    [SerializeField] List<MonsterTraitType> traits = new();
     [SerializeField] GameObject modelPrefab;
     [SerializeField] Vector3 scaleCorrection = Vector3.one;
     [SerializeField] float rotationSpeed = 1f;
@@ -33,7 +38,9 @@ public class MonsterDefinition : ScriptableObject
 
     public string MonsterName => monsterName;
     public int BaseHp => baseHp;
-    public int RewardDNA => rewardDNA;
+    public int MinimumRewardDNA => minimumRewardDNA;
+    public int MaximumRewardDNA => maximumRewardDNA;
+    public IReadOnlyList<MonsterTraitType> Traits => traits;
     public GameObject ModelPrefab => modelPrefab;
     public Vector3 ScaleCorrection => scaleCorrection;
     public float RotationSpeed => rotationSpeed;

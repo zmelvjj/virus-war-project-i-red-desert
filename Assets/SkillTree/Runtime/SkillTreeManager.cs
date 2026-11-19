@@ -18,10 +18,12 @@ public sealed class SkillTreeManager : MonoBehaviour
     bool m_Initialized;
 
     public event Action<SkillNodeData> OnNodeUnlocked;
+    public event Action Initialized;
 
     public SkillTreeData TreeData => m_TreeData;
     public IReadOnlyDictionary<string, SkillNodeState> NodeStates => m_NodeStates;
     public IReadOnlyCollection<string> UnlockedNodeGuids => m_UnlockedNodeGuids;
+    public bool IsInitialized => m_Initialized;
 
     void Awake()
     {
@@ -94,6 +96,7 @@ public sealed class SkillTreeManager : MonoBehaviour
 
         m_Initialized = true;
         RecalculateStates();
+        Initialized?.Invoke();
     }
 
     public SkillNodeState GetState(string nodeGuid)
@@ -126,6 +129,28 @@ public sealed class SkillTreeManager : MonoBehaviour
         RecalculateStates();
         OnNodeUnlocked?.Invoke(nodeData);
         return true;
+    }
+
+    public void RestoreUnlockedNodes(IEnumerable<string> nodeGuids)
+    {
+        if (!m_Initialized)
+            return;
+
+        m_UnlockedNodeGuids.Clear();
+        var savedGuids = new HashSet<string>(nodeGuids);
+        var restoredNodes = new List<SkillNodeData>();
+        foreach (var nodeData in m_TreeData.Nodes)
+        {
+            if (!savedGuids.Contains(nodeData.Guid))
+                continue;
+
+            m_UnlockedNodeGuids.Add(nodeData.Guid);
+            restoredNodes.Add(nodeData);
+        }
+
+        RecalculateStates();
+        foreach (var nodeData in restoredNodes)
+            OnNodeUnlocked?.Invoke(nodeData);
     }
 
     void HandleNodePointerUp(string nodeGuid)

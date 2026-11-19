@@ -36,6 +36,7 @@ public sealed class SkillEffectSystem : MonoBehaviour
     readonly List<OtherUpgradeEffect> m_OtherUpgradeEffects = new();
     readonly HashSet<string> m_ActiveLowStaminaEffects = new();
     readonly HashSet<OtherAbilityType> m_UnlockedOtherAbilities = new();
+    readonly HashSet<string> m_AppliedNodeGuids = new();
 
     SkillTreeManager m_SkillTreeManager;
     GameFlowManager m_GameFlowManager;
@@ -165,8 +166,31 @@ public sealed class SkillEffectSystem : MonoBehaviour
 
     void HandleNodeUnlocked(SkillNodeData nodeData)
     {
+        if (!m_AppliedNodeGuids.Add(nodeData.Guid))
+            return;
+
         foreach (var effect in nodeData.Effects)
             Apply(nodeData.Guid, effect);
+    }
+
+    public void ResetSkillEffects()
+    {
+        ResetRunEffects();
+
+        if (PlayerStats.HasInstance)
+        {
+            foreach (var sourceNodeGuid in m_AppliedNodeGuids)
+                PlayerStats.Instance.RemoveModifiersFromSource(sourceNodeGuid);
+        }
+
+        m_AppliedNodeGuids.Clear();
+        m_OtherUpgradeEffects.Clear();
+        m_UnlockedOtherAbilities.Clear();
+        m_ActiveLowStaminaEffects.Clear();
+        m_NextOtherEffectId = 0;
+
+        if (AbilityManager.HasInstance)
+            AbilityManager.Instance.ResetAbilities();
     }
 
     void Apply(string sourceNodeGuid, SkillEffectData effect)

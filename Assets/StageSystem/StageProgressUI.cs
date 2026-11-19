@@ -8,6 +8,7 @@ public sealed class StageProgressUI : MonoBehaviour
     [SerializeField] TMP_Text progressText;
 
     StageManager m_StageManager;
+    RunManager m_RunManager;
 
     public void Initialize(
         UnityEngine.UI.Slider slider,
@@ -20,11 +21,13 @@ public sealed class StageProgressUI : MonoBehaviour
     void OnEnable()
     {
         AttachManager();
+        AttachRunManager();
     }
 
     void Start()
     {
         AttachManager();
+        AttachRunManager();
         RefreshCurrentState();
     }
 
@@ -37,6 +40,9 @@ public sealed class StageProgressUI : MonoBehaviour
         }
 
         m_StageManager = null;
+        if (m_RunManager != null)
+            m_RunManager.OnRunTypeChanged -= HandleRunTypeChanged;
+        m_RunManager = null;
     }
 
     void AttachManager()
@@ -56,6 +62,19 @@ public sealed class StageProgressUI : MonoBehaviour
         m_StageManager = StageManager.Instance;
         m_StageManager.OnStageChanged += HandleStageChanged;
         m_StageManager.OnStageProgressChanged += HandleProgressChanged;
+    }
+
+    void AttachRunManager()
+    {
+        if (!RunManager.HasInstance || m_RunManager == RunManager.Instance)
+            return;
+
+        if (m_RunManager != null)
+            m_RunManager.OnRunTypeChanged -= HandleRunTypeChanged;
+
+        m_RunManager = RunManager.Instance;
+        m_RunManager.OnRunTypeChanged += HandleRunTypeChanged;
+        HandleRunTypeChanged(m_RunManager.CurrentRunType);
     }
 
     void RefreshCurrentState()
@@ -84,5 +103,12 @@ public sealed class StageProgressUI : MonoBehaviour
 
         progressBar.value = Mathf.Clamp01((float)current / required);
         progressText.text = $"{current} / {required}";
+    }
+
+    void HandleRunTypeChanged(RunType runType)
+    {
+        var visible = runType == RunType.NormalRun;
+        progressBar.gameObject.SetActive(visible);
+        progressText.gameObject.SetActive(visible);
     }
 }

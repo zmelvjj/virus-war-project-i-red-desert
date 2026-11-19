@@ -40,8 +40,13 @@ public class AnimatorControl : MonoBehaviour
         foreach (GameObject item in animeObjects)
         {
             if(item == null || item.GetComponent<Animator>() == null) continue;
+
+            Animator anime = item.GetComponent<Animator>();
             
-            item.GetComponent<Animator>().enabled = true;
+            anime.enabled = true;
+            AnimatorStateInfo stateInfo = anime.GetCurrentAnimatorStateInfo(0);
+
+            anime.Play(stateInfo.fullPathHash, 0, 0f);
         }
     }
 

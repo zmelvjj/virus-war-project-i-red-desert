@@ -30,6 +30,7 @@ public sealed class DNADropSystem : MonoBehaviour
     readonly List<DNAPickup> m_ActivePickups = new();
 
     GameFlowManager m_GameFlowManager;
+    int m_NextBatchId = 1;
 
     public static DNADropSystem Instance { get; private set; }
     public static bool HasInstance => Instance != null;
@@ -66,6 +67,60 @@ public sealed class DNADropSystem : MonoBehaviour
         if (SkillEffectSystem.HasInstance)
             rewardDNA = SkillEffectSystem.Instance.CalculateDNAReward(rewardDNA);
 
+        DropInternal(
+            rewardDNA,
+            deathPosition,
+            scatterRadius,
+            minimumHorizontalImpulse,
+            maximumHorizontalImpulse,
+            upwardImpulse,
+            -1f,
+            0);
+    }
+
+    public int DropSpecialReward(
+        int rewardDNA,
+        Vector3 center,
+        float radius,
+        float minimumImpulse,
+        float maximumImpulse,
+        float verticalImpulse,
+        float collectLockDuration)
+    {
+        var batchId = m_NextBatchId++;
+        DropInternal(
+            rewardDNA,
+            center,
+            radius,
+            minimumImpulse,
+            maximumImpulse,
+            verticalImpulse,
+            collectLockDuration,
+            batchId);
+        return batchId;
+    }
+
+    public void DiscardBatch(int batchId)
+    {
+        for (var i = m_ActivePickups.Count - 1; i >= 0; i--)
+        {
+            var pickup = m_ActivePickups[i];
+            if (pickup.BatchId == batchId)
+                Release(pickup);
+        }
+    }
+
+    void DropInternal(
+        int rewardDNA,
+        Vector3 center,
+        float radius,
+        float minimumImpulse,
+        float maximumImpulse,
+        float verticalImpulse,
+        float collectLockDuration,
+        int batchId)
+    {
+
         var spawnCount = Mathf.CeilToInt((float)rewardDNA / dnaValuePerPickup);
         if (spawnCount <= 0)
             return;
@@ -79,12 +134,12 @@ public sealed class DNADropSystem : MonoBehaviour
             var impulseRatio = Mathf.Clamp01(
                 radialRatio + Random.Range(-forceJitter, forceJitter));
             var horizontalImpulse = Mathf.Lerp(
-                minimumHorizontalImpulse,
-                maximumHorizontalImpulse,
+                minimumImpulse,
+                maximumImpulse,
                 impulseRatio);
-            var position = deathPosition + direction * (scatterRadius * radialRatio);
+            var position = center + direction * (radius * radialRatio);
             var impulse = direction * horizontalImpulse
-                + Vector3.up * upwardImpulse;
+                + Vector3.up * verticalImpulse;
             var pickup = m_Pool.Count > 0 ? m_Pool.Dequeue() : CreateInstance();
             m_ActivePickups.Add(pickup);
             var pickupDNA = Mathf.Min(
@@ -95,7 +150,9 @@ public sealed class DNADropSystem : MonoBehaviour
                 playerTarget,
                 pickupDNA,
                 collectRadius,
-                impulse);
+                impulse,
+                collectLockDuration,
+                batchId);
         }
     }
 

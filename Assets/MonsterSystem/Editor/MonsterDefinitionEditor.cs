@@ -7,7 +7,9 @@ public class MonsterDefinitionEditor : Editor
 {
     SerializedProperty m_MonsterName;
     SerializedProperty m_BaseHp;
-    SerializedProperty m_RewardDNA;
+    SerializedProperty m_MinimumRewardDNA;
+    SerializedProperty m_MaximumRewardDNA;
+    SerializedProperty m_Traits;
     SerializedProperty m_ModelPrefab;
     SerializedProperty m_ScaleCorrection;
     SerializedProperty m_RotationSpeed;
@@ -30,7 +32,9 @@ public class MonsterDefinitionEditor : Editor
     {
         m_MonsterName = serializedObject.FindProperty("monsterName");
         m_BaseHp = serializedObject.FindProperty("baseHp");
-        m_RewardDNA = serializedObject.FindProperty("rewardDNA");
+        m_MinimumRewardDNA = serializedObject.FindProperty("minimumRewardDNA");
+        m_MaximumRewardDNA = serializedObject.FindProperty("maximumRewardDNA");
+        m_Traits = serializedObject.FindProperty("traits");
         m_ModelPrefab = serializedObject.FindProperty("modelPrefab");
         m_ScaleCorrection = serializedObject.FindProperty("scaleCorrection");
         m_RotationSpeed = serializedObject.FindProperty("rotationSpeed");
@@ -56,13 +60,15 @@ public class MonsterDefinitionEditor : Editor
 
         EditorGUILayout.PropertyField(m_MonsterName);
         EditorGUILayout.PropertyField(m_BaseHp);
-        EditorGUILayout.PropertyField(m_RewardDNA);
-        if (m_RewardDNA.intValue < 5 || m_RewardDNA.intValue % 5 != 0)
+        EditorGUILayout.PropertyField(m_MinimumRewardDNA, new GUIContent("Minimum Reward DNA"));
+        EditorGUILayout.PropertyField(m_MaximumRewardDNA, new GUIContent("Maximum Reward DNA"));
+        if (m_MinimumRewardDNA.intValue > m_MaximumRewardDNA.intValue)
         {
             EditorGUILayout.HelpBox(
-                "Reward DNA must be at least 5 and divisible by 5.",
+                "Minimum Reward DNA cannot be greater than Maximum Reward DNA.",
                 MessageType.Warning);
         }
+        EditorGUILayout.PropertyField(m_Traits, new GUIContent("Traits"));
         EditorGUILayout.PropertyField(m_ModelPrefab);
         EditorGUILayout.PropertyField(m_ScaleCorrection);
         EditorGUILayout.PropertyField(m_MovementType);

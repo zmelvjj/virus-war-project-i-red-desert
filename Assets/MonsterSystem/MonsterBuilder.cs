@@ -9,6 +9,9 @@ public sealed class MonsterBuilder
     Vector3 m_MovementCenter;
     float m_MovementRange;
     int m_Hp;
+    float m_RewardMultiplier = 1f;
+    float m_ScaleMultiplier = 1f;
+    readonly HashSet<MonsterTraitType> m_ExcludedTraits = new();
 
     public MonsterBuilder(MonsterDefinition definition)
     {
@@ -28,6 +31,24 @@ public sealed class MonsterBuilder
         return this;
     }
 
+    public MonsterBuilder WithRewardMultiplier(float multiplier)
+    {
+        m_RewardMultiplier = multiplier;
+        return this;
+    }
+
+    public MonsterBuilder WithScaleMultiplier(float multiplier)
+    {
+        m_ScaleMultiplier = multiplier;
+        return this;
+    }
+
+    public MonsterBuilder WithoutTrait(MonsterTraitType trait)
+    {
+        m_ExcludedTraits.Add(trait);
+        return this;
+    }
+
     public MonsterBuilder Within(Vector3 center, float range)
     {
         m_MovementCenter = center;
@@ -39,7 +60,9 @@ public sealed class MonsterBuilder
     {
         var instance = Object.Instantiate(m_Definition.ModelPrefab, m_Position, Quaternion.identity);
         instance.name = m_Definition.MonsterName;
-        instance.transform.localScale = Vector3.Scale(instance.transform.localScale, m_Definition.ScaleCorrection);
+        instance.transform.localScale = Vector3.Scale(
+            instance.transform.localScale,
+            m_Definition.ScaleCorrection) * m_ScaleMultiplier;
 
         PlaceOnGround(instance, m_Position.y);
 
@@ -48,10 +71,42 @@ public sealed class MonsterBuilder
             entity = instance.AddComponent<MonsterEntity>();
 
         var movementType = ConfigureMovement(instance);
-        entity.Initialize(m_Definition, m_Hp, movementType);
+        entity.Initialize(m_Definition, m_Hp, movementType, m_RewardMultiplier);
+        ConfigureTraits(instance, entity);
+        entity.CacheTraits();
         MonsterManager.Instance.Register(entity);
 
         return entity;
+    }
+
+    void ConfigureTraits(GameObject instance, MonsterEntity entity)
+    {
+        var configuredTraits = new HashSet<MonsterTraitType>();
+        var context = new MonsterTraitBuildContext(
+            m_MovementCenter,
+            m_MovementRange);
+
+        foreach (var traitType in m_Definition.Traits)
+        {
+            if (m_ExcludedTraits.Contains(traitType)
+                || !configuredTraits.Add(traitType))
+            {
+                continue;
+            }
+
+            IMonsterTrait trait = traitType switch
+            {
+                MonsterTraitType.StaminaDrop => instance.AddComponent<StaminaDropMonsterTrait>(),
+                MonsterTraitType.PursedMouthDamage => instance.AddComponent<PursedMouthDamageMonsterTrait>(),
+                MonsterTraitType.Split => instance.AddComponent<SplitMonsterTrait>(),
+                MonsterTraitType.MouthDeltaDamage => instance.AddComponent<MouthDeltaDamageMonsterTrait>(),
+                MonsterTraitType.Antibiotic => instance.AddComponent<AntibioticMonsterTrait>(),
+                MonsterTraitType.HitSpeedBoost => instance.AddComponent<HitSpeedBoostMonsterTrait>(),
+                _ => null
+            };
+
+            trait?.Initialize(entity, context);
+        }
     }
 
     MonsterMovementType ConfigureMovement(GameObject instance)
