@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Collections;
 
 public class AnimatorControl : MonoBehaviour
 {
@@ -63,5 +64,51 @@ public class AnimatorControl : MonoBehaviour
     public void Dest()
     {
         Destroy(gameObject);
+    }
+
+    public void GetSink()
+    {
+        foreach (GameObject item in rigidObjects)
+        {
+            if(item == null) continue;
+            
+            Rigidbody rigid = item.GetComponent<Rigidbody>();
+
+            if(rigid != null)
+            {
+                Destroy(rigid);
+            }
+        }
+
+        foreach (GameObject item in rigidObjects)
+        {
+            if(item == null) continue;
+            
+            Collider collider = item.GetComponent<Collider>();
+
+            if (collider != null)
+            {
+                Destroy(collider);
+            }
+        }
+
+        StartCoroutine(Sink());
+    }
+
+    IEnumerator Sink()
+    {
+        float clock = 1.2f;
+        Vector3 pos = transform.position;
+
+        while(clock > 0f)
+        {
+            pos.y = Mathf.Lerp(-0.9f, 1.235f, clock / 1.2f);
+            transform.position = pos;
+            clock -= Time.deltaTime;
+
+            yield return null;
+        }
+
+        Dest();
     }
 }
