@@ -67,8 +67,7 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "project_mind.slnx",
-
+    "dotnet.defaultSolution": "virus-war-project-i-red-desert.slnx",
     "files.watcherExclude": {
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,

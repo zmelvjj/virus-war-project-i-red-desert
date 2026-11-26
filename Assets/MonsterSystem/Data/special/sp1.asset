@@ -17,7 +17,7 @@ MonoBehaviour:
   minimumRewardDNA: 0
   maximumRewardDNA: 0
   traits: 05000000
-  modelPrefab: {fileID: 8674100848413810738, guid: ffdb6d0aa7473764ca0c18cfcaaff55c, type: 3}
+  modelPrefab: {fileID: 1533934350257592720, guid: a376f49bf401c7d4d8c846527b8b3631, type: 3}
   scaleCorrection: {x: 1, y: 1, z: 1}
   rotationSpeed: 100
   movementType: 1
