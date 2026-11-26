@@ -1,0 +1,20 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b46c1f188c4f9446b990a23cee7cabb, type: 3}
+  m_Name: spLv4
+  m_EditorClassIdentifier: Assembly-CSharp::SpecialStageData
+  specialStageId: 4
+  requiredReachedStage: 8
+  spawnCount: 12
+  monsterDefinition: {fileID: 11400000, guid: 19b41d98b4f032e4da9edf35d0da34ef, type: 2}
+  minimumRewardDNA: 3200
+  maximumRewardDNA: 3800

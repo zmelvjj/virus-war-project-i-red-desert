@@ -131,7 +131,10 @@ public sealed class IgniteAbility
             return;
         }
 
+        var previousIgniteCount = m_ActiveIgnites.Count;
         ApplyIgnite(hit.Target, true);
+        if (m_ActiveIgnites.Count > previousIgniteCount)
+            GameSoundPlayer.Request(GameSound.Ignite);
     }
 
     void ApplyIgnite(MonsterEntity target, bool canSpread)

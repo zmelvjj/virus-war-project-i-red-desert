@@ -9,7 +9,22 @@ public sealed class GameSaveData
     public PlayerSaveData player = new();
     public SkillTreeSaveData skillTree = new();
     public SettingsSaveData settings = new();
+    public StageProgressSaveData stageProgress;
     public SpecialStageProgressSaveData specialStageProgress = new();
+    public AugmentSaveData augments = new();
+}
+
+[Serializable]
+public sealed class AugmentSaveData
+{
+    public List<AugmentType> acquiredAugments = new();
+}
+
+[Serializable]
+public struct StageProgressSaveData
+{
+    public int stageIndex;
+    public int killCount;
 }
 
 [Serializable]
@@ -38,6 +53,7 @@ public sealed class SettingsSaveData
 {
     public bool cameraVisible = true;
     public bool damageDisplayVisible = true;
+    public float soundVolume = 1f;
 }
 
 [Serializable]

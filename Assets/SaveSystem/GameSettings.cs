@@ -6,15 +6,18 @@ public sealed class GameSettings : MonoBehaviour
 {
     [SerializeField] bool cameraVisible = true;
     [SerializeField] bool damageDisplayVisible = true;
+    [SerializeField, Range(0f, 1f)] float soundVolume = 1f;
 
     public static GameSettings Instance { get; private set; }
     public static bool HasInstance => Instance != null;
 
     public bool CameraVisible => cameraVisible;
     public bool DamageDisplayVisible => damageDisplayVisible;
+    public float SoundVolume => soundVolume;
 
     public event Action<bool> OnCameraVisibleChanged;
     public event Action<bool> OnDamageDisplayVisibleChanged;
+    public event Action<float> OnSoundVolumeChanged;
 
     void Awake()
     {
@@ -56,6 +59,16 @@ public sealed class GameSettings : MonoBehaviour
         SetCameraVisible(!cameraVisible);
     }
 
+    public void SetSoundVolume(float value)
+    {
+        value = Mathf.Clamp01(value);
+        if (soundVolume == value)
+            return;
+
+        soundVolume = value;
+        OnSoundVolumeChanged?.Invoke(value);
+    }
+
     public void ToggleDamageDisplayVisible()
     {
         SetDamageDisplayVisible(!damageDisplayVisible);
@@ -65,5 +78,6 @@ public sealed class GameSettings : MonoBehaviour
     {
         SetCameraVisible(data.cameraVisible);
         SetDamageDisplayVisible(data.damageDisplayVisible);
+        SetSoundVolume(data.soundVolume);
     }
 }

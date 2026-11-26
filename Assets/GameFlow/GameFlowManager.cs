@@ -45,6 +45,10 @@ public sealed class GameFlowManager : MonoBehaviour
         if (RunManager.HasInstance)
             yield return RunManager.Instance.Initialize();
 
+        while (SaveManager.HasInstance && !SaveManager.Instance.IsLoaded)
+            yield return null;
+
+        uiController.InitializeSkillTree();
         staminaController.BeginRun();
         ChangeState(GameFlowState.MainGame);
         if (RunManager.HasInstance)
@@ -129,6 +133,22 @@ public sealed class GameFlowManager : MonoBehaviour
         if (CurrentState != GameFlowState.MainGame)
             return;
 
+        FinishRun();
+    }
+
+    public void CompleteSpecialRun()
+    {
+        if (!IsMainGameState || RunManager.IsNormalRun)
+            return;
+
+        if (uiController.TryShowAugmentSelection(FinishRun))
+            ChangeState(GameFlowState.AugmentSelection);
+        else
+            FinishRun();
+    }
+
+    void FinishRun()
+    {
         if (RunManager.HasInstance)
             RunManager.Instance.NotifyRunEnded();
 
@@ -137,7 +157,8 @@ public sealed class GameFlowManager : MonoBehaviour
 
     void HandleStaminaDepleted()
     {
-        if (CurrentState == GameFlowState.MainGame)
+        if (CurrentState == GameFlowState.MainGame
+            && (SpecialStageManager.Instance == null || !SpecialStageManager.Instance.IsClearing))
             EndRun();
     }
 }

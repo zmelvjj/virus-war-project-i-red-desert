@@ -25,19 +25,19 @@ MonoBehaviour:
     stat: 0
     ability: 3
     abilityProperty: 0
+    otherAbility: 0
+    otherUpgradeProperty: 0
     operation: 0
     value: 0
+    secondaryValue: 0
   - effectType: 2
     stat: 0
     ability: 3
     abilityProperty: 0
+    otherAbility: 0
+    otherUpgradeProperty: 0
     operation: 1
     value: 100
-  - effectType: 2
-    stat: 0
-    ability: 3
-    abilityProperty: 1
-    operation: 0
-    value: 20
+    secondaryValue: 0
   position: {x: 115.986725, y: 448.98462}
   size: {x: 200, y: 100}

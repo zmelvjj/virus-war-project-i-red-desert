@@ -118,6 +118,9 @@ public class MonsterEntity : MonoBehaviour
             return;
 
         CurrentHp = Mathf.Max(0, CurrentHp - damage);
+        if (damage > 0)
+            GameSoundPlayer.Request(GameSound.MonsterHit);
+
         if (m_Animator != null)
             m_Animator.SetInteger("HP_Ratio", (int)((float)CurrentHp / MaxHp * 100));
         if (CurrentHp <= 0)
@@ -144,6 +147,7 @@ public class MonsterEntity : MonoBehaviour
     void Die(MonsterDeathCause cause)
     {
         m_IsDead = true;
+        GameSoundPlayer.Request(GameSound.MonsterDeath);
         if (m_Animator != null)
             m_Animator.SetInteger("HP_Ratio", 0);
         if (m_NavMeshMovement != null)

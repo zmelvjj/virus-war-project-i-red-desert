@@ -1139,17 +1139,6 @@
                     "operation": 1,
                     "value": 100.0,
                     "secondaryValue": 0.0
-                },
-                {
-                    "effectType": 2,
-                    "stat": 0,
-                    "ability": 3,
-                    "abilityProperty": 1,
-                    "otherAbility": 0,
-                    "otherUpgradeProperty": 0,
-                    "operation": 0,
-                    "value": 20.0,
-                    "secondaryValue": 0.0
                 }
             ],
             "position": {

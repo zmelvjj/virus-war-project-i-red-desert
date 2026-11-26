@@ -36,7 +36,6 @@ public sealed class SkillNodeInspectorView : VisualElement
     static readonly List<AbilityProperty> s_ShockwaveProperties = new()
     {
         AbilityProperty.Chance,
-        AbilityProperty.Range,
         AbilityProperty.Damage
     };
 

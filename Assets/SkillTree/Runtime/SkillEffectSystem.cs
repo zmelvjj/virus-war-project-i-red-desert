@@ -58,14 +58,14 @@ public sealed class SkillEffectSystem : MonoBehaviour
 
     void OnEnable()
     {
-        AttachManager();
         AttachRuntimeSystems();
+        AttachManager();
     }
 
     void Start()
     {
-        AttachManager();
         AttachRuntimeSystems();
+        AttachManager();
     }
 
     void OnDisable()
@@ -97,6 +97,12 @@ public sealed class SkillEffectSystem : MonoBehaviour
 
         m_SkillTreeManager = SkillTreeManager.Instance;
         m_SkillTreeManager.OnNodeUnlocked += HandleNodeUnlocked;
+
+        foreach (var guid in m_SkillTreeManager.UnlockedNodeGuids)
+        {
+            if (m_SkillTreeManager.TryGetNodeData(guid, out var nodeData))
+                HandleNodeUnlocked(nodeData);
+        }
     }
 
     void AttachRuntimeSystems()

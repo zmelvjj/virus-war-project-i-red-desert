@@ -13,8 +13,6 @@ MonoBehaviour:
   m_Name: ShockwaveAbilityDefinition
   m_EditorClassIdentifier: Assembly-CSharp::ShockwaveAbilityDefinition
   baseProcChance: 0.1
-  baseRange: 3
   baseDamageRatio: 0.5
-  vfxPrefab: {fileID: 1921079115439858272, guid: 1e41a236f6f7fea488ef8da9ae450731, type: 3}
-  fixedGroundY: 0
-  vfxPositionOffset: {x: 0, y: 0, z: 0}
+  vfxPrefab: {fileID: 7414643578525845899, guid: 8e0a48eafd7b2d44a8218c5af487c6f7, type: 3}
+  vfxPositionOffset: {x: 0, y: 0.08, z: 0}

@@ -30,6 +30,7 @@ public sealed class SpecialStageManager : MonoBehaviour
     public static SpecialStageManager Instance { get; private set; }
     public static bool HasInstance => Instance != null;
     public int RemainingMonsterCount => m_RemainingMonsters.Count;
+    public bool IsClearing => m_IsClearing;
 
     void Awake()
     {
@@ -57,7 +58,7 @@ public sealed class SpecialStageManager : MonoBehaviour
         }
 
         if (m_RemainingMonsters.Count == 0)
-            StartCoroutine(ClearSpecialStage());
+            StartCoroutine(ClearSpecialStage(false));
     }
 
     public void RegisterSpawnedMonster(
@@ -103,18 +104,19 @@ public sealed class SpecialStageManager : MonoBehaviour
             return;
         }
 
-        StartCoroutine(ClearSpecialStage());
+        StartCoroutine(ClearSpecialStage(true));
     }
 
-    IEnumerator ClearSpecialStage()
+    IEnumerator ClearSpecialStage(bool completedCombat)
     {
         m_IsClearing = true;
         MonsterManager.Instance.MonsterDied -= HandleMonsterDied;
 
-        if (DNADropSystem.HasInstance && m_CurrentStage.RewardDNA > 0)
+        var rewardDNA = m_CurrentStage.RollRewardDNA();
+        if (DNADropSystem.HasInstance && rewardDNA > 0)
         {
             m_RewardBatchId = DNADropSystem.Instance.DropSpecialReward(
-                m_CurrentStage.RewardDNA,
+                rewardDNA,
                 spawnCenter.position,
                 rewardScatterRadius,
                 rewardMinimumImpulse,
@@ -130,7 +132,10 @@ public sealed class SpecialStageManager : MonoBehaviour
             DNADropSystem.Instance.DiscardBatch(m_RewardBatchId);
 
         m_RewardBatchId = 0;
-        GameFlowManager.Instance.EndRun();
+        if (completedCombat)
+            GameFlowManager.Instance.CompleteSpecialRun();
+        else
+            GameFlowManager.Instance.EndRun();
     }
 
     List<Vector3> GenerateSpawnPositions(int requestedCount)

@@ -10,7 +10,6 @@ public sealed class StageManager : MonoBehaviour
 
     StageAddressableLoader m_Loader;
     MonsterManager m_MonsterManager;
-    GameFlowManager m_GameFlowManager;
     int m_CurrentStageListIndex = -1;
     bool m_IsInitialized;
 
@@ -61,8 +60,19 @@ public sealed class StageManager : MonoBehaviour
         if (!ValidateAndSortStages())
             yield break;
 
+        while (SaveManager.HasInstance && !SaveManager.Instance.IsLoaded)
+            yield return null;
+
+        var progress = SaveManager.HasInstance
+            ? SaveManager.Instance.StageProgress
+            : default;
+        m_CurrentStageListIndex = Mathf.Clamp(progress.stageIndex, 0, m_Stages.Count - 1);
+        CurrentKillCount = m_CurrentStageListIndex == progress.stageIndex
+            ? Mathf.Max(0, progress.killCount)
+            : 0;
         m_IsInitialized = true;
-        ResetRun();
+        OnStageChanged?.Invoke(CurrentStageData);
+        OnStageProgressChanged?.Invoke(CurrentKillCount, NextRequiredKillCount);
     }
 
     void OnDisable()
@@ -75,19 +85,6 @@ public sealed class StageManager : MonoBehaviour
         m_Loader?.Release();
         if (Instance == this)
             Instance = null;
-    }
-
-    public void ResetRun()
-    {
-        if (!m_IsInitialized || !RunManager.IsNormalRun)
-            return;
-
-        m_CurrentStageListIndex = 0;
-        CurrentKillCount = 0;
-        OnStageChanged?.Invoke(CurrentStageData);
-        OnStageProgressChanged?.Invoke(
-            CurrentKillCount,
-            NextRequiredKillCount);
     }
 
     public void NotifyMonsterKilled()
@@ -216,27 +213,13 @@ public sealed class StageManager : MonoBehaviour
             m_MonsterManager = MonsterManager.Instance;
             m_MonsterManager.MonsterKilled += HandleMonsterKilled;
         }
-
-        if (GameFlowManager.HasInstance
-            && m_GameFlowManager != GameFlowManager.Instance)
-        {
-            if (m_GameFlowManager != null)
-                m_GameFlowManager.OnRunRestarted -= ResetRun;
-
-            m_GameFlowManager = GameFlowManager.Instance;
-            m_GameFlowManager.OnRunRestarted += ResetRun;
-        }
     }
 
     void DetachRuntimeSystems()
     {
         if (m_MonsterManager != null)
             m_MonsterManager.MonsterKilled -= HandleMonsterKilled;
-        if (m_GameFlowManager != null)
-            m_GameFlowManager.OnRunRestarted -= ResetRun;
-
         m_MonsterManager = null;
-        m_GameFlowManager = null;
     }
 
     void HandleMonsterKilled(MonsterEntity monster)
