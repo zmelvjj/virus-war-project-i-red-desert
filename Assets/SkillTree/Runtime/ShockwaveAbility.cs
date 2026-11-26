@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class ShockwaveAbility
@@ -5,6 +6,7 @@ public sealed class ShockwaveAbility
     readonly ShockwaveAbilityDefinition m_Definition;
     readonly PlayerStats m_PlayerStats;
     readonly AbilityModifierCollection m_Modifiers = new();
+    readonly List<MonsterEntity> m_Targets = new();
 
     bool m_IsUnlocked;
 
@@ -13,16 +15,9 @@ public sealed class ShockwaveAbility
         m_Modifiers.CalculateChance(
             AbilityProperty.Chance,
             m_Definition.BaseProcChance));
-    public float Range => Mathf.Max(
-        0f,
-        m_Modifiers.Calculate(
-            AbilityProperty.Range,
-            m_Definition.BaseRange));
     public float DamageRatio => Mathf.Max(
         0f,
-        m_Modifiers.GetSetValue(
-            AbilityProperty.Damage,
-            m_Definition.BaseDamageRatio)
+        m_Modifiers.GetSetValue(AbilityProperty.Damage, m_Definition.BaseDamageRatio)
             * (1f + m_Modifiers.Sum(
                 AbilityProperty.Damage,
                 SkillModifierOperation.Percent) / 100f));
@@ -49,7 +44,8 @@ public sealed class ShockwaveAbility
 
     public void AddModifier(AbilityModifier modifier)
     {
-        m_Modifiers.Add(modifier);
+        if (modifier.Property == AbilityProperty.Chance || modifier.Property == AbilityProperty.Damage)
+            m_Modifiers.Add(modifier);
     }
 
     public void RemoveModifiersFromSource(string sourceNodeGuid)
@@ -67,45 +63,40 @@ public sealed class ShockwaveAbility
 
     void HandleBasicAttackHit(BasicAttackHit hit)
     {
-        if (hit.Target == null || Random.value >= ProcChance)
+        if (hit.Target == null)
             return;
 
-        var range = Range;
-        if (range <= 0f)
+        var chance = ProcChance;
+        if (chance <= 0f || (chance < 1f && Random.value >= chance))
             return;
 
-        var origin = Vector3.zero;
-        ParticleVfxPoolManager.Instance.Play(
-            m_Definition.VfxPrefab,
-            origin,
-            Quaternion.identity,
-            range);
+        GameSoundPlayer.Request(GameSound.Shockwave);
+        if (Shake.Instance != null)
+            Shake.Instance.ShakeCamera(5f, 2f);
+
+        var prefab = m_Definition.VfxPrefab;
+        if (prefab != null)
+            Object.Instantiate(prefab, m_Definition.VfxPositionOffset, prefab.transform.rotation);
 
         if (!MonsterManager.HasInstance)
             return;
 
-        var damage = Mathf.RoundToInt(Mathf.Max(
-            0f,
-            m_PlayerStats.Damage * DamageRatio + FlatDamage));
-        var sqrRange = range * range;
-        var monsters = MonsterManager.Instance.Monsters;
+        var damage = Mathf.RoundToInt(Mathf.Max(0f, m_PlayerStats.Damage * DamageRatio + FlatDamage));
+        // Death traits can spawn new monsters during the hit.
+        m_Targets.AddRange(MonsterManager.Instance.Monsters);
 
-        for (var i = 0; i < monsters.Count; i++)
+        foreach (var monster in m_Targets)
         {
-            var monster = monsters[i];
             if (monster == null || monster.CurrentHp <= 0)
                 continue;
 
-            var offset = monster.transform.position - origin;
-            offset.y = 0f;
-            if (offset.sqrMagnitude <= sqrRange)
-            {
-                monster.TakeDamage(damage);
-                DamagePopupManager.Instance.ShowDamage(new DamageResult(
-                    monster,
-                    damage,
-                    false));
-            }
+            monster.TakeDamage(damage);
+            DamagePopupManager.Instance.ShowDamage(new DamageResult(
+                monster,
+                damage,
+                false));
         }
+
+        m_Targets.Clear();
     }
 }

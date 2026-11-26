@@ -14,6 +14,7 @@ public sealed class GameFlowUIController : MonoBehaviour
     [SerializeField] UnityEngine.UI.Button restartButton;
     [SerializeField] UnityEngine.UI.Button upgradeButton;
     [SerializeField] UnityEngine.UI.Button upgradeRestartButton;
+    [SerializeField] AugmentSelectionUI augmentSelectionUI;
 
     void OnEnable()
     {
@@ -45,6 +46,16 @@ public sealed class GameFlowUIController : MonoBehaviour
         skillTreeRoot.SetActive(state == GameFlowState.Upgrade);
         upgradeRestartButtonRoot.SetActive(state == GameFlowState.Upgrade);
         temporaryUpgradeHiddenRawImage.SetActive(state != GameFlowState.Upgrade);
+    }
+
+    public void InitializeSkillTree()
+    {
+        skillTreeRoot.GetComponentInChildren<SkillTreeUI>(true).Initialize();
+    }
+
+    public bool TryShowAugmentSelection(System.Action onCompleted)
+    {
+        return augmentSelectionUI != null && augmentSelectionUI.TryShow(onCompleted);
     }
 
     void HandleStaminaChanged(float current, float maximum)

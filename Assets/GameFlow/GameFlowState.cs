@@ -2,5 +2,6 @@ public enum GameFlowState
 {
     MainGame,
     GameOver,
-    Upgrade
+    Upgrade,
+    AugmentSelection
 }

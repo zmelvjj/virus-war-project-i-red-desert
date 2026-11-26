@@ -20,14 +20,18 @@ public sealed class SaveManager : MonoBehaviour
     GameFlowManager m_GameFlowManager;
     DNAWallet m_AppliedWallet;
     PlayerStats m_AppliedPlayerStats;
+    AugmentManager m_AppliedAugmentManager;
 
     public static SaveManager Instance { get; private set; }
     public static bool HasInstance => Instance != null;
     public bool IsLoaded => m_HasLoaded;
+    public StageProgressSaveData StageProgress => m_CurrentData.stageProgress;
     public SpecialStageProgressSaveData SpecialStageProgress =>
         m_CurrentData.specialStageProgress;
 
-    public string SavePath => Path.Combine(
+    public string SavePath => SaveFilePath;
+
+    static string SaveFilePath => Path.Combine(
         Application.persistentDataPath,
         k_SaveFileName);
 
@@ -67,11 +71,20 @@ public sealed class SaveManager : MonoBehaviour
 
     public void Save()
     {
-        if (m_IsApplyingData || !m_HasLoaded)
-            return;
+        TrySave();
+    }
 
-        m_CurrentData = CollectRuntimeData();
-        WriteData(m_CurrentData);
+    public bool TrySave()
+    {
+        if (m_IsApplyingData || !m_HasLoaded)
+            return false;
+
+        var data = CollectRuntimeData();
+        if (!WriteData(data))
+            return false;
+
+        m_CurrentData = data;
+        return true;
     }
 
     public void Load()
@@ -79,7 +92,7 @@ public sealed class SaveManager : MonoBehaviour
         var createdDefault = !File.Exists(SavePath);
         m_CurrentData = createdDefault
             ? CreateDefaultSave()
-            : ReadData();
+            : ReadData() ?? CreateDefaultSave();
         Normalize(m_CurrentData);
 
         m_HasLoaded = true;
@@ -87,6 +100,7 @@ public sealed class SaveManager : MonoBehaviour
         m_SkillTreeApplied = false;
         m_AppliedWallet = null;
         m_AppliedPlayerStats = null;
+        m_AppliedAugmentManager = null;
 
         ApplyLoadedDataToAvailableSystems();
         m_GameSettings?.Apply(m_CurrentData.settings);
@@ -98,7 +112,7 @@ public sealed class SaveManager : MonoBehaviour
             WriteData(m_CurrentData);
     }
 
-    public GameSaveData CreateDefaultSave()
+    static GameSaveData CreateDefaultSave()
     {
         return new GameSaveData
         {
@@ -165,12 +179,25 @@ public sealed class SaveManager : MonoBehaviour
             data.settings.cameraVisible = GameSettings.Instance.CameraVisible;
             data.settings.damageDisplayVisible =
                 GameSettings.Instance.DamageDisplayVisible;
+            data.settings.soundVolume = GameSettings.Instance.SoundVolume;
         }
         else
         {
             data.settings.cameraVisible = m_CurrentData.settings.cameraVisible;
             data.settings.damageDisplayVisible =
                 m_CurrentData.settings.damageDisplayVisible;
+            data.settings.soundVolume = m_CurrentData.settings.soundVolume;
+        }
+
+        data.stageProgress = m_CurrentData.stageProgress;
+        if (StageManager.HasInstance && StageManager.Instance.CurrentStageIndex >= 0)
+        {
+            var stageManager = StageManager.Instance;
+            data.stageProgress = new StageProgressSaveData
+            {
+                stageIndex = stageManager.CurrentStageIndex,
+                killCount = stageManager.CurrentKillCount
+            };
         }
 
         if (RunManager.HasInstance && RunManager.Instance.IsInitialized)
@@ -188,36 +215,58 @@ public sealed class SaveManager : MonoBehaviour
                 m_CurrentData.specialStageProgress.pendingSpecialStageId;
         }
 
+        data.augments.acquiredAugments.AddRange(m_AppliedAugmentManager != null
+            ? m_AppliedAugmentManager.AcquiredAugments
+            : m_CurrentData.augments.acquiredAugments);
+
         return data;
     }
 
-    GameSaveData ReadData()
+    static GameSaveData ReadData()
     {
         try
         {
-            var json = File.ReadAllText(SavePath);
-            return JsonUtility.FromJson<GameSaveData>(json)
-                ?? CreateDefaultSave();
+            var json = File.ReadAllText(SaveFilePath);
+            return JsonUtility.FromJson<GameSaveData>(json);
         }
         catch (System.Exception exception)
         {
             Debug.LogError($"[SaveManager] Save load failed: {exception.Message}");
-            return CreateDefaultSave();
+            return null;
         }
     }
 
-    void WriteData(GameSaveData data)
+    static bool WriteData(GameSaveData data)
     {
         try
         {
             Directory.CreateDirectory(Application.persistentDataPath);
-            File.WriteAllText(SavePath, JsonUtility.ToJson(data, true));
+            File.WriteAllText(SaveFilePath, JsonUtility.ToJson(data, true));
+            return true;
         }
         catch (System.Exception exception)
         {
             Debug.LogError($"[SaveManager] Save write failed: {exception.Message}");
+            return false;
         }
     }
+
+#if UNITY_EDITOR
+    public static bool ResetSaveFile()
+    {
+        return WriteData(CreateDefaultSave());
+    }
+
+    public static bool AddDNAToSaveFile(int amount)
+    {
+        var data = File.Exists(SaveFilePath) ? ReadData() : CreateDefaultSave();
+        if (data == null)
+            return false;
+
+        data.currentDNA += amount;
+        return WriteData(data);
+    }
+#endif
 
     void TryApplySkillTree()
     {
@@ -247,12 +296,19 @@ public sealed class SaveManager : MonoBehaviour
 
         m_IsApplyingData = true;
         ApplyLoadedDataToAvailableSystems();
+        m_GameSettings?.Apply(m_CurrentData.settings);
         m_IsApplyingData = false;
         TryApplySkillTree();
     }
 
     void ApplyLoadedDataToAvailableSystems()
     {
+        if (AugmentManager.Instance != null && m_AppliedAugmentManager != AugmentManager.Instance)
+        {
+            m_AppliedAugmentManager = AugmentManager.Instance;
+            m_AppliedAugmentManager.RestoreAcquiredAugments(m_CurrentData.augments.acquiredAugments);
+        }
+
         if (DNAWallet.HasInstance && m_AppliedWallet != DNAWallet.Instance)
         {
             m_AppliedWallet = DNAWallet.Instance;
@@ -396,5 +452,7 @@ public sealed class SaveManager : MonoBehaviour
         data.settings ??= new SettingsSaveData();
         data.specialStageProgress ??= new SpecialStageProgressSaveData();
         data.specialStageProgress.resolvedSpecialStageIds ??= new List<string>();
+        data.augments ??= new AugmentSaveData();
+        data.augments.acquiredAugments ??= new List<AugmentType>();
     }
 }

@@ -68,6 +68,10 @@ public sealed class LightningAbility
         if (hit.Target == null || Random.value > ProcChance)
             return;
 
+        GameSoundPlayer.Request(GameSound.Lightning);
+        if (Shake.Instance != null)
+            Shake.Instance.ShakeCamera(5f, 1f);
+
         var damage = Mathf.RoundToInt(Mathf.Max(
             0f,
             m_PlayerStats.Damage * DamageRatio + FlatDamage));

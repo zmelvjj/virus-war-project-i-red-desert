@@ -1,0 +1,16 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f1deb154b88bc54e85abac5362add4a, type: 3}
+  m_Name: ReplicationGauge
+  m_EditorClassIdentifier: Assembly-CSharp::AugmentDefinition
+  augmentType: 2
+  cardUIPrefab: {fileID: 1960515849562359045, guid: eb71ae4c490f3ad42bae7c0134bb7464, type: 3}

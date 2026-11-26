@@ -103,6 +103,7 @@ public class RangeDamageDealer : MonoBehaviour
             baseDamage,
             mouthOpenDecrease,
             mouthOpenDifference));
+        GameSoundPlayer.Request(GameSound.Attack);
     }
 
     void SampleMouthOpen(

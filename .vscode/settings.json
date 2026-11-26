@@ -67,5 +67,28 @@
         "*.sln": "*.csproj",
         "*.slnx": "*.csproj"
     },
-    "dotnet.defaultSolution": "virus-war-project-i-red-desert.slnx"
+    "dotnet.defaultSolution": "project_mind.slnx",
+
+    "files.watcherExclude": {
+        "**/.git/objects/**": true,
+        "**/.git/subtree-cache/**": true,
+        "**/node_modules/*/**": true,
+        "**/Library/**": true,
+        "**/Temp/**": true,
+        "**/Obj/**": true,
+        "**/Build/**": true,
+        "**/Builds/**": true,
+        "**/Logs/**": true
+    },
+    "search.exclude": {
+        "**/Library": true,
+        "**/Temp": true,
+        "**/Obj": true,
+        "**/Build": true,
+        "**/Logs": true
+    },
+    "dotnet.backgroundAnalysis.analyzerDiagnosticsScope": "openFiles",
+    "dotnet.backgroundAnalysis.compilerDiagnosticsScope": "openFiles",
+    "csharp.referencesCodeLens.enabled": false,
+    "csharp.testsCodeLens.enabled": false
 }

@@ -22,6 +22,8 @@ public sealed class SkillTreeUI : MonoBehaviour,
     RectTransform m_Viewport;
     Vector2 m_LastPointerPosition;
     bool m_IsDragging;
+    bool m_Initialized;
+    bool m_HasStarted;
 
     public IReadOnlyDictionary<string, SkillNodeData> NodeData => m_NodeData;
 
@@ -35,6 +37,13 @@ public sealed class SkillTreeUI : MonoBehaviour,
     {
         ClampScaleAndPosition();
         Initialize();
+        m_HasStarted = true;
+        RefreshStates();
+    }
+
+    void OnEnable()
+    {
+        RefreshStates();
     }
 
     void OnDisable()
@@ -117,6 +126,9 @@ public sealed class SkillTreeUI : MonoBehaviour,
 
     public void Initialize()
     {
+        if (m_Initialized)
+            return;
+
         var markers = GetComponentsInChildren<GeneratedSkillTreeMarker>(true);
         if (markers.Length != 1)
         {
@@ -146,10 +158,20 @@ public sealed class SkillTreeUI : MonoBehaviour,
         }
 
         SkillTreeManager.Instance.Initialize(treeData, this, m_NodeData);
+        m_Initialized = SkillTreeManager.Instance.IsInitialized;
+    }
+
+    void RefreshStates()
+    {
+        if (m_HasStarted && m_Initialized)
+            ApplyStates(SkillTreeManager.Instance.NodeStates);
     }
 
     public void ApplyStates(IReadOnlyDictionary<string, SkillNodeState> states)
     {
+        if (!m_HasStarted || !isActiveAndEnabled)
+            return;
+
         foreach (var pair in m_NodeUis)
             pair.Value.ApplyState(states[pair.Key]);
 
